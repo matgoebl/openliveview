@@ -345,7 +345,7 @@ public class LiveViewThread extends Thread {
 	                	parentService.setNotificationNeedsUpdate(false);
 	                	sendCall(new MenuItem((byte) 4, true, new UShort((short) (parentService.getNotificationUnreadCount())),
 	                            "Notifications", menuImage_notification));
-	                	notificationcontentslist = parentService.getNotificationContents();
+	                	//notificationcontentslist = parentService.getNotificationContents();
 	                	if (parentService.getNotificationUnreadCount()>0)
 	                	{
 		                	sendCall(new SetLed(Color.BLUE,0,1000));
@@ -401,7 +401,7 @@ public class LiveViewThread extends Thread {
             CapsResponse caps = (CapsResponse) event;
             Log.d(TAG, "LV capabilities: " + caps.toString());
             Log.d(TAG, "LV Version: " + caps.getSoftwareVersion());
-            sendCall(new SetMenuSize((byte) 6)); //                          CHANGE THIS ROW TO GET MORE BUTTONS
+            sendCall(new SetMenuSize((byte) 5)); //                          CHANGE THIS ROW TO GET MORE BUTTONS
             sendCall(new SetVibrate(0, 50));
             break;
         case MessageConstants.MSG_GETTIME:
@@ -424,8 +424,8 @@ public class LiveViewThread extends Thread {
                     "Previous", menuImage_left));
             sendCall(new MenuItem((byte) 4, true, new UShort((short) (parentService.getNotificationUnreadCount())),
                     "Notifications", menuImage_notification));
-            sendCall(new MenuItem((byte) 5, true, new UShort((short) 4),
-                    "Alerts test", menuImage));
+            //sendCall(new MenuItem((byte) 5, true, new UShort((short) 4),
+            //        "Alerts test", menuImage));
             menu_state = 0;
             init_state = 1; //enable notification receive code
             break;
@@ -438,12 +438,12 @@ public class LiveViewThread extends Thread {
             }
             if (alert.getAlertAction()==MessageConstants.ALERTACTION_LAST)
             {
-            	alertId = 19;
+            	alertId = (byte) (parentService.getNotificationTotalCount()-1);
             }
             if (alert.getAlertAction()==MessageConstants.ALERTACTION_NEXT)
             {
             	alertId += 1;
-            	if (alertId > 19)
+            	if (alertId > (byte) parentService.getNotificationTotalCount()-1)
             	{
             		alertId = 0;
             	}
@@ -453,23 +453,31 @@ public class LiveViewThread extends Thread {
             	alertId -= 1;
             	if (alertId < 0)
             	{
-            		alertId = 19;
+            		alertId = (byte) (parentService.getNotificationTotalCount()-1);
             	}
-            } 
-	            
-	            
-	                     
+            }                               
             if (alert.getMenuItemId()==4) //Notifications
             {
-            	Log.d(TAG, "Notifications alert: "+notificationcontentslist);
-                sendCall(new GetAlertResponse(2, 1, 0, (String) "Time", (String) "Notification", notificationcontentslist, menuImage_notification));            	
-            	//sendCall(new GetAlertResponse(20, 4, 15, "TIME", "HEADER", "01234567890123456789012345678901234567890123456789", menuImage_left));
-            }
+            	Log.d(TAG, "Notifications alert");
+            	Log.d(TAG, "(String) parentService.getNotificationContent("+alertId+")");
+            	Log.d(TAG, "Result: "+(String) parentService.getNotificationContent(alertId));
+            	if (parentService.getNotificationTotalCount() > 0)
+            	{
+            		sendCall(new GetAlertResponse((byte) parentService.getNotificationTotalCount(), (byte) parentService.getNotificationUnreadCount(), alertId, (String) "Time", (String) parentService.getNotificationTitle(alertId), (String) parentService.getNotificationContent(alertId), menuImage_notification));            	
+            		//sendCall(new GetAlertResponse((byte) parentService.getNotificationTotalCount()+1, (byte) parentService.getNotificationUnreadCount(), alertId, "", "Notifications", "", menuImage_notification));
+            	}
+            	else
+            	{
+	            	sendCall(new GetAlertResponse(0, 0, alertId, "", "No notifications", "", menuImage_notification));
+	            }
+           }
             else
             {
             	Log.d(TAG, "Unknown alert. Display demo. (id: "+last_menu_id+")");
             	sendCall(new GetAlertResponse(20, 4, alertId, "ID: "+alertId, "HEADER", "01234567890123456789012345678901234567890123456789", menuImage));
             }
+            //Log.d(TAG, "DEBUG E");
+            parentService.setNotificationUnreadCount((byte) 0);
             break;
         case MessageConstants.MSG_NAVIGATION:
         	//These lines are saved for later use: (do not uncomment!)
@@ -482,6 +490,11 @@ public class LiveViewThread extends Thread {
             if (nav.isInAlert())
             {
         		Log.d(TAG, "User pressed button in alert.");
+        		//if (last_alert_menuitem==4)
+        		//{
+        			//parentService.setNotificationUnreadCount((byte) 0);
+        			//parentService.setNotificationTotalCount((byte) 0);
+        		//}
         		sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));   
             }
             else
@@ -502,10 +515,10 @@ public class LiveViewThread extends Thread {
 	        	          	     }
 	        	          	     else
 	        	          	     {
-	        	          	    	 menu_state = 1;
+	        	          	    	 /* menu_state = 1;
 	        	          		 	 sendCall(new SetMenuSize((byte) 0));
 	        	          		 	 sendCall(new ClearDisplay());
-	        	          		 	 draw_media_menu();
+	        	          		 	 draw_media_menu(); */
 	        	          	     } 
 	        	         	break;
 	        				default:

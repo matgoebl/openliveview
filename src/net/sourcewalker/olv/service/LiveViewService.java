@@ -24,6 +24,12 @@ public class LiveViewService extends Service {
 
     private LiveViewThread workerThread = null;
     
+    byte NotificationUnreadCount     = 0;
+    byte NotificationTotalCount      = 0;
+    String [] NotificationTitle     = new String [101];
+    String [] NotificationContent   = new String [101];
+    Boolean NotificationNeedsUpdate = true;
+    
     BroadcastReceiver notification_receiver = new ShowNotificationReceiver();
 
     /*
@@ -38,6 +44,11 @@ public class LiveViewService extends Service {
     
     @Override
     public void onCreate() {    
+    	for (int cid = 0; cid < 100; cid++)
+    	{
+    		NotificationContent[100-cid] = "Empty";
+    		NotificationTitle[100-cid] = "Empty";
+    	}
     	registerReceiver(notification_receiver,  new IntentFilter(SHOW_NOTIFICATION));
     }
     
@@ -85,17 +96,28 @@ public class LiveViewService extends Service {
         stopSelf();
     }
     
-    String NotificationContents = "";
+    
+    //byte NotificationUnreadCount     = 0;
+    //byte NotificationTotalCount      = 0;
+    //String [] NotificationTitle     = new String [101];
+    //String [] NotificationContent   = new String [101];
+    //Boolean NotificationNeedsUpdate = true;
 
-    public String getNotificationContents() {
-        return NotificationContents;
+    public String getNotificationContent(int id) {
+        return NotificationContent[id];
     }
 
-    public void setNotificationContents(String NotificationContents) {
-        this.NotificationContents = NotificationContents;
+    public void setNotificationContent(int id, String NotificationContents) {
+        this.NotificationContent[id] = NotificationContents;
     }
     
-    Boolean NotificationNeedsUpdate = true;
+    public String getNotificationTitle(int id) {
+        return NotificationTitle[id];
+    }
+
+    public void setNotificationTitle(int id, String NotificationTitleVal) {
+        this.NotificationTitle[id] = NotificationTitleVal;
+    }    
 
     public Boolean getNotificationNeedsUpdate() {
         return NotificationNeedsUpdate;
@@ -104,15 +126,21 @@ public class LiveViewService extends Service {
     public void setNotificationNeedsUpdate(Boolean NotificationNeedsUpdate) {
         this.NotificationNeedsUpdate = NotificationNeedsUpdate;
     }
-    
-    int NotificationUnreadCount = 0;
 
     public int getNotificationUnreadCount() {
         return NotificationUnreadCount;
     }
 
-    public void setNotificationReady(int NotificationUnreadCount) {
+    public void setNotificationUnreadCount(byte NotificationUnreadCount) {
         this.NotificationUnreadCount = NotificationUnreadCount;
+    }
+    
+    public int getNotificationTotalCount() {
+        return NotificationTotalCount;
+    }
+
+    public void setNotificationTotalCount(byte NotificationTotalCount) {
+        this.NotificationTotalCount = NotificationTotalCount;
     }
     
     public class ShowNotificationReceiver extends BroadcastReceiver  
@@ -122,8 +150,18 @@ public class LiveViewService extends Service {
         {  
         	NotificationNeedsUpdate = true;
         	NotificationUnreadCount += 1;
-        	NotificationContents += intent.getExtras().getString("contents") + (char)10;
-        	Log.w("ShowNotificationReceiver", "Unread:" + NotificationUnreadCount + " Text: " + NotificationContents);
+        	for (int cid = 0; cid < 100; cid++)
+        	{
+        		NotificationContent[100-cid] = NotificationContent[99-cid];
+        		NotificationTitle[100-cid] = NotificationTitle[99-cid];
+        	}
+        	if (NotificationTotalCount < 100)
+        	{
+        		NotificationTotalCount += 1;
+        	}
+        	NotificationContent[0] = intent.getExtras().getString("contents") + (char)10;
+        	NotificationTitle[0] = intent.getExtras().getString("title") + (char)10;
+        	Log.w("ShowNotificationReceiver", "Added new notification");
         }  
     }    
 /*

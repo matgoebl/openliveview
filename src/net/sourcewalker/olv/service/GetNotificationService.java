@@ -3,6 +3,7 @@ package net.sourcewalker.olv.service;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ public class GetNotificationService extends AccessibilityService {
 
 	private static final String LOG_TAG = "OLV Notification service";
 	final public static String SHOW_NOTIFICATION = "SHOW_NOTIFICATION";
+	int time;
 	
 	//private LiveViewService parentService;
 	
@@ -66,6 +68,11 @@ public class GetNotificationService extends AccessibilityService {
 	                	Intent bci = new Intent(SHOW_NOTIFICATION);
 	                	Bundle bcb = new Bundle();
 	                	bcb.putString("contents", notificationList.get(i).toString());
+	                	bcb.putString("title", "Notification");
+	                	time = (int) (Calendar.getInstance().getTimeInMillis() / 1000);
+	                    time += Calendar.getInstance().get(Calendar.ZONE_OFFSET)/1000;
+	                    time += Calendar.getInstance().get(Calendar.DST_OFFSET) / 1000;
+	                	bcb.putInt("timestamp", time);
 	                	bci.putExtras(bcb);
 	                	sendBroadcast(bci);  
 	                	Log.w(LOG_TAG, "The notification was sent to the lvservice.");
