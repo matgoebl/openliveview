@@ -1,0 +1,10 @@
+My manual on howto use git to update the sourcecode of this project.
+
+
+UPLOAD CODE:
+git commit -a
+git push googlecode master:master
+
+SETUP:
+git remote add googlecode https://renze%40rnplus.nl@code.google.com/p/openliveview/
+git commit -m "<name>"
