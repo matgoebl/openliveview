@@ -28,6 +28,7 @@ public class LiveViewService extends Service {
     byte NotificationTotalCount      = 0;
     String [] NotificationTitle     = new String [101];
     String [] NotificationContent   = new String [101];
+    int [] NotificationTime         = new int [101];
     Boolean NotificationNeedsUpdate = true;
     
     BroadcastReceiver notification_receiver = new ShowNotificationReceiver();
@@ -117,6 +118,14 @@ public class LiveViewService extends Service {
 
     public void setNotificationTitle(int id, String NotificationTitleVal) {
         this.NotificationTitle[id] = NotificationTitleVal;
+    } 
+    
+    public int getNotificationTime(int id) {
+        return NotificationTime[id];
+    }
+
+    public void setNotificationTime(int id, int NotificationTimeVal) {
+        this.NotificationTime[id] = NotificationTimeVal;
     }    
 
     public Boolean getNotificationNeedsUpdate() {
@@ -154,13 +163,15 @@ public class LiveViewService extends Service {
         	{
         		NotificationContent[100-cid] = NotificationContent[99-cid];
         		NotificationTitle[100-cid] = NotificationTitle[99-cid];
+        		NotificationTime[100-cid] = NotificationTime[99-cid];
         	}
         	if (NotificationTotalCount < 100)
         	{
         		NotificationTotalCount += 1;
         	}
-        	NotificationContent[0] = intent.getExtras().getString("contents") + (char)10;
-        	NotificationTitle[0] = intent.getExtras().getString("title") + (char)10;
+        	NotificationContent[0] = intent.getExtras().getString("contents"); // + (char)10
+        	NotificationTitle[0] = intent.getExtras().getString("title");
+        	NotificationTime[0] = intent.getExtras().getInt("timestamp");
         	Log.w("ShowNotificationReceiver", "Added new notification");
         }  
     }    

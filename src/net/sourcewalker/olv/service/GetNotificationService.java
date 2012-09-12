@@ -1,21 +1,21 @@
 package net.sourcewalker.olv.service;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
+//import java.io.IOException;
+//import java.lang.reflect.Field;
+//import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
+//import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+//import java.util.Map;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
-import android.app.Notification;
+//import android.app.Notification;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
-import android.widget.RemoteViews;
+//import android.widget.RemoteViews;
 
 public class GetNotificationService extends AccessibilityService {
 

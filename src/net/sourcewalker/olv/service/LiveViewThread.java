@@ -4,6 +4,8 @@ package net.sourcewalker.olv.service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.UUID;
 
 import net.sourcewalker.olv.LiveViewPreferences;
@@ -98,7 +100,7 @@ public class LiveViewThread extends Thread {
     
     private Integer init_state = 0;
     
-    private String notificationcontentslist = " ";
+    private String notificationTimeString = "00:00 00-00-2000";
     
     
     
@@ -458,13 +460,29 @@ public class LiveViewThread extends Thread {
             }                               
             if (alert.getMenuItemId()==4) //Notifications
             {
-            	Log.d(TAG, "Notifications alert");
-            	Log.d(TAG, "(String) parentService.getNotificationContent("+alertId+")");
-            	Log.d(TAG, "Result: "+(String) parentService.getNotificationContent(alertId));
+            	Log.d(TAG, "Notifications alert (ID: "+alertId+") Time:"+parentService.getNotificationTime(alertId));         	
+                final Calendar cal = Calendar.getInstance();
+                cal.setTimeInMillis(parentService.getNotificationTime(alertId));
+                //Date date = cal.getTime();
+                long notificationYear =  cal.get(cal.YEAR); //date.getYear();
+                long notificationMonth = cal.get(cal.MONTH);//date.getMonth();
+                long notificationDay = cal.get(cal.DAY_OF_MONTH);//date.getDay();
+                long notificationHour = cal.get(cal.HOUR);//date.getHours();
+                long notificationMinute  = cal.get(cal.MINUTE);//date.getMinutes();
+                /*long notificationYear = 1970;
+                long notificationMonth = 0;
+                long notificationDay = notificationTime / (3600*24);
+                notificationTime -= notificationDay * (3600*24);
+                long notificationHour = notificationTime / 3600;
+                notificationTime -= notificationHour * 3600;
+                long notificationMinute = notificationTime / 60;
+                notificationTime -= notificationMinute * 60; */
+                String notificationTimeString = String.format(
+                        "%d:%d %d-%d-%d", notificationHour,
+                        notificationMinute, notificationDay, notificationMonth, notificationYear ); 
             	if (parentService.getNotificationTotalCount() > 0)
             	{
-            		sendCall(new GetAlertResponse((byte) parentService.getNotificationTotalCount(), (byte) parentService.getNotificationUnreadCount(), alertId, (String) "Time", (String) parentService.getNotificationTitle(alertId), (String) parentService.getNotificationContent(alertId), menuImage_notification));            	
-            		//sendCall(new GetAlertResponse((byte) parentService.getNotificationTotalCount()+1, (byte) parentService.getNotificationUnreadCount(), alertId, "", "Notifications", "", menuImage_notification));
+            		sendCall(new GetAlertResponse((byte) parentService.getNotificationTotalCount(), (byte) parentService.getNotificationUnreadCount(), alertId, (String) notificationTimeString, (String) parentService.getNotificationTitle(alertId), (String) parentService.getNotificationContent(alertId), menuImage_notification));            	
             	}
             	else
             	{
