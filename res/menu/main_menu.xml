@@ -5,4 +5,8 @@
         android:id="@+id/menu_viewlog"
         android:title="@string/menu_viewlog"
         android:icon="@drawable/menu_log" />
+    <item
+        android:id="@+id/menu_hacks"
+        android:title="@string/menu_hack"
+        android:icon="@drawable/menu_hack" />
 </menu>

@@ -1,11 +1,14 @@
 package net.sourcewalker.olv.service;
-//EDIT BY RN+ : ADDED GUI AND COMMANDS
+/*
+ * @author Robert (xperimental@solidproject.de);
+ * This file has been changed by RN+ (Renze Nicolai)
+ * Image file loader was changed by: basty149
+ */
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.UUID;
 
 import net.sourcewalker.olv.LiveViewPreferences;
@@ -49,60 +52,43 @@ import android.os.Vibrator;
 import android.util.Log;
 import android.view.KeyEvent;
 
-/**
- * @author Robert &lt;xperimental@solidproject.de&gt;
- */
 public class LiveViewThread extends Thread {
 
     private static final String TAG = "LiveViewThread";
-
     private static final UUID SERIAL = UUID
             .fromString("00001101-0000-1000-8000-00805F9B34FB");
-
     private static final int SERVICE_NOTIFY = 100;
-
+    
     private final byte[] menuImage;
-    
     private final byte[] menuImage_notification;
-    
-    private final byte[] menuImage_phone;
-    
+    private final byte[] menuImage_phone;  
     private final byte[] menuImage_music;
-    
     private final byte[] menuImage_left;
-    
     private final byte[] menuImage_right;
-    
     private final byte[] menuImage_plus;
-    
     private final byte[] menuImage_min;
-    
     private final byte[] menuImage_media_isplaying;
     private final byte[] menuImage_media_isnotplaying;
 
     private final BluetoothAdapter btAdapter;
-
     private BluetoothServerSocket serverSocket;
-
     private long startUpTime;
-
     private LiveViewService parentService;
-
     private BluetoothSocket clientSocket;
-
     private Notification notification;
     
     private Integer menu_state = 0;
-    
     private byte last_menu_id = 0;
+    private byte alertId = 0;
+    private Integer init_state = 0; 
     
-    private byte alertId;
+    private byte menu_button_count = 5;
     
-    private Integer init_state = 0;
-    
-    private String notificationTimeString = "00:00 00-00-2000";
-    
-    
+    private byte menu_button_notifications_id = 0;
+    private byte menu_button_media_next_id = 1;
+    private byte menu_button_media_play_id = 2;
+    private byte menu_button_media_previous_id = 3;
+    private byte menu_button_findphone_id = 4;
     
     public LiveViewThread(LiveViewService parentService) {
         super("LiveViewThread");
@@ -127,178 +113,44 @@ public class LiveViewThread extends Thread {
         btAdapter = BluetoothAdapter.getDefaultAdapter();
                 
         
-        try {
-            InputStream stream = parentService.getAssets().open(
-                    "menu_blank.png");
-            ByteArrayOutputStream arrayStream = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            while (stream.available() > 0) {
-                int read = stream.read(buffer);
-                arrayStream.write(buffer, 0, read);
-            }
-            stream.close();
-            menuImage = arrayStream.toByteArray();
-            //Log.d(TAG, "Menu icon size: " + menuImage.length);
-        } catch (IOException e) {
-            Log.e(TAG, "Error reading menu icon: " + e.getMessage());
-            throw new RuntimeException("Error reading menu icon: "
-                    + e.getMessage(), e);
-        }
-        try {
-            InputStream stream = parentService.getAssets().open(
-                    "menu_notification.png");
-            ByteArrayOutputStream arrayStream = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            while (stream.available() > 0) {
-                int read = stream.read(buffer);
-                arrayStream.write(buffer, 0, read);
-            }
-            stream.close();
-            menuImage_notification = arrayStream.toByteArray();
-            //Log.d(TAG, "Menu icon size: " + menuImage.length);
-        } catch (IOException e) {
-            Log.e(TAG, "Error reading menu icon: " + e.getMessage());
-            throw new RuntimeException("Error reading menu icon: "
-                    + e.getMessage(), e);
-        }
-        try {
-            InputStream stream = parentService.getAssets().open(
-                    "menu_phone.png");
-            ByteArrayOutputStream arrayStream = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            while (stream.available() > 0) {
-                int read = stream.read(buffer);
-                arrayStream.write(buffer, 0, read);
-            }
-            stream.close();
-            menuImage_phone = arrayStream.toByteArray();
-            //Log.d(TAG, "Menu icon size: " + menuImage.length);
-        } catch (IOException e) {
-            Log.e(TAG, "Error reading menu icon: " + e.getMessage());
-            throw new RuntimeException("Error reading menu icon: "
-                    + e.getMessage(), e);
-        }
-        try {
-            InputStream stream = parentService.getAssets().open(
-                    "menu_music.png");
-            ByteArrayOutputStream arrayStream = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            while (stream.available() > 0) {
-                int read = stream.read(buffer);
-                arrayStream.write(buffer, 0, read);
-            }
-            stream.close();
-            menuImage_music = arrayStream.toByteArray();
-            //Log.d(TAG, "Menu icon size: " + menuImage.length);
-        } catch (IOException e) {
-            Log.e(TAG, "Error reading menu icon: " + e.getMessage());
-            throw new RuntimeException("Error reading menu icon: "
-                    + e.getMessage(), e);
-        }
-        try {
-            InputStream stream = parentService.getAssets().open(
-                    "menu_left.png");
-            ByteArrayOutputStream arrayStream = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            while (stream.available() > 0) {
-                int read = stream.read(buffer);
-                arrayStream.write(buffer, 0, read);
-            }
-            stream.close();
-            menuImage_left = arrayStream.toByteArray();
-            //Log.d(TAG, "Media menu size: " + menuImage.length);
-        } catch (IOException e) {
-            Log.e(TAG, "Error reading menu image: " + e.getMessage());
-            throw new RuntimeException("Error reading menu image: "
-                    + e.getMessage(), e);
-        }
-        try {
-            InputStream stream = parentService.getAssets().open(
-                    "menu_right.png");
-            ByteArrayOutputStream arrayStream = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            while (stream.available() > 0) {
-                int read = stream.read(buffer);
-                arrayStream.write(buffer, 0, read);
-            }
-            stream.close();
-            menuImage_right = arrayStream.toByteArray();
-            //Log.d(TAG, "Media menu size: " + menuImage.length);
-        } catch (IOException e) {
-            Log.e(TAG, "Error reading menu image: " + e.getMessage());
-            throw new RuntimeException("Error reading menu image: "
-                    + e.getMessage(), e);
-        }
-        try {
-            InputStream stream = parentService.getAssets().open(
-                    "menu_plus.png");
-            ByteArrayOutputStream arrayStream = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            while (stream.available() > 0) {
-                int read = stream.read(buffer);
-                arrayStream.write(buffer, 0, read);
-            }
-            stream.close();
-            menuImage_plus = arrayStream.toByteArray();
-            //Log.d(TAG, "Media menu size: " + menuImage.length);
-        } catch (IOException e) {
-            Log.e(TAG, "Error reading menu image: " + e.getMessage());
-            throw new RuntimeException("Error reading menu image: "
-                    + e.getMessage(), e);
-        }
-        try {
-            InputStream stream = parentService.getAssets().open(
-                    "menu_min.png");
-            ByteArrayOutputStream arrayStream = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            while (stream.available() > 0) {
-                int read = stream.read(buffer);
-                arrayStream.write(buffer, 0, read);
-            }
-            stream.close();
-            menuImage_min = arrayStream.toByteArray();
-            //Log.d(TAG, "Media menu size: " + menuImage.length);
-        } catch (IOException e) {
-            Log.e(TAG, "Error reading menu image: " + e.getMessage());
-            throw new RuntimeException("Error reading menu image: "
-                    + e.getMessage(), e);
-        }   
-        try {
-            InputStream stream = parentService.getAssets().open(
-                    "jerry_music_play_icn.png");
-            ByteArrayOutputStream arrayStream = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            while (stream.available() > 0) {
-                int read = stream.read(buffer);
-                arrayStream.write(buffer, 0, read);
-            }
-            stream.close();
-            menuImage_media_isplaying = arrayStream.toByteArray();
-            //Log.d(TAG, "Media menu size: " + menuImage.length);
-        } catch (IOException e) {
-            Log.e(TAG, "Error reading menu image: " + e.getMessage());
-            throw new RuntimeException("Error reading menu image: "
-                    + e.getMessage(), e);
-        }
-        try {
-            InputStream stream = parentService.getAssets().open(
-                    "jerry_music_pause_icn.png");
-            ByteArrayOutputStream arrayStream = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            while (stream.available() > 0) {
-                int read = stream.read(buffer);
-                arrayStream.write(buffer, 0, read);
-            }
-            stream.close();
-            menuImage_media_isnotplaying = arrayStream.toByteArray();
-           // Log.d(TAG, "Media menu size: " + menuImage.length);
-        } catch (IOException e) {
-            Log.e(TAG, "Error reading menu image: " + e.getMessage());
-            throw new RuntimeException("Error reading menu image: "
-                    + e.getMessage(), e);
-        }  
+        menuImage = loadImageByteArray(parentService, "menu_blank.png");
+        menuImage_notification = loadImageByteArray(parentService, "menu_notification.png");
+        menuImage_phone = loadImageByteArray(parentService, "menu_phone.png");
+        menuImage_music = loadImageByteArray(parentService, "menu_music.png");
+        menuImage_left = loadImageByteArray(parentService, "menu_left.png");
+        menuImage_right = loadImageByteArray(parentService, "menu_right.png");
+        menuImage_plus = loadImageByteArray(parentService, "menu_plus.png");
+        menuImage_min = loadImageByteArray(parentService, "menu_min.png");
+        menuImage_media_isplaying = loadImageByteArray(parentService, "jerry_music_play_icn.png");
+        menuImage_media_isnotplaying = loadImageByteArray(parentService, "jerry_music_pause_icn.png");
         menu_state = 0;
     }
+    
+    /**
+     * This function was added by 149
+     * Return byte array for the supplied image file
+     * @param parentService
+     * @param imageFileName Image file name
+     * @return byte[] for the image file
+     */
+	private byte[] loadImageByteArray(LiveViewService parentService, String imageFileName) {
+		try {
+			InputStream stream = parentService.getAssets().open(imageFileName);
+            ByteArrayOutputStream arrayStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            while (stream.available() > 0) {
+                int read = stream.read(buffer);
+                arrayStream.write(buffer, 0, read);
+            }
+            stream.close();
+            return arrayStream.toByteArray();
+            //Log.d(TAG, "Icon size: " + menuImage.length);
+        } catch (IOException e) {
+            String message = "Error reading icon " + imageFileName + " : " + e.getMessage();
+			Log.e(TAG, message);
+            throw new RuntimeException(message, e);
+        }
+	}
 
     /*
      * (non-Javadoc)
@@ -345,9 +197,8 @@ public class LiveViewThread extends Thread {
                 	if (init_state == 1)
                 	{
 	                	parentService.setNotificationNeedsUpdate(false);
-	                	sendCall(new MenuItem((byte) 4, true, new UShort((short) (parentService.getNotificationUnreadCount())),
+	                	sendCall(new MenuItem((byte) menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
 	                            "Notifications", menuImage_notification));
-	                	//notificationcontentslist = parentService.getNotificationContents();
 	                	if (parentService.getNotificationUnreadCount()>0)
 	                	{
 		                	sendCall(new SetLed(Color.BLUE,0,1000));
@@ -355,7 +206,7 @@ public class LiveViewThread extends Thread {
 	                	}
 	                	else
 	                	{
-	                		sendCall(new SetLed(Color.RED,0,100)); //To show update, just debug.
+	                		sendCall(new SetLed(Color.RED,0,100));
 	                	}
                 	}
                 } 
@@ -403,7 +254,7 @@ public class LiveViewThread extends Thread {
             CapsResponse caps = (CapsResponse) event;
             Log.d(TAG, "LV capabilities: " + caps.toString());
             Log.d(TAG, "LV Version: " + caps.getSoftwareVersion());
-            sendCall(new SetMenuSize((byte) 5)); //                          CHANGE THIS ROW TO GET MORE BUTTONS
+            sendCall(new SetMenuSize((byte) menu_button_count)); //                          CHANGE THIS ROW TO GET MORE BUTTONS
             sendCall(new SetVibrate(0, 50));
             break;
         case MessageConstants.MSG_GETTIME:
@@ -416,16 +267,16 @@ public class LiveViewThread extends Thread {
             break;
         case MessageConstants.MSG_GETMENUITEMS:
             Log.d(TAG, "Sending menu items...");
-            sendCall(new MenuItem((byte) 0, false, new UShort((short) 0),
-                    "Find my phone", menuImage_phone));
-            sendCall(new MenuItem((byte) 1, false, new UShort((short) 0),
-                    "Next", menuImage_right));
-            sendCall(new MenuItem((byte) 2, false, new UShort((short) 0),
-                    "Play / Pause", menuImage_music));
-            sendCall(new MenuItem((byte) 3, false, new UShort((short) 0),
-                    "Previous", menuImage_left));
-            sendCall(new MenuItem((byte) 4, true, new UShort((short) (parentService.getNotificationUnreadCount())),
+            sendCall(new MenuItem((byte) menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
                     "Notifications", menuImage_notification));
+            sendCall(new MenuItem((byte) menu_button_media_next_id, false, new UShort((short) 0),
+                    "Next", menuImage_right));
+            sendCall(new MenuItem((byte) menu_button_media_play_id, false, new UShort((short) 0),
+                    "Play / Pause", menuImage_music));
+            sendCall(new MenuItem((byte) menu_button_media_previous_id, false, new UShort((short) 0),
+                    "Previous", menuImage_left));
+            sendCall(new MenuItem((byte) menu_button_findphone_id, false, new UShort((short) 0),
+                    "Find my phone", menuImage_phone));
             //sendCall(new MenuItem((byte) 5, true, new UShort((short) 4),
             //        "Alerts test", menuImage));
             menu_state = 0;
@@ -434,18 +285,37 @@ public class LiveViewThread extends Thread {
         case MessageConstants.MSG_GETALERT:
         	GetAlert alert = (GetAlert) event;
             Log.d(TAG, "Alert triggered ("+alert.getMenuItemId()+", "+alert.getAlertAction()+", "+alert.getMaxBodySize()+")");
+            if (last_menu_id!=alert.getMenuItemId())
+            {
+            	alertId = 0;
+            }
+            last_menu_id = alert.getMenuItemId();
             if (alert.getAlertAction()==MessageConstants.ALERTACTION_FIRST)
             {
             	alertId = 0;
             }
             if (alert.getAlertAction()==MessageConstants.ALERTACTION_LAST)
             {
-            	alertId = (byte) (parentService.getNotificationTotalCount()-1);
+            	if (last_menu_id == 0)
+            	{
+            		alertId = (byte) (parentService.getNotificationTotalCount()-1);
+            	}
+            	else
+            	{
+            		alertId = 0;
+            	}
             }
             if (alert.getAlertAction()==MessageConstants.ALERTACTION_NEXT)
             {
             	alertId += 1;
-            	if (alertId > (byte) parentService.getNotificationTotalCount()-1)
+            	if (last_menu_id == 0)
+            	{
+                	if (alertId > (byte) parentService.getNotificationTotalCount()-1)
+                	{
+                		alertId = 0;
+                	}
+            	}
+            	else
             	{
             		alertId = 0;
             	}
@@ -453,33 +323,30 @@ public class LiveViewThread extends Thread {
             if (alert.getAlertAction()==MessageConstants.ALERTACTION_PREV)
             {
             	alertId -= 1;
-            	if (alertId < 0)
+            	if (last_menu_id == 0)
             	{
-            		alertId = (byte) (parentService.getNotificationTotalCount()-1);
+	            	if (alertId < 0)
+	            	{
+	            		alertId = (byte) (parentService.getNotificationTotalCount()-1);
+	            	}
+            	}
+            	else
+            	{
+            		alertId = 0;
             	}
             }                               
-            if (alert.getMenuItemId()==4) //Notifications
+            if (last_menu_id==0) //Notifications
             {
             	Log.d(TAG, "Notifications alert (ID: "+alertId+") Time:"+parentService.getNotificationTime(alertId));         	
                 final Calendar cal = Calendar.getInstance();
-                cal.setTimeInMillis(parentService.getNotificationTime(alertId));
-                //Date date = cal.getTime();
-                long notificationYear =  cal.get(cal.YEAR); //date.getYear();
-                long notificationMonth = cal.get(cal.MONTH);//date.getMonth();
-                long notificationDay = cal.get(cal.DAY_OF_MONTH);//date.getDay();
-                long notificationHour = cal.get(cal.HOUR);//date.getHours();
-                long notificationMinute  = cal.get(cal.MINUTE);//date.getMinutes();
-                /*long notificationYear = 1970;
-                long notificationMonth = 0;
-                long notificationDay = notificationTime / (3600*24);
-                notificationTime -= notificationDay * (3600*24);
-                long notificationHour = notificationTime / 3600;
-                notificationTime -= notificationHour * 3600;
-                long notificationMinute = notificationTime / 60;
-                notificationTime -= notificationMinute * 60; */
-                String notificationTimeString = String.format(
-                        "%d:%d %d-%d-%d", notificationHour,
-                        notificationMinute, notificationDay, notificationMonth, notificationYear ); 
+                cal.setTimeInMillis(parentService.getNotificationTime(alertId)*1000);
+                long notificationYear =  cal.get(Calendar.YEAR);
+                long notificationMonth = cal.get(Calendar.MONTH);
+                long notificationDay = cal.get(Calendar.DAY_OF_MONTH);
+                long notificationHour = cal.get(Calendar.HOUR);
+                long notificationMinute  = cal.get(Calendar.MINUTE);
+                String notificationTimeString = String.format("%d:%d %d-%d-%d", notificationHour,
+                        notificationMinute, notificationDay, notificationMonth, notificationYear );
             	if (parentService.getNotificationTotalCount() > 0)
             	{
             		sendCall(new GetAlertResponse((byte) parentService.getNotificationTotalCount(), (byte) parentService.getNotificationUnreadCount(), alertId, (String) notificationTimeString, (String) parentService.getNotificationTitle(alertId), (String) parentService.getNotificationContent(alertId), menuImage_notification));            	
@@ -508,7 +375,7 @@ public class LiveViewThread extends Thread {
             if (nav.isInAlert())
             {
         		Log.d(TAG, "User pressed button in alert.");
-        		//if (last_alert_menuitem==4)
+        		//if (last_alert_menuitem==0)
         		//{
         			//parentService.setNotificationUnreadCount((byte) 0);
         			//parentService.setNotificationTotalCount((byte) 0);
@@ -525,7 +392,7 @@ public class LiveViewThread extends Thread {
 	        				case MessageConstants.NAVACTION_LONGPRESS:
 	        					Log.d(TAG, "Long press on select key.");
 	        					sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
-	        	         	    if (menu_state == 1 || menu_state == 2)
+	        	         	    if (menu_state > 0)
 	        	          	    {
 	        	          			menu_state = 0;
 	        	          		    Log.d(TAG, "The menu is now enabled.");
@@ -552,7 +419,7 @@ public class LiveViewThread extends Thread {
         							int keycode = 0;	        							
         							switch(nav.getMenuItemId())
         							{
-        								case 0:
+        								case 4:
         									Log.d(TAG, "Find my phone: generating noise and vibration...");
         			            			Vibrator v = (Vibrator) parentService.getSystemService(Context.VIBRATOR_SERVICE);
         			            			v.vibrate(300);
@@ -565,7 +432,7 @@ public class LiveViewThread extends Thread {
         								case 1:
         									Log.d(TAG, "MEDIA: Next");
         		            				keycode = KeyEvent.KEYCODE_MEDIA_NEXT;
-        					                Log.d("RN+", "Broadcasting ACTION_MEDIA_BUTTON with ACTION_DOWN and then ACTION_UP with " + keycode);
+        					                //Log.d(TAG, "Broadcasting ACTION_MEDIA_BUTTON with ACTION_DOWN and then ACTION_UP with " + keycode);
         					                buttonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         					                buttonIntent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, keycode));
         					                parentService.sendOrderedBroadcast(buttonIntent, null);
@@ -576,7 +443,7 @@ public class LiveViewThread extends Thread {
         								case 2:
         									Log.d(TAG, "MEDIA: Play / Pause");
         									keycode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
-        					                Log.d("RN+", "Broadcasting ACTION_MEDIA_BUTTON with ACTION_DOWN and then ACTION_UP with " +	keycode);
+        					                //Log.d(TAG, "Broadcasting ACTION_MEDIA_BUTTON with ACTION_DOWN and then ACTION_UP with " +	keycode);
         					                buttonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         					                buttonIntent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, keycode));
         					                parentService.sendOrderedBroadcast(buttonIntent, null);
@@ -587,7 +454,7 @@ public class LiveViewThread extends Thread {
         								case 3:
         									Log.d(TAG, "MEDIA: Previous");
         									keycode = KeyEvent.KEYCODE_MEDIA_PREVIOUS;
-        					                Log.d("RN+", "Broadcasting ACTION_MEDIA_BUTTON with ACTION_DOWN and then ACTION_UP with " +	keycode);
+        					                //Log.d(TAG, "Broadcasting ACTION_MEDIA_BUTTON with ACTION_DOWN and then ACTION_UP with " +	keycode);
         					                buttonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         					                buttonIntent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, keycode));
         					                parentService.sendOrderedBroadcast(buttonIntent, null);

@@ -1,50 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.sourcewalker.olv"
     android:versionCode="1"
-    android:versionName="alpha RN+ edit">
-    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
-    <uses-permission android:name="android.permission.VIBRATE"/>
+    android:versionName="alpha RN+ edit" >
+
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <application
         android:icon="@drawable/icon"
-        android:label="@string/app_name">
+        android:label="@string/app_name" >
         <activity
             android:name=".LiveViewPreferences"
-            android:label="@string/app_name">
+            android:label="@string/app_name" >
             <intent-filter>
-                <action
-                    android:name="android.intent.action.MAIN" />
-                <category
-                    android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".LogViewActivity" />
+        <activity android:name=".LogViewActivity" />
+
+        <service android:name=".service.LiveViewService" />
         <service
-            android:name=".service.LiveViewService" />
-        <service android:name=".service.GetNotificationService" android:description="@string/accessibility_service_description">
+            android:name=".service.GetNotificationService"
+            android:description="@string/accessibility_service_description" >
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
         </service>
-        <receiver
-            android:name=".service.BTReceiver">
+
+        <receiver android:name=".service.BTReceiver" >
             <intent-filter>
-                <action
-                    android:name="android.bluetooth.device.action.ACL_CONNECTED" />
-                <action
-                    android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
-                <action
-                    android:name="android.bluetooth.device.action.ACL_DISCONNECT_REQUESTED" />
+                <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
+                <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
+                <action android:name="android.bluetooth.device.action.ACL_DISCONNECT_REQUESTED" />
             </intent-filter>
         </receiver>
+
         <provider
             android:name=".data.LiveViewDataProvider"
             android:authorities="net.sourcewalker.olv" />
+
+        <activity
+            android:name=".HackActivity"
+            android:label="@string/title_activity_hack" >
+        </activity>
     </application>
-    <uses-sdk
-        android:minSdkVersion="8" />
-    <uses-permission
-        android:name="android.permission.BLUETOOTH" />
+
+    <uses-sdk android:minSdkVersion="8" />
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+
 </manifest>

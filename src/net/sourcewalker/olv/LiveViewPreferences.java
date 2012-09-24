@@ -77,6 +77,9 @@ public class LiveViewPreferences extends PreferenceActivity {
         case R.id.menu_viewlog:
             startActivity(new Intent(this, LogViewActivity.class));
             break;
+        case R.id.menu_hacks:
+            startActivity(new Intent(this, HackActivity.class));
+            break;
         }
         return true;
     }

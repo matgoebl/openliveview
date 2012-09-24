@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">OpenLiveView</string>
     <string name="prefs_deviceaddress_key">device.address</string>
     <string name="prefs_deviceaddress_title">LiveView device</string>
@@ -7,4 +8,9 @@
     <string name="notify_service_running">LiveView connected.</string>
     <string name="menu_viewlog">View log</string>
     <string name="accessibility_service_description">This service will display your notifications on the connected LiveView device.</string>
+    <string name="menu_hack">Pairing problems?</string>
+    <string name="hack_intro">THIS FUNCTION IS NOT IMPLEMENTED YET!    This function will change your bluetooth linkkeys for the LiveView device. Root access required, use at your own risk! (and look at the source if you want to know how it works)</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_hack">Pairing problems?</string>
+
 </resources>
