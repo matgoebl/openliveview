@@ -1,5 +1,8 @@
 OpenLiveView
 ============
+
+(This file was made by the developer who made the base of the current OLV project)
+
 *An open implementation of Sony's LiveView&trade; protocol.*
 
 This Android application aims to be a complete replacement for the proprietary applications provided by Sony. Currently this project in a very early stage of development, so it is not suitable for daily use.

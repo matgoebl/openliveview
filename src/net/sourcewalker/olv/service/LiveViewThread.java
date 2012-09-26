@@ -335,7 +335,7 @@ public class LiveViewThread extends Thread {
             		alertId = 0;
             	}
             }                               
-            if (last_menu_id==0) //Notifications
+/*            if (last_menu_id==0) //Notifications
             {
             	Log.d(TAG, "Notifications alert (ID: "+alertId+") Time:"+parentService.getNotificationTime(alertId));         	
                 final Calendar cal = Calendar.getInstance();
@@ -344,6 +344,29 @@ public class LiveViewThread extends Thread {
                 long notificationMonth = cal.get(Calendar.MONTH);
                 long notificationDay = cal.get(Calendar.DAY_OF_MONTH);
                 long notificationHour = cal.get(Calendar.HOUR);
+                long notificationMinute  = cal.get(Calendar.MINUTE);
+                String notificationTimeString = String.format("%d:%d %d-%d-%d", notificationHour,
+                        notificationMinute, notificationDay, notificationMonth, notificationYear );
+            	if (parentService.getNotificationTotalCount() > 0)
+            	{
+            		sendCall(new GetAlertResponse((byte) parentService.getNotificationTotalCount(), (byte) parentService.getNotificationUnreadCount(), alertId, (String) notificationTimeString, (String) parentService.getNotificationTitle(alertId), (String) parentService.getNotificationContent(alertId), menuImage_notification));            	
+            	}
+            	else
+            	{
+	            	sendCall(new GetAlertResponse(0, 0, alertId, "", "No notifications", "", menuImage_notification));
+	            }
+	        }
+*/
+            if (last_menu_id==0) //Notifications (Date and time fixed by TpmKranz)
+            {
+            	Log.d(TAG, "Notifications alert (ID: "+alertId+") Time:"+parentService.getNotificationTime(alertId));         	
+                final Calendar cal = Calendar.getInstance();
+                cal.setTimeInMillis(((long) parentService.getNotificationTime(alertId))*1000);
+                long notificationYear =  cal.get(Calendar.YEAR);
+                long notificationMonth = cal.get(Calendar.MONTH) + 1 ; //Because January == 0
+                long notificationDay = cal.get(Calendar.DAY_OF_MONTH);
+                long notificationHour = cal.get(Calendar.HOUR_OF_DAY) - (cal.get(Calendar.ZONE_OFFSET)/3600000)
+                		- (cal.get(Calendar.DST_OFFSET)/3600000); //Because getNotificationTime delivers the seconds that have gone since 1.1.1970 0:0	in the CURRENT timezone
                 long notificationMinute  = cal.get(Calendar.MINUTE);
                 String notificationTimeString = String.format("%d:%d %d-%d-%d", notificationHour,
                         notificationMinute, notificationDay, notificationMonth, notificationYear );
