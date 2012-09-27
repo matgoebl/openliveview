@@ -2,10 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.sourcewalker.olv"
     android:versionCode="1"
-    android:versionName="alpha RN+ edit" >
+    android:versionName="RN+" >
+    
+    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="16" />
 
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" /> <!-- Needed for connection -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" /> <!-- Is this needed? -->
+    <uses-permission android:name="android.permission.VIBRATE" /> <!-- Find my phone uses this -->
+    <uses-permission android:name="android.permission.READ_CONTACTS"/><!-- SMS receiver -->
+	<uses-permission android:name="android.permission.RECEIVE_SMS"/><!-- SMS receiver -->
+	<uses-permission android:name="android.permission.READ_SMS"/><!-- SMS receiver -->
 
     <application
         android:icon="@drawable/icon"
@@ -22,9 +28,24 @@
         <activity android:name=".LogViewActivity" />
 
         <service android:name=".service.LiveViewService" />
+        
         <service
-            android:name=".service.GetNotificationService"
-            android:description="@string/accessibility_service_description" >
+            android:name=".service.GetNotificationAccessibilityService"
+            android:description="@string/accessibility_service_description"
+            android:enabled="@bool/need_bind_accessibility_service_permission"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+        		android:name="android.accessibilityservice"
+       			android:resource="@xml/accessibilityservice" />
+        </service>
+        
+        <service
+            android:name=".service.GetNotificationAccessibilityService"
+            android:description="@string/accessibility_service_description"
+            android:enabled="@bool/not_need_bind_accessibility_service_permission">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
@@ -47,9 +68,5 @@
             android:label="@string/title_activity_hack" >
         </activity>
     </application>
-
-    <uses-sdk android:minSdkVersion="8" />
-
-    <uses-permission android:name="android.permission.BLUETOOTH" />
 
 </manifest>

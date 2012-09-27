@@ -3,6 +3,7 @@ My manual on howto use git to update the sourcecode of this project.
 
 
 UPLOAD CODE:
+git add .
 git commit -a
 git push googlecode master:master
 

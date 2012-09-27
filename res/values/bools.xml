@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <!-- Jelly Bean needs extra permissions for the accessability service.
+         However on older versions that permission causes a crash,
+         so it has to be disabled on pre Jelly Bean android -->
+	<bool name="need_bind_accessibility_service_permission">false</bool>   
+	<bool name="not_need_bind_accessibility_service_permission">true</bool>     
+	
+	<!-- Enable functions to keep the liveview connected on older versions of android -->
+	<bool name="enable_hack_menu">false</bool> <!-- when it works, change to true -->	
+</resources>

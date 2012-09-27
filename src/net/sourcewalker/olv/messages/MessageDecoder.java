@@ -42,8 +42,12 @@ public final class MessageDecoder {
         }
     }
 
-    public static final LiveViewEvent decode(byte[] message, int length)
+    public static final LiveViewEvent decode(byte[] message, int length, boolean timeout)
             throws DecodeException {
+    	if (timeout)
+    	{
+    		throw new DecodeException("timeout");
+    	}
         if (length < 4) {
             Log.w(TAG, "Got empty message!");
             throw new DecodeException("Can't decode empty message!");

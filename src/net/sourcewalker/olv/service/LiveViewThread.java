@@ -8,8 +8,11 @@ package net.sourcewalker.olv.service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Calendar;
 import java.util.UUID;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import net.sourcewalker.olv.LiveViewPreferences;
 import net.sourcewalker.olv.R;
@@ -31,6 +34,7 @@ import net.sourcewalker.olv.messages.calls.MessageAck;
 import net.sourcewalker.olv.messages.calls.NavigationResponse;
 import net.sourcewalker.olv.messages.calls.SetLed;
 import net.sourcewalker.olv.messages.calls.SetMenuSize;
+import net.sourcewalker.olv.messages.calls.SetScreenMode;
 import net.sourcewalker.olv.messages.calls.SetVibrate;
 import net.sourcewalker.olv.messages.events.CapsResponse;
 import net.sourcewalker.olv.messages.events.GetAlert;
@@ -51,8 +55,16 @@ import android.net.Uri;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.KeyEvent;
+import net.sourcewalker.olv.data.Prefs;
 
 public class LiveViewThread extends Thread {
+	private ThreadLocal<DateFormat> sdf = new ThreadLocal<DateFormat>()
+	{
+		protected DateFormat initialValue()
+		{
+			return SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.SHORT, SimpleDateFormat.SHORT, Locale.getDefault());
+		};
+	};
 
     private static final String TAG = "LiveViewThread";
     private static final UUID SERIAL = UUID
@@ -84,11 +96,11 @@ public class LiveViewThread extends Thread {
     
     private byte menu_button_count = 5;
     
-    private byte menu_button_notifications_id = 0;
-    private byte menu_button_media_next_id = 1;
-    private byte menu_button_media_play_id = 2;
-    private byte menu_button_media_previous_id = 3;
-    private byte menu_button_findphone_id = 4;
+    private byte menu_button_notifications_id = -1;
+    private byte menu_button_media_next_id = -1;
+    private byte menu_button_media_play_id = -1;
+    private byte menu_button_media_previous_id = -1;
+    private byte menu_button_findphone_id = -1;
     
     public LiveViewThread(LiveViewService parentService) {
         super("LiveViewThread");
@@ -123,11 +135,48 @@ public class LiveViewThread extends Thread {
         menuImage_min = loadImageByteArray(parentService, "menu_min.png");
         menuImage_media_isplaying = loadImageByteArray(parentService, "jerry_music_play_icn.png");
         menuImage_media_isnotplaying = loadImageByteArray(parentService, "jerry_music_pause_icn.png");
+        
+        
+        /* Testing code for dynamic menu */
+        menu_button_count = 0;
+        
+        Prefs prefs = new Prefs(parentService);
+        Boolean menu_show_find_my_phone = prefs.getmenushowfindmyphone();
+        Boolean menu_show_notifications = prefs.getmenushownotifications();
+        Boolean menu_show_media_next = prefs.getmenushowmedianext();
+        Boolean menu_show_media_play = prefs.getmenushowmediaplay();
+        Boolean menu_show_media_previous = prefs.getmenushowmediaprevious();
+        if (menu_show_notifications)
+        {        
+	        menu_button_notifications_id = menu_button_count;
+	        menu_button_count += 1;
+        }        
+        if (menu_show_media_next)
+        {
+	        menu_button_media_next_id = menu_button_count;
+	        menu_button_count += 1;
+        }
+        if (menu_show_media_play)
+        {
+	        menu_button_media_play_id = menu_button_count;
+	        menu_button_count += 1;
+        }
+        if (menu_show_media_previous)
+        {
+	        menu_button_media_previous_id = menu_button_count;
+	        menu_button_count += 1;
+        }
+        if (menu_show_find_my_phone)
+        {
+        	menu_button_findphone_id = menu_button_count;
+        	menu_button_count += 1;
+        }
+        
         menu_state = 0;
     }
     
     /**
-     * This function was added by 149
+     * This function was added by basty149
      * Return byte array for the supplied image file
      * @param parentService
      * @param imageFileName Image file name
@@ -171,10 +220,14 @@ public class LiveViewThread extends Thread {
             Log.e(TAG, "Error starting BT server: " + e.getMessage());
             return;
         }
+        
+        Prefs prefs = new Prefs(parentService);
+        Boolean enable_timeout = prefs.getenabletimeout();
+        
         try {
             Log.d(TAG, "Listening for LV...");
             clientSocket = serverSocket.accept();
-            EventReader reader = new EventReader(clientSocket.getInputStream());
+            EventReader reader = new EventReader(clientSocket.getInputStream(), enable_timeout);
             // Single connect only
             serverSocket.close();
             serverSocket = null;
@@ -188,7 +241,24 @@ public class LiveViewThread extends Thread {
 	                Log.d(TAG, "Got message: " + response);
 	                processEvent(response);
                 } catch (DecodeException e) {
-                    Log.e(TAG, "Error decoding message: " + e.getMessage());
+                	if (e.getMessage()=="timeout") //This works, but should be implemented in some other way
+                	{
+                		
+                		/*
+                		 * I added this very function to test
+                		 * sending messages that are not requested by the liveview
+                		 * Everything added here will be executed in a certain time interval on moments when the liveview is not communicating.
+                		 */
+                		
+                    		Log.d(TAG, "Timeout triggered!");    
+                    		
+                    		//sendCall(new SetLed(Color.RED,1,500)); //Flash the led.
+                			//Note: Executing the timeout also triggers the notification stuff. (look down)
+                	}
+                	else
+                	{
+                		Log.e(TAG, "Error decoding message: " + e.getMessage());
+                	}
                 }
                 
                 if (parentService.getNotificationNeedsUpdate()==true)
@@ -196,18 +266,24 @@ public class LiveViewThread extends Thread {
                 	
                 	if (init_state == 1)
                 	{
-	                	parentService.setNotificationNeedsUpdate(false);
-	                	sendCall(new MenuItem((byte) menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
-	                            "Notifications", menuImage_notification));
-	                	if (parentService.getNotificationUnreadCount()>0)
-	                	{
-		                	sendCall(new SetLed(Color.BLUE,0,1000));
-		                	sendCall(new SetVibrate(0, 200));
-	                	}
-	                	else
-	                	{
-	                		sendCall(new SetLed(Color.RED,0,100));
-	                	}
+                		if (menu_state == 0)
+                		{
+                			if (menu_button_notifications_id>0)
+                			{
+			                	parentService.setNotificationNeedsUpdate(false);
+			                	sendCall(new MenuItem((byte) menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
+			                            "Notifications", menuImage_notification));
+			                	if (parentService.getNotificationUnreadCount()>0)
+			                	{
+				                	sendCall(new SetLed(Color.GREEN,0,1000));
+				                	sendCall(new SetVibrate(0, 200));
+			                	}
+			                	else
+			                	{
+			                		sendCall(new SetLed(Color.RED,0,1000));
+			                	}
+                			}
+                		}
                 	}
                 } 
             } while (true);
@@ -248,6 +324,8 @@ public class LiveViewThread extends Thread {
      */
         
     private void processEvent(LiveViewEvent event) throws IOException {
+        Prefs prefs = new Prefs(parentService);
+        Boolean enable_media_menu = prefs.getenablemediamenu();
     	//Log.d(TAG, "PROCESSEVENT: " + event.getId());
         switch (event.getId()) {
         case MessageConstants.MSG_GETCAPS_RESP:
@@ -267,16 +345,31 @@ public class LiveViewThread extends Thread {
             break;
         case MessageConstants.MSG_GETMENUITEMS:
             Log.d(TAG, "Sending menu items...");
-            sendCall(new MenuItem((byte) menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
-                    "Notifications", menuImage_notification));
-            sendCall(new MenuItem((byte) menu_button_media_next_id, false, new UShort((short) 0),
-                    "Next", menuImage_right));
-            sendCall(new MenuItem((byte) menu_button_media_play_id, false, new UShort((short) 0),
-                    "Play / Pause", menuImage_music));
-            sendCall(new MenuItem((byte) menu_button_media_previous_id, false, new UShort((short) 0),
-                    "Previous", menuImage_left));
-            sendCall(new MenuItem((byte) menu_button_findphone_id, false, new UShort((short) 0),
-                    "Find my phone", menuImage_phone));
+            if (menu_button_notifications_id>=0)
+            {
+	            sendCall(new MenuItem((byte) menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
+	                    "Notifications", menuImage_notification));
+            }
+            if (menu_button_media_next_id>=0)
+            {
+	            sendCall(new MenuItem((byte) menu_button_media_next_id, false, new UShort((short) 0),
+	                    "Next", menuImage_right));
+            }
+            if (menu_button_media_play_id>=0)
+            {
+	            sendCall(new MenuItem((byte) menu_button_media_play_id, false, new UShort((short) 0),
+	                    "Play / Pause", menuImage_music));
+            }
+            if (menu_button_media_previous_id>=0)
+            {
+	            sendCall(new MenuItem((byte) menu_button_media_previous_id, false, new UShort((short) 0),
+	                    "Previous", menuImage_left));
+            }
+            if (menu_button_findphone_id>=0)
+            {
+	            sendCall(new MenuItem((byte) menu_button_findphone_id, false, new UShort((short) 0),
+	                    "Find my phone", menuImage_phone));
+            }
             //sendCall(new MenuItem((byte) 5, true, new UShort((short) 4),
             //        "Alerts test", menuImage));
             menu_state = 0;
@@ -360,7 +453,7 @@ public class LiveViewThread extends Thread {
             if (last_menu_id==0) //Notifications (Date and time fixed by TpmKranz)
             {
             	Log.d(TAG, "Notifications alert (ID: "+alertId+") Time:"+parentService.getNotificationTime(alertId));         	
-                final Calendar cal = Calendar.getInstance();
+                /* final Calendar cal = Calendar.getInstance();
                 cal.setTimeInMillis(((long) parentService.getNotificationTime(alertId))*1000);
                 long notificationYear =  cal.get(Calendar.YEAR);
                 long notificationMonth = cal.get(Calendar.MONTH) + 1 ; //Because January == 0
@@ -369,9 +462,10 @@ public class LiveViewThread extends Thread {
                 		- (cal.get(Calendar.DST_OFFSET)/3600000); //Because getNotificationTime delivers the seconds that have gone since 1.1.1970 0:0	in the CURRENT timezone
                 long notificationMinute  = cal.get(Calendar.MINUTE);
                 String notificationTimeString = String.format("%d:%d %d-%d-%d", notificationHour,
-                        notificationMinute, notificationDay, notificationMonth, notificationYear );
+                        notificationMinute, notificationDay, notificationMonth, notificationYear ); */
             	if (parentService.getNotificationTotalCount() > 0)
             	{
+            		String notificationTimeString = sdf.get().format(new Date(parentService.getNotificationTime(alertId)));
             		sendCall(new GetAlertResponse((byte) parentService.getNotificationTotalCount(), (byte) parentService.getNotificationUnreadCount(), alertId, (String) notificationTimeString, (String) parentService.getNotificationTitle(alertId), (String) parentService.getNotificationContent(alertId), menuImage_notification));            	
             	}
             	else
@@ -423,10 +517,14 @@ public class LiveViewThread extends Thread {
 	        	          	     }
 	        	          	     else
 	        	          	     {
-	        	          	    	 /* menu_state = 1;
+	        	          	    	 /* Media menu test 1 */
+	        	          	    	if(enable_media_menu)
+	        	          	    	{
+	        	          	    	 menu_state = 1;
 	        	          		 	 sendCall(new SetMenuSize((byte) 0));
 	        	          		 	 sendCall(new ClearDisplay());
-	        	          		 	 draw_media_menu(); */
+	        	          		 	 draw_media_menu(); 
+	        	          	    	}
 	        	          	     } 
 	        	         	break;
 	        				default:
@@ -439,20 +537,24 @@ public class LiveViewThread extends Thread {
         					{
         						case 0:
         							Intent buttonIntent = null;
-        							int keycode = 0;	        							
-        							switch(nav.getMenuItemId())
+        							int keycode = 0;	 
+        							
+        							boolean hasdonesomething = false;
+        							if (nav.getMenuItemId()==menu_button_findphone_id)
         							{
-        								case 4:
-        									Log.d(TAG, "Find my phone: generating noise and vibration...");
-        			            			Vibrator v = (Vibrator) parentService.getSystemService(Context.VIBRATOR_SERVICE);
-        			            			v.vibrate(300);
-        			            			Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        			            			Ringtone r = RingtoneManager.getRingtone(parentService.getApplicationContext(), notification);
-        			            			r.play();
-        			            			Log.d(TAG, "Find my phone: done, returning to menu.");
-        			            			sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
-        			            		break;
-        								case 1:
+    									Log.d(TAG, "Find my phone: generating noise and vibration...");
+    			            			Vibrator v = (Vibrator) parentService.getSystemService(Context.VIBRATOR_SERVICE);
+    			            			v.vibrate(300);
+    			            			Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+    			            			Ringtone r = RingtoneManager.getRingtone(parentService.getApplicationContext(), notification);
+    			            			r.setStreamType(AudioManager.STREAM_ALARM); /* Needs to be tested first */
+    			            			r.play();
+    			            			Log.d(TAG, "Find my phone: done, returning to menu.");
+    			            			sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL)); 
+    			            			hasdonesomething = true;
+        							}
+        							if (nav.getMenuItemId()==menu_button_media_next_id)
+        							{
         									Log.d(TAG, "MEDIA: Next");
         		            				keycode = KeyEvent.KEYCODE_MEDIA_NEXT;
         					                //Log.d(TAG, "Broadcasting ACTION_MEDIA_BUTTON with ACTION_DOWN and then ACTION_UP with " + keycode);
@@ -462,8 +564,10 @@ public class LiveViewThread extends Thread {
         					                buttonIntent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP, keycode));
         					                parentService.sendOrderedBroadcast(buttonIntent, null);	            				
         		            				sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
-        		            			break;
-        								case 2:
+        		            				hasdonesomething = true;
+        							}
+        							if (nav.getMenuItemId()==menu_button_media_play_id)
+        							{
         									Log.d(TAG, "MEDIA: Play / Pause");
         									keycode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
         					                //Log.d(TAG, "Broadcasting ACTION_MEDIA_BUTTON with ACTION_DOWN and then ACTION_UP with " +	keycode);
@@ -473,8 +577,10 @@ public class LiveViewThread extends Thread {
         					                buttonIntent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP, keycode));
         					                parentService.sendOrderedBroadcast(buttonIntent, null);
         				            	   sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
-        				            	break;
-        								case 3:
+        				            	   hasdonesomething = true;
+        							}
+        							if (nav.getMenuItemId()==menu_button_media_previous_id)
+        							{
         									Log.d(TAG, "MEDIA: Previous");
         									keycode = KeyEvent.KEYCODE_MEDIA_PREVIOUS;
         					                //Log.d(TAG, "Broadcasting ACTION_MEDIA_BUTTON with ACTION_DOWN and then ACTION_UP with " +	keycode);
@@ -484,11 +590,12 @@ public class LiveViewThread extends Thread {
         					                buttonIntent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP, keycode));
         					                parentService.sendOrderedBroadcast(buttonIntent, null);
         				            	   sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
-        				            	break;
-    									default:
+        				            	   hasdonesomething = true;
+        							}
+    								if (hasdonesomething == false)
+    								{
     										Log.d(TAG, "Navigation error: unknown menu id!");
     	    	        	         		sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
-    	    	        	         	break;
         							}
         						break;
         						case 1:
@@ -529,7 +636,7 @@ public class LiveViewThread extends Thread {
         		Log.d(TAG, "Nope, there is no music playing.");
         		sendCall(new DisplayBitmap((byte) 34, (byte) 34, menuImage_media_isnotplaying));
           }  
-          sendCall(new DisplayText("Test")); 
+          //sendCall(new DisplayText("Test"));  //Does not work (yet)
     }
 
     /**

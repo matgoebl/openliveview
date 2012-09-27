@@ -9,9 +9,13 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.ListPreference;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
+import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 public class LiveViewPreferences extends PreferenceActivity {
 
@@ -28,8 +32,9 @@ public class LiveViewPreferences extends PreferenceActivity {
         addPreferencesFromResource(R.xml.preferences);
 
         devicePreference = (ListPreference) findPreference(getString(R.string.prefs_deviceaddress_key));
+                
     }
-
+   
     /*
      * (non-Javadoc)
      * @see android.app.Activity#onResume()
@@ -40,7 +45,7 @@ public class LiveViewPreferences extends PreferenceActivity {
 
         fillDevices();
     }
-
+    
     /**
      * Get the list of paired devices from the system and fill the preference
      * list.

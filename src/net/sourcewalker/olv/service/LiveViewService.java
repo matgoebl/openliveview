@@ -1,24 +1,30 @@
 package net.sourcewalker.olv.service;
 
+import net.sourcewalker.olv.content.ContentNotification;
+import net.sourcewalker.olv.content.manager.SMSNotificationManager;
 import net.sourcewalker.olv.messages.calls.SetVibrate;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.telephony.SmsMessage;
 import android.util.Log;
+import android.widget.Toast;
 
 /**
  * This service hosts and controls the thread communicating with the LiveView
  * device.
  * 
- * @author Robert &lt;xperimental@solidproject.de&gt;
+ * @author Robert (xperimental@solidproject.de);
  */
 public class LiveViewService extends Service {
 
-    public static final String ACTION_START = "start";
-    public static final String ACTION_STOP = "stop";
+	public final			String ACTION_RECEIVE_SMS	= "android.provider.Telephony.SMS_RECEIVED";
+    public static final	String ACTION_START 		= "start";
+    public static final	String ACTION_STOP 			= "stop";
     
     final public static String SHOW_NOTIFICATION = "SHOW_NOTIFICATION";
 
@@ -28,7 +34,7 @@ public class LiveViewService extends Service {
     byte NotificationTotalCount      = 0;
     String [] NotificationTitle     = new String [101];
     String [] NotificationContent   = new String [101];
-    int [] NotificationTime         = new int [101];
+    long [] NotificationTime       = new long [101];
     Boolean NotificationNeedsUpdate = true;
     
     BroadcastReceiver notification_receiver = new ShowNotificationReceiver();
@@ -51,6 +57,9 @@ public class LiveViewService extends Service {
     		NotificationTitle[100-cid] = "Empty";
     	}
     	registerReceiver(notification_receiver,  new IntentFilter(SHOW_NOTIFICATION));
+    	//IntentFilter intentFilter = new IntentFilter(android.Manifest.permission.RECEIVE_SMS);
+    	IntentFilter intentFilter = new IntentFilter(ACTION_RECEIVE_SMS);
+    	registerReceiver(notification_receiver,  intentFilter);
     }
     
     @Override
@@ -120,7 +129,7 @@ public class LiveViewService extends Service {
         this.NotificationTitle[id] = NotificationTitleVal;
     } 
     
-    public int getNotificationTime(int id) {
+    public long getNotificationTime(int id) {
         return NotificationTime[id];
     }
 
@@ -169,10 +178,20 @@ public class LiveViewService extends Service {
         	{
         		NotificationTotalCount += 1;
         	}
-        	NotificationContent[0] = intent.getExtras().getString("contents"); // + (char)10
-        	NotificationTitle[0] = intent.getExtras().getString("title");
-        	NotificationTime[0] = intent.getExtras().getInt("timestamp");
-        	Log.w("ShowNotificationReceiver", "Added new notification");
+        	if (intent.getAction().equals(ACTION_RECEIVE_SMS))
+        	{
+            	ContentNotification notification = SMSNotificationManager.getNotificationContent(context, intent);
+            	NotificationContent[0] = notification.getContent();
+            	NotificationTitle[0] = notification.getTitle();
+            	NotificationTime[0]=notification.getTimestamp();
+        	}
+        	else
+        	{
+	        	NotificationContent[0] = intent.getExtras().getString("contents");
+	        	NotificationTitle[0] = intent.getExtras().getString("title");
+	        	NotificationTime[0] = intent.getExtras().getInt("timestamp");
+        	}
+        	Log.w("ShowNotificationReceiver", "Added new notification.");
         }  
     }    
 /*

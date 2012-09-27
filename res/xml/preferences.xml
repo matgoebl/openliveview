@@ -1,8 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <ListPreference
-        android:key="@string/prefs_deviceaddress_key"
-        android:summary="@string/prefs_deviceaddress_summary"
-        android:title="@string/prefs_deviceaddress_title"></ListPreference>
+    <PreferenceCategory android:title="@string/prefs_cat_device_title"><ListPreference android:key="@string/prefs_deviceaddress_key" android:summary="@string/prefs_deviceaddress_summary" android:title="@string/prefs_deviceaddress_title">
+    </ListPreference></PreferenceCategory>
+    
+    <PreferenceCategory android:title="@string/prefs_cat_menu_title">
+    
+    <CheckBoxPreference android:key="@string/prefs_menu_notifications_visible_key" android:title="@string/prefs_menu_notifications_visible_title" android:summary="@string/prefs_menu_notifications_visible_summary"/><CheckBoxPreference android:key="@string/prefs_menu_media_next_key" android:title="@string/prefs_menu_media_next_title" android:summary="@string/prefs_menu_media_next_summary" />
+    <CheckBoxPreference android:key="@string/prefs_menu_media_play_key" android:title="@string/prefs_menu_media_play_title" android:summary="@string/prefs_menu_media_play_summary"/>
+    <CheckBoxPreference android:key="@string/prefs_menu_media_previous_key" android:title="@string/prefs_menu_media_previous_title" android:summary="@string/prefs_menu_media_previous_summary"/><CheckBoxPreference android:key="@string/prefs_menu_find_my_phone_visible_key" android:summary="@string/prefs_menu_find_my_phone_visible_summary" android:title="@string/prefs_menu_find_my_phone_visible_title">
+    </CheckBoxPreference>
+</PreferenceCategory>
+    
+    <PreferenceCategory android:title="@string/prefs_go_to_accessibility_title">
+        <Preference
+            android:title="@string/prefs_go_to_accessibility_title"
+            android:key="@string/prefs_go_to_accessibility_key"
+            android:summary="@string/prefs_go_to_accessibility_summary">
+            <intent android:action="android.settings.ACCESSIBILITY_SETTINGS" />
+            </Preference>
+        </PreferenceCategory>
+    <PreferenceCategory android:title="@string/prefs_cat_experimental_title">
+        <CheckBoxPreference android:key="@string/prefs_enabletimeout_key" android:title="@string/prefs_enabletimeout_title" android:summary="@string/prefs_enabletimeout_summary"/>
+        <CheckBoxPreference android:key="@string/prefs_mediaenablemenu_key" android:title="@string/prefs_mediaenablemenu_title" android:summary="@string/prefs_mediaenablemenu_summary"/>
+        
+    </PreferenceCategory><PreferenceCategory android:title="@string/prefs_cat_olvversion_title">
+        <Preference android:title="@string/prefs_version_title" android:selectable="false" android:summary="@string/prefs_version_summary"/>
+    </PreferenceCategory>
+    
+    
+    
 </PreferenceScreen>

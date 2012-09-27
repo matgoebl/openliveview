@@ -24,7 +24,42 @@ public class Prefs {
     public String getDeviceAddress() {
         return preferences.getString("device.address", null);
     }
+    
+    public Boolean getmenushowfindmyphone()
+    {
+    	return preferences.getBoolean("menu.findmyphonevisible", false);
+    }
+    
+    public Boolean getmenushownotifications()
+    {
+    	return preferences.getBoolean("menu.notificationsvisible", false);
+    }
+    
+    public Boolean getmenushowmedianext()
+    {
+    	return preferences.getBoolean("menu.medianextvisible", false);
+    }
+    
+    public Boolean getmenushowmediaplay()
+    {
+    	return preferences.getBoolean("menu.mediaplayvisible", false);
+    }  
+    
+    public Boolean getmenushowmediaprevious()
+    {
+    	return preferences.getBoolean("menu.mediapreviousvisible", false);
+    }    
+    
+    public Boolean getenabletimeout()
+    {
+    	return preferences.getBoolean("system.enabletimeout", false);
+    }
 
+    public Boolean getenablemediamenu()
+    {
+    	return preferences.getBoolean("media.enablemenu", false);
+    }  
+    
     public void setDeviceAddress(String address) {
         Editor editor = preferences.edit();
         editor.putString(keyDeviceAddress, address);

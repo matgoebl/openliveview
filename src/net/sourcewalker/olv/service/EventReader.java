@@ -20,6 +20,7 @@ import net.sourcewalker.olv.messages.MessageDecoder;
 public class EventReader {
 
     private final InputStream stream;
+	private boolean enable_timeout;
 
     /**
      * Construct a MessageReader using the {@link InputStream} provided.
@@ -27,9 +28,10 @@ public class EventReader {
      * @param inputStream
      *            Stream to read messages from.
      */
-    public EventReader(InputStream inputStream) {
+    public EventReader(InputStream inputStream, boolean etimeout) {
         super();
         this.stream = inputStream;
+        this.enable_timeout = etimeout;
     }
 
     /**
@@ -54,9 +56,49 @@ public class EventReader {
         ByteArrayOutputStream msgStream = new ByteArrayOutputStream();
         int needRead = 1;
         ReaderState state = ReaderState.ID;
+        boolean timeout = false;
+        boolean received = false;
+        long timeout_timer = 0;
         do {
-            byte read = (byte) stream.read();
+        	
+            byte read = -1;
+            
+            timeout = false;
+            received = false;
+            do
+            {
+	            if( stream.available() > 0 )
+	            {
+	            	read = (byte) stream.read();
+	            	received = true;
+	            	timeout_timer = 0;
+	            }
+	            else
+	            {
+	            	if (enable_timeout == true)
+	            	{
+		            	if (timeout_timer > 1000000) //Should make this dynamic
+		            	{
+		            		timeout = true;
+		            		timeout_timer = 0;
+		            	}
+		            	else
+		            	{
+		            		timeout_timer++;
+		            	}
+	            	}
+	            }
+            }
+	        while ((timeout == false)&&(received == false));
+            
             //Log.w("DEBUG", "Read: "+read);
+            
+            if (timeout)
+            {
+            	byte[] msgArray = {0};
+            	return MessageDecoder.decode(msgArray, 0, timeout);
+            }
+            
             if (read == -1) {
                 throw new DecodeException("Invalid message received (length="
                         + msgStream.size() + ")");
@@ -82,7 +124,8 @@ public class EventReader {
             }
         } while (needRead > 0);
         byte[] msgArray = msgStream.toByteArray();
-        return MessageDecoder.decode(msgArray, msgArray.length);
+        return MessageDecoder.decode(msgArray, msgArray.length, timeout);
+        
     }
 
     /**
