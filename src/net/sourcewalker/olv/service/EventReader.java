@@ -65,31 +65,38 @@ public class EventReader {
             
             timeout = false;
             received = false;
-            do
+            if (enable_timeout == true)
             {
+            	do
+                {
 	            if( stream.available() > 0 )
 	            {
-	            	read = (byte) stream.read();
-	            	received = true;
-	            	timeout_timer = 0;
-	            }
-	            else
-	            {
-	            	if (enable_timeout == true)
-	            	{
-		            	if (timeout_timer > 1000000) //Should make this dynamic
+		            	read = (byte) stream.read();
+		            	received = true;
+		            	timeout_timer = 0;
+		            }
+		            else
+		            {
+		            	if (enable_timeout == true)
 		            	{
-		            		timeout = true;
-		            		timeout_timer = 0;
+			            	if (timeout_timer > 1000000) //Should make this dynamic
+			            	{
+			            		timeout = true;
+			            		timeout_timer = 0;
+			            	}
+			            	else
+			            	{
+			            		timeout_timer++;
+			            	}
 		            	}
-		            	else
-		            	{
-		            		timeout_timer++;
-		            	}
-	            	}
-	            }
+		            }
+                }
+    	        while ((timeout == false)&&(received == false));
             }
-	        while ((timeout == false)&&(received == false));
+            else
+            {
+            	read = (byte) stream.read();
+            }
             
             //Log.w("DEBUG", "Read: "+read);
             

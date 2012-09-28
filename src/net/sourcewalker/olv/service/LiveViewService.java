@@ -189,7 +189,7 @@ public class LiveViewService extends Service {
         	{
 	        	NotificationContent[0] = intent.getExtras().getString("contents");
 	        	NotificationTitle[0] = intent.getExtras().getString("title");
-	        	NotificationTime[0] = intent.getExtras().getInt("timestamp");
+	        	NotificationTime[0] = intent.getExtras().getLong("timestamp");
         	}
         	Log.w("ShowNotificationReceiver", "Added new notification.");
         }  
