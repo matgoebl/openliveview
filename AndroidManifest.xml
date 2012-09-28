@@ -30,7 +30,7 @@
         <service android:name=".service.LiveViewService" />
         
         <service
-            android:name=".service.GetNotificationAccessibilityService"
+            android:name=".service.GetNotificationServiceJB"
             android:description="@string/accessibility_service_description"
             android:enabled="@bool/need_bind_accessibility_service_permission"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
@@ -43,7 +43,7 @@
         </service>
         
         <service
-            android:name=".service.GetNotificationAccessibilityService"
+            android:name=".service.GetNotificationService"
             android:description="@string/accessibility_service_description"
             android:enabled="@bool/not_need_bind_accessibility_service_permission">
             <intent-filter>

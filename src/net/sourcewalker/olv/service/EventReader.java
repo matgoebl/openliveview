@@ -96,6 +96,7 @@ public class EventReader {
             else
             {
             	read = (byte) stream.read();
+            	timeout = false;
             }
             
             //Log.w("DEBUG", "Read: "+read);

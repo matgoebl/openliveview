@@ -220,14 +220,23 @@ public class LiveViewThread extends Thread {
             Log.e(TAG, "Error starting BT server: " + e.getMessage());
             return;
         }
-        
-        Prefs prefs = new Prefs(parentService);
-        Boolean enable_timeout = prefs.getenabletimeout();
-        
+                
         try {
             Log.d(TAG, "Listening for LV...");
             clientSocket = serverSocket.accept();
+            Prefs prefs = new Prefs(parentService);
+            Boolean enable_timeout = prefs.getenabletimeout();
             EventReader reader = new EventReader(clientSocket.getInputStream(), enable_timeout);
+            
+    		if (enable_timeout)
+    		{
+    			Log.d(TAG, "Enable updates is now enabled.");
+    		}
+    		else
+    		{
+    			Log.d(TAG, "Enable updates is now disabled.");
+    		}
+            
             // Single connect only
             serverSocket.close();
             serverSocket = null;
@@ -235,6 +244,19 @@ public class LiveViewThread extends Thread {
             sendCall(new CapsRequest());
             Log.d(TAG, "Message sent.");
             do {
+            	if (enable_timeout != prefs.getenabletimeout())
+            	{
+            		enable_timeout = prefs.getenabletimeout();
+            		reader = new EventReader(clientSocket.getInputStream(), enable_timeout);
+            		if (enable_timeout)
+            		{
+            			Log.d(TAG, "Setting changed: Enable updates is now enabled.");
+            		}
+            		else
+            		{
+            			Log.d(TAG, "Setting changed: Enable updates is now disabled.");
+            		}
+            	}
                 try {
                     LiveViewEvent response = reader.readMessage();
 	                sendCall(new MessageAck(response.getId()));
@@ -268,7 +290,7 @@ public class LiveViewThread extends Thread {
                 	{
                 		if (menu_state == 0)
                 		{
-                			if (menu_button_notifications_id>0)
+                			if (menu_button_notifications_id>=0)
                 			{
 			                	parentService.setNotificationNeedsUpdate(false);
 			                	sendCall(new MenuItem((byte) menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
@@ -277,10 +299,12 @@ public class LiveViewThread extends Thread {
 			                	{
 				                	sendCall(new SetLed(Color.GREEN,0,1000));
 				                	sendCall(new SetVibrate(0, 200));
+				                	Log.d(TAG, "Notification ready.");  
 			                	}
 			                	else
 			                	{
 			                		sendCall(new SetLed(Color.RED,0,1000));
+			                		Log.d(TAG, "No notification ready."); 
 			                	}
                 			}
                 		}
@@ -433,8 +457,16 @@ public class LiveViewThread extends Thread {
             	Log.d(TAG, "Notifications alert (ID: "+alertId+") Time:"+parentService.getNotificationTime(alertId));
             	if (parentService.getNotificationTotalCount() > 0)
             	{
+            		if (parentService.getNotificationType(alertId)=="SMS")
+            		{
+                		String notificationTimeString = sdf.get().format(new Date(parentService.getNotificationTime(alertId)));
+                		sendCall(new GetAlertResponse((byte) parentService.getNotificationTotalCount(), (byte) parentService.getNotificationUnreadCount(), alertId, (String) notificationTimeString, (String) parentService.getNotificationTitle(alertId), (String) parentService.getNotificationContent(alertId), menuImage));            	
+            		}
+            		else
+            		{
             		String notificationTimeString = sdf.get().format(new Date(parentService.getNotificationTime(alertId)));
             		sendCall(new GetAlertResponse((byte) parentService.getNotificationTotalCount(), (byte) parentService.getNotificationUnreadCount(), alertId, (String) notificationTimeString, (String) parentService.getNotificationTitle(alertId), (String) parentService.getNotificationContent(alertId), menuImage_notification));            	
+            		}
             	}
             	else
             	{

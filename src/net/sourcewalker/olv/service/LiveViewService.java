@@ -34,6 +34,7 @@ public class LiveViewService extends Service {
     byte NotificationTotalCount      = 0;
     String [] NotificationTitle     = new String [101];
     String [] NotificationContent   = new String [101];
+    String [] NotificationType      = new String [101];
     long [] NotificationTime       = new long [101];
     Boolean NotificationNeedsUpdate = true;
     
@@ -137,6 +138,14 @@ public class LiveViewService extends Service {
         this.NotificationTime[id] = NotificationTimeVal;
     }    
 
+    public String getNotificationType(int id) {
+        return NotificationType[id];
+    }
+
+    public void setNotificationType(int id, String NotificationTypeVal) {
+        this.NotificationType[id] = NotificationTypeVal;
+    }    
+    
     public Boolean getNotificationNeedsUpdate() {
         return NotificationNeedsUpdate;
     }
@@ -173,6 +182,7 @@ public class LiveViewService extends Service {
         		NotificationContent[100-cid] = NotificationContent[99-cid];
         		NotificationTitle[100-cid] = NotificationTitle[99-cid];
         		NotificationTime[100-cid] = NotificationTime[99-cid];
+        		NotificationType[100-cid] = NotificationType[99-cid];
         	}
         	if (NotificationTotalCount < 100)
         	{
@@ -184,12 +194,14 @@ public class LiveViewService extends Service {
             	NotificationContent[0] = notification.getContent();
             	NotificationTitle[0] = notification.getTitle();
             	NotificationTime[0]=notification.getTimestamp();
+            	NotificationType[0]= "SMS";
         	}
         	else
         	{
 	        	NotificationContent[0] = intent.getExtras().getString("contents");
 	        	NotificationTitle[0] = intent.getExtras().getString("title");
 	        	NotificationTime[0] = intent.getExtras().getLong("timestamp");
+	        	NotificationType[0]= "GENERIC";
         	}
         	Log.w("ShowNotificationReceiver", "Added new notification.");
         }  

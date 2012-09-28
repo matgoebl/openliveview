@@ -13,7 +13,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
-public class GetNotificationAccessibilityService extends AccessibilityService {
+public class GetNotificationServiceJB extends AccessibilityService {
 
 	private static final String LOG_TAG = "OLV Notification service";
 	final public static String SHOW_NOTIFICATION = "SHOW_NOTIFICATION";	
