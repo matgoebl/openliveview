@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="net.sourcewalker.olv"
+    package="nl.rnplus.olv"
     android:versionCode="1"
-    android:versionName="RN+" >
+    android:versionName="RN+ 01-10-2012" android:installLocation="internalOnly">
     
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="16" />
 
     <uses-permission android:name="android.permission.BLUETOOTH" /> <!-- Needed for connection -->
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" /> <!-- Is this needed? -->
     <uses-permission android:name="android.permission.VIBRATE" /> <!-- Find my phone uses this -->
     <uses-permission android:name="android.permission.READ_CONTACTS"/><!-- SMS receiver -->
 	<uses-permission android:name="android.permission.RECEIVE_SMS"/><!-- SMS receiver -->
@@ -15,7 +14,7 @@
 
     <application
         android:icon="@drawable/icon"
-        android:label="@string/app_name" >
+        android:label="@string/app_name" android:hardwareAccelerated="true" android:debuggable="false">
         <activity
             android:name=".LiveViewPreferences"
             android:label="@string/app_name" >
@@ -43,7 +42,7 @@
         </service>
         
         <service
-            android:name=".service.GetNotificationService"
+            android:name="nl.rnplus.olv.service.GetNotificationService"
             android:description="@string/accessibility_service_description"
             android:enabled="@bool/not_need_bind_accessibility_service_permission">
             <intent-filter>
@@ -51,7 +50,7 @@
             </intent-filter>
         </service>
 
-        <receiver android:name=".service.BTReceiver" >
+        <receiver android:name="nl.rnplus.olv.service.BTReceiver" >
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
@@ -60,11 +59,11 @@
         </receiver>
 
         <provider
-            android:name=".data.LiveViewDataProvider"
-            android:authorities="net.sourcewalker.olv" />
+            android:name="nl.rnplus.olv.data.LiveViewDataProvider"
+            android:authorities="nl.rnplus.olv" />
 
         <activity
-            android:name=".HackActivity"
+            android:name="nl.rnplus.olv.HackActivity"
             android:label="@string/title_activity_hack" >
         </activity>
     </application>
