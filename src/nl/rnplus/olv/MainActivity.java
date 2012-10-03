@@ -1,0 +1,29 @@
+package nl.rnplus.olv;
+
+import android.os.Bundle;
+import android.app.Activity;
+import android.content.Intent;
+import android.view.View;
+import nl.rnplus.olv.data.Prefs;
+
+public class MainActivity extends Activity {
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Prefs prefs = new Prefs(this);
+        Boolean setupcompleted = prefs.getsetupcompleted();
+        if (setupcompleted==false)
+        {
+        	Intent myIntent = new Intent(this, ConfigWizardActivity.class);
+        	this.startActivity(myIntent);
+        }
+    }
+    
+    public void open_settings(View view)
+    {
+    	Intent myIntent = new Intent(this, LiveViewPreferences.class);
+    	this.startActivity(myIntent);
+    }
+}

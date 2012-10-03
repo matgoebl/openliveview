@@ -246,7 +246,24 @@ public class LiveViewThread extends Thread {
                 }
                 /* Notifications */
                 Prefs prefs = new Prefs(parentService);
+                Boolean update_unread_count_when_menu_opens = prefs.getupdateunreadcountwhenmenuopens();
                 Boolean enable_notification_buzzer = prefs.getenablenotificationbuzzer();
+                
+                if (update_unread_count_when_menu_opens && parentService.getNotificationNeedsUpdate())
+                {
+                	if (enable_notification_buzzer == false)
+                    {
+                		parentService.setNotificationNeedsUpdate(false);
+                    }
+	            	if (parentService.getNotificationUnreadCount()>0)
+	            	{
+	                    if (menu_button_notifications_id>=0)
+	                    {
+	                    	sendCall(new MenuItem((byte) menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
+	        			                            "Notifications", menuImage_notification));
+	                    }
+	            	}
+                }
                 if (enable_notification_buzzer && parentService.getNotificationNeedsUpdate())
                 {
                 	parentService.setNotificationNeedsUpdate(false);

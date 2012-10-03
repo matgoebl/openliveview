@@ -27,7 +27,7 @@ public class Prefs {
     
     public Boolean getmenushowfindmyphone()
     {
-    	return preferences.getBoolean("menu.findmyphonevisible", false);
+    	return preferences.getBoolean("menu.findmyphonevisible", true);
     }
     
     public Boolean getmenushownotifications()
@@ -64,6 +64,22 @@ public class Prefs {
     {
     	return preferences.getBoolean("media.enablemenu", false);
     }  
+    
+    public Boolean getsetupcompleted()
+    {
+    	return preferences.getBoolean("system.setupcompleted", false);
+    } 
+    
+    public Boolean getupdateunreadcountwhenmenuopens()
+    {
+    	return preferences.getBoolean("system.updateunreadcountwhenmenuopens", false);
+    } 
+    
+    public void setsetupcompleted(Boolean value) {
+        Editor editor = preferences.edit();
+        editor.putBoolean("system.setupcompleted", value);
+        editor.commit();
+    }
     
     public void setDeviceAddress(String address) {
         Editor editor = preferences.edit();
