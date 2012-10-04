@@ -11,7 +11,7 @@ import android.provider.BaseColumns;
  */
 public final class LiveViewData {
 
-    public static final String AUTHORITY = "net.sourcewalker.olv";
+    public static final String AUTHORITY = "nl.rnplus.olv";
 
     /**
      * The "log" database contains a persistent log for the application.
@@ -23,9 +23,9 @@ public final class LiveViewData {
         public static final Uri CONTENT_URI = Uri.parse("content://"
                 + AUTHORITY + "/log");
 
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/net.sourcewalker.olv.log";
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/nl.rnplus.olv.log";
 
-        public static final String CONTENT_TYPE_ITEM = "vnd.android.cursor.item/net.sourcewalker.olv.log";
+        public static final String CONTENT_TYPE_ITEM = "vnd.android.cursor.item/nl.rnplus.olv.log";
 
         public static final String TABLE = "log";
 
