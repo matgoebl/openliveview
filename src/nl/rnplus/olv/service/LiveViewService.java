@@ -55,9 +55,7 @@ public class LiveViewService extends Service {
     		NotificationTitle[100-cid] = "Empty";
     	}
     	registerReceiver(notification_receiver,  new IntentFilter(SHOW_NOTIFICATION));
-    	//IntentFilter intentFilter = new IntentFilter(android.Manifest.permission.RECEIVE_SMS);
-    	IntentFilter intentFilter = new IntentFilter(ACTION_RECEIVE_SMS);
-    	registerReceiver(notification_receiver,  intentFilter);
+    	registerReceiver(notification_receiver,  new IntentFilter(ACTION_RECEIVE_SMS));
     }
     
     @Override

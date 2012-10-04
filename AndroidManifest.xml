@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="nl.rnplus.olv"
-    android:versionCode="2"
-    android:versionName="1.0.0.1" android:installLocation="internalOnly">
+    android:versionCode="3"
+    android:versionName="@string/prefs_version_summary" android:installLocation="internalOnly">
     
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="16" />
 
-    <uses-permission android:name="android.permission.BLUETOOTH" /> <!-- Needed for connection -->
-    <uses-permission android:name="android.permission.VIBRATE" /> <!-- Find my phone uses this -->
-    <uses-permission android:name="android.permission.READ_CONTACTS"/><!-- SMS receiver -->
-	<uses-permission android:name="android.permission.RECEIVE_SMS"/><!-- SMS receiver -->
-	<uses-permission android:name="android.permission.READ_SMS"/><!-- SMS receiver -->
-	<uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.BLUETOOTH" /> <!-- Needed for "Connection" -->
+    <uses-permission android:name="android.permission.VIBRATE" /> <!-- Needed for "Find my phone" -->
+    <uses-permission android:name="android.permission.READ_CONTACTS"/><!-- Needed for "SMS receiver" -->
+	<uses-permission android:name="android.permission.RECEIVE_SMS"/><!-- Needed for "SMS receiver" -->
+	<uses-permission android:name="android.permission.READ_SMS"/><!-- Needed for "SMS receiver" -->
+	<uses-permission android:name="android.permission.INTERNET"/><!-- Needed for "Donation link" -->
 
     <application
         android:icon="@drawable/icon"
         android:label="@string/app_name" android:hardwareAccelerated="true" android:debuggable="false">
         <activity
             android:name=".LiveViewPreferences"
-            android:label="@string/app_name"
+            android:label="@string/preferences_name"
+            android:icon="@drawable/ic_menu_manage"
             android:launchMode="singleInstance">
             <intent-filter>
             </intent-filter>

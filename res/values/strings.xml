@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">OpenLiveView</string>
     <string name="prefs_cat_device_title">Device</string>
     <string name="prefs_cat_menu_title">Menu</string>
@@ -48,18 +47,18 @@
     <string name="hack_intro">This function will change your bluetooth linkkeys for the LiveView device. Root access required, use at your own risk! (and look at the source if you want to know how it works)</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_hack">Pairing problems?</string>
-    
     <string name="prefs_cat_olvversion_title">Other stuff</string>
     <string name="prefs_version_title">Version</string>
-    <string name="prefs_version_summary">1.0.0.1</string>    
-    
+    <string name="prefs_version_summary">1.0.0.2</string>    
     <string name="title_activity_main">OpenLiveView</string>
 	<string name="main_application_text">Welcome to OpenLiveView!</string>
 	<string name="main_settings_btn_text">Settings</string>
 	<string name="main_logo_content_desc">OpenLiveView logo</string>
 	<string name="main_help_text">You can configure OpenLiveView by clicking the "Settings" button. Do not forget to enable the Accessibility service for receiving notifications.</string>
-
 	<string name="wizard_finish_btn_text">Next ></string>
 	<string name="wizard_bluetooth_btn_text">Bluetooth</string>
 	<string name="wizard_intro_text">Please pair your LiveView using the bluetooth settings on your device. When you are done press next and choose your LiveView device from the list.</string>
+	<string name="notification_findliveview">Find&#8230;</string>
+	<string name="notification_settings">Settings</string>
+	<string name="preferences_name">OpenLiveView settings</string>
 </resources>

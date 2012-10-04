@@ -8,6 +8,6 @@
     <item
         android:id="@+id/menu_hacks"
         android:title="@string/menu_hack"
-        android:icon="@drawable/menu_hack"
+        android:icon="@drawable/ic_menu_directions"
         android:enabled="@bool/enable_hack_menu" />
 </menu>

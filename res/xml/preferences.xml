@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory android:title="@string/prefs_cat_device_title"><ListPreference android:key="@string/prefs_deviceaddress_key" android:summary="@string/prefs_deviceaddress_summary" android:title="@string/prefs_deviceaddress_title">
+    <PreferenceCategory android:title="@string/prefs_cat_device_title"><ListPreference android:key="@string/prefs_deviceaddress_key" android:summary="@string/prefs_deviceaddress_summary" android:title="@string/prefs_deviceaddress_title" android:icon="@drawable/ic_liveview">
     </ListPreference></PreferenceCategory>
     
     <PreferenceCategory android:title="@string/prefs_cat_menu_title">
     
-    <CheckBoxPreference android:key="@string/prefs_menu_notifications_visible_key" android:title="@string/prefs_menu_notifications_visible_title" android:summary="@string/prefs_menu_notifications_visible_summary"/><CheckBoxPreference android:key="@string/prefs_menu_media_next_key" android:title="@string/prefs_menu_media_next_title" android:summary="@string/prefs_menu_media_next_summary" />
-    <CheckBoxPreference android:key="@string/prefs_menu_media_play_key" android:title="@string/prefs_menu_media_play_title" android:summary="@string/prefs_menu_media_play_summary"/>
-    <CheckBoxPreference android:key="@string/prefs_menu_media_previous_key" android:title="@string/prefs_menu_media_previous_title" android:summary="@string/prefs_menu_media_previous_summary"/><CheckBoxPreference android:key="@string/prefs_menu_find_my_phone_visible_key" android:summary="@string/prefs_menu_find_my_phone_visible_summary" android:title="@string/prefs_menu_find_my_phone_visible_title" android:defaultValue="true">
+    <CheckBoxPreference android:key="@string/prefs_menu_notifications_visible_key" android:title="@string/prefs_menu_notifications_visible_title" android:summary="@string/prefs_menu_notifications_visible_summary" android:icon="@drawable/ic_menu_notifications"/><CheckBoxPreference android:key="@string/prefs_menu_media_next_key" android:title="@string/prefs_menu_media_next_title" android:summary="@string/prefs_menu_media_next_summary" android:icon="@drawable/ic_media_next"/>
+    <CheckBoxPreference android:key="@string/prefs_menu_media_play_key" android:title="@string/prefs_menu_media_play_title" android:summary="@string/prefs_menu_media_play_summary" android:icon="@drawable/ic_media_play"/>
+    <CheckBoxPreference android:key="@string/prefs_menu_media_previous_key" android:title="@string/prefs_menu_media_previous_title" android:summary="@string/prefs_menu_media_previous_summary" android:icon="@drawable/ic_media_previous"/><CheckBoxPreference android:key="@string/prefs_menu_find_my_phone_visible_key" android:summary="@string/prefs_menu_find_my_phone_visible_summary" android:title="@string/prefs_menu_find_my_phone_visible_title" android:defaultValue="true" android:icon="@drawable/ic_menu_mylocation">
     </CheckBoxPreference>
 </PreferenceCategory>
     
@@ -27,8 +27,8 @@
         <CheckBoxPreference android:summary="@string/prefs_updateunreadcountwhenmenuopens_summary" android:title="@string/prefs_updateunreadcountwhenmenuopens_title" android:key="@string/prefs_updateunreadcountwhenmenuopens_key"/>
         
     </PreferenceCategory><PreferenceCategory android:title="@string/prefs_cat_olvversion_title">
-        <Preference android:title="@string/prefs_version_title" android:selectable="false" android:summary="@string/prefs_version_summary"/>
-        <Preference android:key="@string/prefs_donate_key" android:summary="@string/prefs_donate_summary" android:title="@string/prefs_donate_title">
+        <Preference android:title="@string/prefs_version_title" android:selectable="false" android:summary="@string/prefs_version_summary" android:icon="@drawable/ic_menu_info_details"/>
+        <Preference android:key="@string/prefs_donate_key" android:summary="@string/prefs_donate_summary" android:title="@string/prefs_donate_title" android:icon="@drawable/ic_menu_allfriends">
                     <intent android:action="android.intent.action.VIEW"
                 android:data="http://olv.rnplus.nl/" />
         </Preference>

@@ -1,10 +1,10 @@
+package nl.rnplus.olv.service;
 /*
- * Workerthread for communication with the LiveView device
  * @author Robert (xperimental@solidproject.de);
  * This file has been changed by Renze Nicolai (RN+)
  * Image file loader was changed by: basty149
  */
-package nl.rnplus.olv.service;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,7 +13,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -22,20 +21,15 @@ import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.KeyEvent;
 import nl.rnplus.olv.LiveViewPreferences;
-import nl.rnplus.olv.MainActivity;
 import nl.rnplus.olv.R;
 import nl.rnplus.olv.data.LiveViewDbHelper;
 import nl.rnplus.olv.data.Prefs;
@@ -60,44 +54,7 @@ import nl.rnplus.olv.messages.events.CapsResponse;
 import nl.rnplus.olv.messages.events.GetAlert;
 import nl.rnplus.olv.messages.events.Navigation;
 
-@TargetApi(16)
-public class LiveViewThread extends Thread
-{
-	
-	/* Service constants */
-	private		static	final	String	TAG				=	"LiveViewThread";
-	private		static	final	UUID	SERIAL			=	UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-	private		static final	int		SERVICE_NOTIFY	=	100;
-	
-	/* GUI elements */
-    private				final	byte[]	menuImage;
-    private				final	byte[]	menuImage_notification;
-    private				final	byte[]	menuImage_phone;  
-    private				final	byte[]	menuImage_music;
-    private				final	byte[]	menuImage_left;
-    private				final	byte[]	menuImage_right;
-    private				final	byte[]	menuImage_media_isplaying;
-    private				final	byte[]	menuImage_media_isnotplaying;
-
-    /* Communication */
-    private				final	BluetoothAdapter		btAdapter;
-    private						BluetoothServerSocket	serverSocket;
-    private				long							startUpTime;
-    private						LiveViewService			parentService;
-    private						BluetoothSocket			clientSocket;
-    private						Notification			notification;
-    
-    /* Menu variables */
-    private						Integer					menu_state						= 0;
-    private						byte					last_menu_id					= 0;
-    private						byte					alertId							= 0;
-    private						byte					menu_button_count				= 0;
-    private						byte					menu_button_notifications_id	= -1;
-    private						byte					menu_button_media_next_id		= -1;
-    private						byte					menu_button_media_play_id		= -1;
-    private						byte					menu_button_media_previous_id	= -1;
-    private						byte					menu_button_findphone_id		= -1;
-    
+public class LiveViewStandbyThread extends Thread {
 	private ThreadLocal<DateFormat> sdf = new ThreadLocal<DateFormat>()
 	{
 		protected DateFormat initialValue()
@@ -105,57 +62,69 @@ public class LiveViewThread extends Thread
 			return SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.SHORT, SimpleDateFormat.SHORT, Locale.getDefault());
 		};
 	};
+
+    private static final String TAG = "LiveViewThread";
+    private static final UUID SERIAL = UUID
+            .fromString("00001101-0000-1000-8000-00805F9B34FB");
+    private static final int SERVICE_NOTIFY = 100;
     
-    public LiveViewThread(LiveViewService parentService)
-    {
+    private final byte[] menuImage;
+    private final byte[] menuImage_notification;
+    private final byte[] menuImage_phone;  
+    private final byte[] menuImage_music;
+    private final byte[] menuImage_left;
+    private final byte[] menuImage_right;
+    private final byte[] menuImage_media_isplaying;
+    private final byte[] menuImage_media_isnotplaying;
+
+    private final BluetoothAdapter btAdapter;
+    private BluetoothServerSocket serverSocket;
+    private long startUpTime;
+    private LiveViewService parentService;
+    private BluetoothSocket clientSocket;
+    private Notification notification;
+    
+    private Integer menu_state = 0;
+    private byte last_menu_id = 0;
+    private byte alertId = 0;
+    
+    private byte menu_button_count = 5;
+    
+    private byte menu_button_notifications_id = -1;
+    private byte menu_button_media_next_id = -1;
+    private byte menu_button_media_play_id = -1;
+    private byte menu_button_media_previous_id = -1;
+    private byte menu_button_findphone_id = -1;
+    
+    public LiveViewStandbyThread(LiveViewService parentService) {
         super("LiveViewThread");
         this.parentService = parentService;
         
-        int sdk=new Integer(Build.VERSION.SDK).intValue();
+        menu_state = 0;
+                
+        notification = new Notification(R.drawable.icon,
+                "LiveView connected...", System.currentTimeMillis());    
+        Context context = parentService.getApplicationContext();
+        CharSequence contentTitle = parentService.getString(R.string.app_name);
+        CharSequence contentText = parentService
+                .getString(R.string.notify_service_running);
+        Intent notificationIntent = new Intent(parentService,
+                LiveViewPreferences.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(parentService,
+                0, notificationIntent, 0);
+        notification.setLatestEventInfo(context, contentTitle, contentText,
+                contentIntent);
         
-        //Pending intent 1: Open the mainActivity
-        Intent notificationIntent = new Intent(parentService, MainActivity.class);
-        PendingIntent pi_content = PendingIntent.getActivity(parentService, 0, notificationIntent, 0);
+        /* Added following as hint for removing the deprecated stuff above when upgrading to minimum api 11 */
         
-    	//Pending intent 2: Find the LiveView
-    	Intent bci = new Intent("SHOW_NOTIFICATION");
-    	Bundle bcb = new Bundle();
-    	bcb.putString("contents", "This is a test.");
-    	bcb.putString("title", "Test");
-    	long time = System.currentTimeMillis();
-    	bcb.putLong("timestamp", time);
-    	bci.putExtras(bcb);
-    	PendingIntent pi_findliveview = PendingIntent.getBroadcast(parentService, 0, bci, 0); 
-    	
-    	//Pending intent 3: Open the settings
-    	Intent i_opensettings = new Intent();  
-    	i_opensettings.setClass(parentService,LiveViewPreferences.class);
-    	PendingIntent pi_opensettings = PendingIntent.getActivity(parentService, 0, i_opensettings, 0);
-    	
-        
-        if (sdk<16)
-        {
-	        notification = new Notification(R.drawable.icon,"LiveView connected...", System.currentTimeMillis());    
-	        Context context = parentService.getApplicationContext();
-	        CharSequence contentTitle = parentService.getString(R.string.app_name);
-	        CharSequence contentText = parentService.getString(R.string.notify_service_running);
-	        notification.setLatestEventInfo(context, contentTitle, contentText, pi_content);
-        }
-        else
-        {
-	        CharSequence contentTitle = parentService.getString(R.string.app_name);
-	        CharSequence contentText = parentService.getString(R.string.notify_service_running);	 
-	        //Bitmap icon = BitmapFactory.decodeResource(parentService.getResources(), R.drawable.olv_icon);
-	        notification = new Notification.Builder(parentService.getApplicationContext())
-	        .setContentTitle(contentTitle)
-	        .setContentText(contentText)
-	        .setSmallIcon(R.drawable.ic_liveview)
-	        .setContentIntent(pi_content)
-	        //.addAction(R.drawable.ic_menu_find, parentService.getString(R.string.notification_findliveview), pi_findliveview)
-	        .addAction(R.drawable.ic_menu_manage, parentService.getString(R.string.notification_settings), pi_opensettings)
-	        //.setLargeIcon(icon)
-	        .build();
-        }
+        /* notification = new Notification.Builder(parentService.getApplicationContext())
+        .setContentTitle(contentTitle)
+        .setContentText(contentText)
+        .setSmallIcon(R.drawable.icon)
+        //.setLargeIcon(R.drawable.icon)
+        .build();  
+        */ 
+
         btAdapter = BluetoothAdapter.getDefaultAdapter();
                 
         
