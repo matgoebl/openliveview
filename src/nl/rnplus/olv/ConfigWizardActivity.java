@@ -38,14 +38,13 @@ public class ConfigWizardActivity extends Activity {
     {
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
     	builder.setTitle("Choose your LiveView device");
-    	//choiceList =  {"Coke", "Pepsi" , "Sprite" , "Seven Up" };
     	fillDevices();
-    	selected = -1; // does not select anything
+    	selected = -1;
     	builder.setSingleChoiceItems(choiceList, selected, new DialogInterface.OnClickListener()
     	{
     		public void onClick(DialogInterface dialog, int which)
 	    	{
-	    		Toast.makeText(mContext, "Select "+choiceList[which], Toast.LENGTH_SHORT).show();
+	    		//Toast.makeText(mContext, "Select "+choiceList[which], Toast.LENGTH_SHORT).show();
 	    		selected = which;
 	    		devicelist.dismiss();
 	        	if (selected > -1)

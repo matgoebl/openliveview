@@ -49,7 +49,7 @@
     <string name="title_activity_hack">Pairing problems?</string>
     <string name="prefs_cat_olvversion_title">Other stuff</string>
     <string name="prefs_version_title">Version</string>
-    <string name="prefs_version_summary">1.0.0.2</string>    
+    <string name="prefs_version_summary">1.0.0.3</string>    
     <string name="title_activity_main">OpenLiveView</string>
 	<string name="main_application_text">Welcome to OpenLiveView!</string>
 	<string name="main_settings_btn_text">Settings</string>

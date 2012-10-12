@@ -18,6 +18,7 @@ public class MainActivity extends Activity {
         {
         	Intent myIntent = new Intent(this, ConfigWizardActivity.class);
         	this.startActivity(myIntent);
+        	finish();
         }
     }
     

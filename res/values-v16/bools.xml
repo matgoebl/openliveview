@@ -8,5 +8,5 @@
 	<bool name="not_need_bind_accessibility_service_permission">false</bool>  
 	
 	<!-- Enable functions to keep the liveview connected on older versions of android -->
-	<bool name="enable_hack_menu">false</bool>
+	<bool name="enable_hack_menu">true</bool>
 </resources>

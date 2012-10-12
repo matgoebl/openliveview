@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import android.widget.Toast;
 
 /**
  * This receiver listens for system broadcasts related to the bluetooth device
@@ -29,6 +30,8 @@ public class BTReceiver extends BroadcastReceiver {
         String address = prefs.getDeviceAddress();
         if (address == null) {
             Log.w(TAG, "No device configured!");
+            prefs.setsetupcompleted(false); //Show the setup to the user when there is not device configured.
+            Toast.makeText(context, "No LiveView device configured! Please configure OLV by opening the app.", Toast.LENGTH_SHORT).show();
         } else {
             Log.d(TAG, "Device address: " + address);
             String action = intent.getAction();

@@ -56,11 +56,21 @@ public class LiveViewService extends Service {
     	}
     	registerReceiver(notification_receiver,  new IntentFilter(SHOW_NOTIFICATION));
     	registerReceiver(notification_receiver,  new IntentFilter(ACTION_RECEIVE_SMS));
+    	
+    	/* Added in version 1.0.0.3: Mediaplayer information receiver */
+    	IntentFilter mediaintentfilter = new IntentFilter();
+    	mediaintentfilter.addAction("com.android.music.metachanged");
+    	mediaintentfilter.addAction("com.android.music.playstatechanged");
+    	mediaintentfilter.addAction("com.android.music.playbackcomplete");
+    	mediaintentfilter.addAction("com.android.music.queuechanged");
+    	registerReceiver(media_receiver, mediaintentfilter);
+    	
     }
     
     @Override
     public void onDestroy() {    
     	unregisterReceiver(notification_receiver);
+    	unregisterReceiver(media_receiver);
     }    
 
     /*
@@ -207,5 +217,48 @@ public class LiveViewService extends Service {
     b.putString("keyvalue", "yourprefixvalue");
     i.putExtras(b);
 */
+    
+    /* Media receiver */
+    
+    boolean MediaInfoNeedsUpdate = false;
+    String MediaInfoArtist = "";
+    String MediaInfoTrack  = "";
+    String MediaInfoAlbum  = "";
+    
+    public Boolean getMediaInfoNeedsUpdate() {
+        return MediaInfoNeedsUpdate;
+    }
+
+    public void setMediaInfoNeedsUpdate(Boolean NotificationNeedsUpdate) {
+        this.MediaInfoNeedsUpdate = NotificationNeedsUpdate;
+    }
+    
+    public String getMediaInfoArtist() {
+        return MediaInfoArtist;
+    }
+    
+    public String getMediaInfoTrack() {
+        return MediaInfoTrack;
+    }
+    
+    public String getMediaInfoAlbum() {
+        return MediaInfoAlbum;
+    }
+    
+    private BroadcastReceiver media_receiver = new BroadcastReceiver() {
+
+    	@Override
+    	public void onReceive(Context context, Intent intent)
+    	{
+    	String action = intent.getAction();
+    	String cmd = intent.getStringExtra("command");
+    	//Log.d("mIntentReceiver.onReceive ", action + " / " + cmd);
+    	MediaInfoArtist = intent.getStringExtra("artist");
+    	MediaInfoAlbum = intent.getStringExtra("album");
+    	MediaInfoTrack = intent.getStringExtra("track");
+    	MediaInfoNeedsUpdate = true;
+    	Log.d("Music",MediaInfoArtist+":"+MediaInfoAlbum+":"+MediaInfoTrack);
+    	}
+    	};
     
 }

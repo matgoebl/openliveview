@@ -22,8 +22,6 @@ import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.Ringtone;
@@ -46,17 +44,24 @@ import nl.rnplus.olv.messages.MessageConstants;
 import nl.rnplus.olv.messages.UShort;
 import nl.rnplus.olv.messages.calls.CapsRequest;
 import nl.rnplus.olv.messages.calls.ClearDisplay;
+import nl.rnplus.olv.messages.calls.ClearDisplayAck;
 import nl.rnplus.olv.messages.calls.DeviceStatusAck;
 import nl.rnplus.olv.messages.calls.DisplayBitmap;
+import nl.rnplus.olv.messages.calls.DisplayBitmapAck;
+import nl.rnplus.olv.messages.calls.DisplayPanel;
+import nl.rnplus.olv.messages.calls.DisplayPanelAck;
 import nl.rnplus.olv.messages.calls.GetAlertResponse;
 import nl.rnplus.olv.messages.calls.GetTimeResponse;
 import nl.rnplus.olv.messages.calls.MenuItem;
 import nl.rnplus.olv.messages.calls.MessageAck;
 import nl.rnplus.olv.messages.calls.NavigationResponse;
 import nl.rnplus.olv.messages.calls.SetLed;
+import nl.rnplus.olv.messages.calls.SetLedAck;
 import nl.rnplus.olv.messages.calls.SetMenuSize;
 import nl.rnplus.olv.messages.calls.SetVibrate;
+import nl.rnplus.olv.messages.calls.SetVibrateAck;
 import nl.rnplus.olv.messages.events.CapsResponse;
+import nl.rnplus.olv.messages.events.DeviceStatus;
 import nl.rnplus.olv.messages.events.GetAlert;
 import nl.rnplus.olv.messages.events.Navigation;
 
@@ -111,13 +116,13 @@ public class LiveViewThread extends Thread
         super("LiveViewThread");
         this.parentService = parentService;
         
-        int sdk=new Integer(Build.VERSION.SDK).intValue();
+        int sdk= Integer.valueOf(Build.VERSION.SDK_INT);
         
         //Pending intent 1: Open the mainActivity
         Intent notificationIntent = new Intent(parentService, MainActivity.class);
         PendingIntent pi_content = PendingIntent.getActivity(parentService, 0, notificationIntent, 0);
         
-    	//Pending intent 2: Find the LiveView
+    	//Pending intent 2: Find the LiveView (currently does not do what it should do, only for testing!)
     	Intent bci = new Intent("SHOW_NOTIFICATION");
     	Bundle bcb = new Bundle();
     	bcb.putString("contents", "This is a test.");
@@ -133,7 +138,7 @@ public class LiveViewThread extends Thread
     	PendingIntent pi_opensettings = PendingIntent.getActivity(parentService, 0, i_opensettings, 0);
     	
         
-        if (sdk<16)
+        if (sdk<Build.VERSION_CODES.JELLY_BEAN) //Use deprecated notification code when running on android versions older than Jelly Bean.
         {
 	        notification = new Notification(R.drawable.icon,"LiveView connected...", System.currentTimeMillis());    
 	        Context context = parentService.getApplicationContext();
@@ -341,56 +346,93 @@ public class LiveViewThread extends Thread
      * @throws IOException
      */
         
-    private void processEvent(LiveViewEvent event) throws IOException {
+    private void processEvent(LiveViewEvent event) throws IOException
+    {
         Prefs prefs = new Prefs(parentService);
         Boolean enable_media_menu = prefs.getenablemediamenu();
-    	//Log.d(TAG, "PROCESSEVENT: " + event.getId());
-        switch (event.getId()) {
+    	//Log.d(TAG, "OLV will now process an event with id: " + event.getId());
+        switch (event.getId())
+        {
         case MessageConstants.MSG_GETCAPS_RESP:
             CapsResponse caps = (CapsResponse) event;
             Log.d(TAG, "LV capabilities: " + caps.toString());
             Log.d(TAG, "LV Version: " + caps.getSoftwareVersion());
-            sendCall(new SetMenuSize((byte) menu_button_count)); //                          CHANGE THIS ROW TO GET MORE BUTTONS
-            sendCall(new SetVibrate(0, 50));
+            if (menu_state==0)
+            {
+            	sendCall(new SetMenuSize((byte) menu_button_count));
+            }
+            else
+            {
+            	sendCall(new SetMenuSize((byte) 0));	
+            }
+            sendCall(new SetVibrate(0, 100));
             break;
         case MessageConstants.MSG_GETTIME:
             Log.d(TAG, "Sending current time...");
             sendCall(new GetTimeResponse());
             break;
         case MessageConstants.MSG_DEVICESTATUS:
-            Log.d(TAG, "Acknowledging status.");
+        	DeviceStatus status = (DeviceStatus) event;
+            Log.d(TAG, "Acknowledging status: "+status.toString());
             sendCall(new DeviceStatusAck());
+            break;
+        case MessageConstants.MSG_SETVIBRATE_ACK:
+            Log.d(TAG, "Acknowledging set vibrate.");
+            sendCall(new SetVibrateAck());
+            break;
+        case MessageConstants.MSG_SETLED_ACK:
+            Log.d(TAG, "Acknowledging set led.");
+            sendCall(new SetLedAck());
+            break;
+        case MessageConstants.MSG_CLEARDISPLAY_ACK:
+            Log.d(TAG, "Acknowledging clear display.");
+            sendCall(new ClearDisplayAck());
+            break;
+        case MessageConstants.MSG_DISPLAYBITMAP_ACK:
+            Log.d(TAG, "Acknowledging display bitmap.");
+            sendCall(new DisplayBitmapAck());
+            break;
+        case MessageConstants.MSG_DISPLAYPANEL_ACK:
+            Log.d(TAG, "Acknowledging display panel.");
+            sendCall(new DisplayPanelAck());
             break;
         case MessageConstants.MSG_GETMENUITEMS:
             Log.d(TAG, "Sending menu items...");
-            if (menu_button_notifications_id>=0)
+            if (menu_state==0)
             {
-            	sendCall(new MenuItem((byte) menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
-			                            "Notifications", menuImage_notification));
+	            if (menu_button_notifications_id>=0)
+	            {
+	            	sendCall(new MenuItem((byte) menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
+				                            "Notifications", menuImage_notification));
+	            }
+	            if (menu_button_media_next_id>=0)
+	            {
+		            sendCall(new MenuItem((byte) menu_button_media_next_id, false, new UShort((short) 0),
+		                    "Next", menuImage_right));
+	            }
+	            if (menu_button_media_play_id>=0)
+	            {
+		            sendCall(new MenuItem((byte) menu_button_media_play_id, false, new UShort((short) 0),
+		                    "Play / Pause", menuImage_music));
+	            }
+	            if (menu_button_media_previous_id>=0)
+	            {
+		            sendCall(new MenuItem((byte) menu_button_media_previous_id, false, new UShort((short) 0),
+		                    "Previous", menuImage_left));
+	            }
+	            if (menu_button_findphone_id>=0)
+	            {
+		            sendCall(new MenuItem((byte) menu_button_findphone_id, false, new UShort((short) 0),
+		                    "Find my phone", menuImage_phone));
+	            }
+	            Log.d(TAG, "Menu items sent, menu_state is 0.");
             }
-            if (menu_button_media_next_id>=0)
+            else
             {
-	            sendCall(new MenuItem((byte) menu_button_media_next_id, false, new UShort((short) 0),
-	                    "Next", menuImage_right));
-            }
-            if (menu_button_media_play_id>=0)
-            {
-	            sendCall(new MenuItem((byte) menu_button_media_play_id, false, new UShort((short) 0),
-	                    "Play / Pause", menuImage_music));
-            }
-            if (menu_button_media_previous_id>=0)
-            {
-	            sendCall(new MenuItem((byte) menu_button_media_previous_id, false, new UShort((short) 0),
-	                    "Previous", menuImage_left));
-            }
-            if (menu_button_findphone_id>=0)
-            {
-	            sendCall(new MenuItem((byte) menu_button_findphone_id, false, new UShort((short) 0),
-	                    "Find my phone", menuImage_phone));
+            	Log.d(TAG, "Menu items not sent, not in menu_state 0.");
             }
             //sendCall(new MenuItem((byte) 5, true, new UShort((short) 4),
             //        "Alerts test", menuImage));
-            menu_state = 0;
             break;
         case MessageConstants.MSG_GETALERT:
         	GetAlert alert = (GetAlert) event;
@@ -471,7 +513,6 @@ public class LiveViewThread extends Thread
             	Log.d(TAG, "Unknown alert. Display demo. (id: "+last_menu_id+")");
             	sendCall(new GetAlertResponse(20, 4, alertId, "ID: "+alertId, "HEADER", "01234567890123456789012345678901234567890123456789", menuImage));
             }
-            //Log.d(TAG, "DEBUG E");
             parentService.setNotificationUnreadCount((byte) 0);
             break;
         case MessageConstants.MSG_NAVIGATION:
@@ -479,8 +520,6 @@ public class LiveViewThread extends Thread
 			 * sendCall(new SetScreenMode((byte) MessageConstants.BRIGHTNESS_DIM));
         	 * sendCall(new SetLed(Color.GREEN,1,500));
         	 * sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
-             * sendCall(new SetScreenMode((byte) MessageConstants.BRIGHTNESS_DIM));
-             * sendCall(new SetLed(Color.YELLOW,1,500));
              */
             Navigation nav = (Navigation) event;
             if (nav.isInAlert())
@@ -595,7 +634,9 @@ public class LiveViewThread extends Thread
 		        				sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
 		        			break;
 			         	    default:
-			         	    	Log.d(TAG, "Navigation error: unknown button!");
+			         	    	String message = "Navigation error: unknown button ("+nav.getNavAction()+")!";
+	    		                Log.e(TAG, message);
+	    		                LiveViewDbHelper.logMessage(parentService, message);
 			         	    	sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
 			         	    break;
 			            }       
@@ -614,23 +655,34 @@ public class LiveViewThread extends Thread
 			        	          		sendCall(new SetMenuSize((byte) 5));
 			        	         	break;
 			        				default:
-			        					Log.d(TAG, "Navigation error: unknown action with select button while in media menu!");
+			        					String message = "Navigation error: unknown action with select button while in media menu ("+nav.getNavAction()+")!";
+			    		                Log.e(TAG, message);
+			    		                LiveViewDbHelper.logMessage(parentService, message);
 			        	         		sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));  
 			        	         	break;
 		    					}	
 			        		break;
 	        				default:
-			         	    	Log.d(TAG, "Navigation error: unknown button while in media menu!");
+			         	    	String message = "Error: Navigation: unknown button while in media menu!";
+				                Log.e(TAG, message);
+				                LiveViewDbHelper.logMessage(parentService, message);
 			         	    	sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
 			         	    break;
 			            }
 	            	break;
 					default:
-						Log.d(TAG, "Navigation error: unknown menu state!");
+						String message = "Error: Navigation: unknown menu state!";
+		                Log.e(TAG, message);
+		                LiveViewDbHelper.logMessage(parentService, message);
     	         		sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));	
     	         	break;
             	}
             }
+            break;
+            default:
+            	String message = "Error: Unknown event (" + event.getId() + ")!";
+                Log.e(TAG, message);
+                LiveViewDbHelper.logMessage(parentService, message);
             break;
         }
     }
@@ -641,12 +693,15 @@ public class LiveViewThread extends Thread
           if (playing)
           {
         		Log.d(TAG, "A song is playing.");
-        		sendCall(new DisplayBitmap((byte) 34, (byte) 34, menuImage_media_isplaying));
+        		sendCall(new DisplayPanel(parentService.getMediaInfoTrack(), "Artist: " + parentService.getMediaInfoArtist()+" Album: "+ parentService.getMediaInfoAlbum(), menuImage_media_isplaying, false));
+        		//sendCall(new DisplayBitmap((byte) 34, (byte) 34, menuImage_media_isplaying));
+        		//sendCall(new DisplayPanel("HEADER", "FOOTER", menuImage_media_isplaying, false));
           }
           else
           {
         		Log.d(TAG, "Nope, there is no music playing.");
-        		sendCall(new DisplayBitmap((byte) 34, (byte) 34, menuImage_media_isnotplaying));
+        		sendCall(new DisplayPanel("Not playing...", "RN+ MEDIA MENU TEST", menuImage_media_isnotplaying, false));
+        		//sendCall(new DisplayBitmap((byte) 34, (byte) 34, menuImage_media_isnotplaying));
           }  
     }
 
@@ -666,18 +721,25 @@ public class LiveViewThread extends Thread
         }
     }
 
-    public void stopLoop() {
-        if (serverSocket != null) {
-            try {
+    public void stopLoop()
+    {
+        if (serverSocket != null)
+        {
+            try
+            {
                 serverSocket.close();
-            } catch (IOException e) {
-                Log.e(TAG,
-                        "Error while closing server socket: " + e.getMessage());
+            }
+            catch (IOException e)
+            {
+            	String message = "Error while closing server socket: " + e.getMessage();
+                Log.e(TAG, message);
+                LiveViewDbHelper.logMessage(parentService, message);
             }
         }
     }
     
-    public boolean isLooping() {
+    public boolean isLooping()
+    {
         return serverSocket != null;
     }
 

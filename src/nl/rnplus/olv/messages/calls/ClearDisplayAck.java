@@ -1,18 +1,18 @@
 package nl.rnplus.olv.messages.calls;
 
+/* Renze Nicolai
+ * Added 5-10-2012
+ * ClearDisplayAck.java
+ * Not checked: maybe not complete.
+ */
+
 import nl.rnplus.olv.messages.LiveViewCall;
 import nl.rnplus.olv.messages.MessageConstants;
 
-/**
- * @author Xperimental
- */
-public class MessageAck extends LiveViewCall {
+public class ClearDisplayAck extends LiveViewCall {
 
-    private final byte ackMsgId;
-
-    public MessageAck(byte ackMsgId) {
-        super(MessageConstants.MSG_ACK);
-        this.ackMsgId = ackMsgId;
+    public ClearDisplayAck() {
+        super(MessageConstants.MSG_CLEARDISPLAY_ACK);
     }
 
     /*
@@ -21,7 +21,7 @@ public class MessageAck extends LiveViewCall {
      */
     @Override
     protected byte[] getPayload() {
-        return new byte[] { ackMsgId };
+        return new byte[] { MessageConstants.RESULT_OK };
     }
 
 }
