@@ -86,4 +86,9 @@ public class Prefs {
         editor.putString(keyDeviceAddress, address);
         editor.commit();
     }
+    
+    public int getmenuupdownaction()
+    {
+    	return Integer.parseInt(preferences.getString("menu.menuupdownaction", "0"));
+    }    
 }

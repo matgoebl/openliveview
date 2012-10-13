@@ -549,10 +549,10 @@ public class LiveViewThread extends Thread
 		        	          	    	 */
 		        	          	    	if(enable_media_menu)
 		        	          	    	{
-											menu_state = 1;
-											sendCall(new SetMenuSize((byte) 0));
-											sendCall(new ClearDisplay());
-											draw_media_menu(); 
+											//menu_state = 1;
+											//sendCall(new SetMenuSize((byte) 0));
+											//sendCall(new ClearDisplay());
+											draw_media_menu();
 		        	          	    	}
 			        	         	break;
 			        				default:
@@ -624,13 +624,15 @@ public class LiveViewThread extends Thread
 	    							}
 	    					break;
 		        			case MessageConstants.NAVTYPE_DOWN:
-		        				Log.d(TAG, "Down button pressed while in main menu. Flashing blue led.");
-		        				sendCall(new SetLed(Color.BLUE,1,500));
+		        				Log.d(TAG, "Down button pressed while in main menu.");
+		                        if (prefs.getmenuupdownaction()==1) action_volume_down();
+		                        if (prefs.getmenuupdownaction()==2) sendCall(new SetLed(Color.BLUE,1,500));
 		        				sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
 		        			break;
 		        			case MessageConstants.NAVTYPE_UP:
-		        				Log.d(TAG, "Up button pressed while in main menu. Flashing blue led.");
-		        				sendCall(new SetLed(Color.BLUE,1,500));
+		        				Log.d(TAG, "Up button pressed while in main menu.");
+		        				if (prefs.getmenuupdownaction()==1) action_volume_up();
+		                        if (prefs.getmenuupdownaction()==2) sendCall(new SetLed(Color.BLUE,1,500));
 		        				sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
 		        			break;
 			         	    default:
@@ -703,6 +705,20 @@ public class LiveViewThread extends Thread
         		sendCall(new DisplayPanel("Not playing...", "RN+ MEDIA MENU TEST", menuImage_media_isnotplaying, false));
         		//sendCall(new DisplayBitmap((byte) 34, (byte) 34, menuImage_media_isnotplaying));
           }  
+    }
+    
+    public void action_volume_up()
+    {
+    	AudioManager audioManager = (AudioManager) parentService.getSystemService(Context.AUDIO_SERVICE);
+		audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)+1,
+		AudioManager.FLAG_SHOW_UI);
+    }
+    
+    public void action_volume_down()
+    {
+    	AudioManager audioManager = (AudioManager) parentService.getSystemService(Context.AUDIO_SERVICE);
+		audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)-1,
+		AudioManager.FLAG_SHOW_UI);
     }
 
     /**

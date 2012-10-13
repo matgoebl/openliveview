@@ -30,7 +30,7 @@
     <string name="prefs_donate_summary">Please help support the development of OpenLiveView!</string>
     <string name="prefs_enablenotificationbuzzer_key">system.enablenotificationbuzzer</string>
     <string name="prefs_enablenotificationbuzzer_title">New message alert</string>
-    <string name="prefs_enablenotificationbuzzer_summary">Activate buzzer when opening menu while a notification is still unread. (Not standby alert!)</string>
+    <string name="prefs_enablenotificationbuzzer_summary">Activate buzzer when opening menu while a notification is still unread.</string>
     <string name="prefs_updateunreadcountwhenmenuopens_key">system.updateunreadcountwhenmenuopens</string>
     <string name="prefs_updateunreadcountwhenmenuopens_title">Update unread items counter</string>
     <string name="prefs_updateunreadcountwhenmenuopens_summary">Update unread items counter every time the menu opens.</string>
@@ -61,4 +61,8 @@
 	<string name="notification_findliveview">Find&#8230;</string>
 	<string name="notification_settings">Settings</string>
 	<string name="preferences_name">OpenLiveView settings</string>
+	<string name="prefs_menu_updown_action_key">menu.menuupdownaction</string>
+    <string name="prefs_menu_updown_action_title">Action of Up / Down key</string>
+    <string name="prefs_menu_updown_action_summary">What should the up and down keys do while in the main menu?</string>       
+	<string name="prefs_cat_actions_title">Actions</string>
 </resources>
