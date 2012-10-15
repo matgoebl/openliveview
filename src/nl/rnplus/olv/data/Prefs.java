@@ -63,6 +63,10 @@ public class Prefs {
     public Boolean getenablemediamenu()
     {
     	return preferences.getBoolean("media.enablemenu", false);
+    }
+    public Boolean getmenushowbatterystatus()
+    {
+    	return preferences.getBoolean("menu.batterystatusvisible", false);
     }  
     
     public Boolean getsetupcompleted()

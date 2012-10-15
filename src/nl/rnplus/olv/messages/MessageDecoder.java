@@ -22,9 +22,15 @@ public final class MessageDecoder {
         case MessageConstants.MSG_GETCAPS_RESP:
             return new CapsResponse();
         case MessageConstants.MSG_SETVIBRATE_ACK:
-        case MessageConstants.MSG_CLEARDISPLAY_ACK:  //Added by RN+
-        case MessageConstants.MSG_DISPLAYBITMAP_ACK: //Added by RN+
-        case MessageConstants.MSG_SETSCREENMODE_ACK: //Added by RN+	
+        	return new ResultEvent(id);
+        case MessageConstants.MSG_CLEARDISPLAY_ACK:
+        	return new ResultEvent(id);
+        case MessageConstants.MSG_DISPLAYBITMAP_ACK:
+        	return new ResultEvent(id);
+        case MessageConstants.MSG_SETSCREENMODE_ACK:
+        	return new ResultEvent(id);
+        case MessageConstants.MSG_DISPLAYPANEL_ACK:
+        	return new ResultEvent(id);
         case MessageConstants.MSG_SETLED_ACK:
             return new ResultEvent(id);
         case MessageConstants.MSG_GETTIME:

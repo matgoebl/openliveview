@@ -22,16 +22,19 @@ import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.widget.Toast;
 import nl.rnplus.olv.LiveViewPreferences;
 import nl.rnplus.olv.MainActivity;
 import nl.rnplus.olv.R;
@@ -44,22 +47,17 @@ import nl.rnplus.olv.messages.MessageConstants;
 import nl.rnplus.olv.messages.UShort;
 import nl.rnplus.olv.messages.calls.CapsRequest;
 import nl.rnplus.olv.messages.calls.ClearDisplay;
-import nl.rnplus.olv.messages.calls.ClearDisplayAck;
 import nl.rnplus.olv.messages.calls.DeviceStatusAck;
 import nl.rnplus.olv.messages.calls.DisplayBitmap;
-import nl.rnplus.olv.messages.calls.DisplayBitmapAck;
 import nl.rnplus.olv.messages.calls.DisplayPanel;
-import nl.rnplus.olv.messages.calls.DisplayPanelAck;
 import nl.rnplus.olv.messages.calls.GetAlertResponse;
 import nl.rnplus.olv.messages.calls.GetTimeResponse;
 import nl.rnplus.olv.messages.calls.MenuItem;
 import nl.rnplus.olv.messages.calls.MessageAck;
 import nl.rnplus.olv.messages.calls.NavigationResponse;
 import nl.rnplus.olv.messages.calls.SetLed;
-import nl.rnplus.olv.messages.calls.SetLedAck;
 import nl.rnplus.olv.messages.calls.SetMenuSize;
 import nl.rnplus.olv.messages.calls.SetVibrate;
-import nl.rnplus.olv.messages.calls.SetVibrateAck;
 import nl.rnplus.olv.messages.events.CapsResponse;
 import nl.rnplus.olv.messages.events.DeviceStatus;
 import nl.rnplus.olv.messages.events.GetAlert;
@@ -81,8 +79,9 @@ public class LiveViewThread extends Thread
     private				final	byte[]	menuImage_music;
     private				final	byte[]	menuImage_left;
     private				final	byte[]	menuImage_right;
-    private				final	byte[]	menuImage_media_isplaying;
-    private				final	byte[]	menuImage_media_isnotplaying;
+    private				final	byte[]	bgImage_media_isplaying;
+    private				final	byte[]	bgImage_media_isnotplaying;
+    private				final	byte[]	menuImage_battery;
 
     /* Communication */
     private				final	BluetoothAdapter		btAdapter;
@@ -102,6 +101,7 @@ public class LiveViewThread extends Thread
     private						byte					menu_button_media_play_id		= -1;
     private						byte					menu_button_media_previous_id	= -1;
     private						byte					menu_button_findphone_id		= -1;
+    private						byte					menu_button_battery_status_id	= -1;
     
 	private ThreadLocal<DateFormat> sdf = new ThreadLocal<DateFormat>()
 	{
@@ -164,27 +164,28 @@ public class LiveViewThread extends Thread
         btAdapter = BluetoothAdapter.getDefaultAdapter();
                 
         
-        menuImage = loadImageByteArray(parentService, "menu_blank.png");
-        menuImage_notification = loadImageByteArray(parentService, "menu_notification.png");
-        menuImage_phone = loadImageByteArray(parentService, "menu_phone.png");
-        menuImage_music = loadImageByteArray(parentService, "menu_music.png");
-        menuImage_left = loadImageByteArray(parentService, "menu_left.png");
-        menuImage_right = loadImageByteArray(parentService, "menu_right.png");
+        menuImage 						= loadImageByteArray(parentService, "menu_blank.png");
+        menuImage_notification 			= loadImageByteArray(parentService, "menu_notification.png");
+        menuImage_phone 				= loadImageByteArray(parentService, "menu_phone.png");
+        menuImage_music 				= loadImageByteArray(parentService, "menu_music.png");
+        menuImage_left 					= loadImageByteArray(parentService, "menu_left.png");
+        menuImage_right 				= loadImageByteArray(parentService, "menu_right.png");
+        bgImage_media_isplaying 		= loadImageByteArray(parentService, "jerry_music_pause_icn.png");
+        bgImage_media_isnotplaying 		= loadImageByteArray(parentService, "jerry_music_play_icn.png");
+        menuImage_battery 				= loadImageByteArray(parentService, "menu_battery.png");
         /* menuImage_plus = loadImageByteArray(parentService, "menu_plus.png");
         menuImage_min = loadImageByteArray(parentService, "menu_min.png"); */
-        menuImage_media_isplaying = loadImageByteArray(parentService, "jerry_music_pause_icn.png");
-        menuImage_media_isnotplaying = loadImageByteArray(parentService, "jerry_music_play_icn.png");
-        
         
         /* Testing code for dynamic menu */
         menu_button_count = 0;
         
         Prefs prefs = new Prefs(parentService);
-        Boolean menu_show_find_my_phone = prefs.getmenushowfindmyphone();
-        Boolean menu_show_notifications = prefs.getmenushownotifications();
-        Boolean menu_show_media_next = prefs.getmenushowmedianext();
-        Boolean menu_show_media_play = prefs.getmenushowmediaplay();
-        Boolean menu_show_media_previous = prefs.getmenushowmediaprevious();
+        Boolean menu_show_find_my_phone 		= prefs.getmenushowfindmyphone();
+        Boolean menu_show_notifications 		= prefs.getmenushownotifications();
+        Boolean menu_show_media_next 			= prefs.getmenushowmedianext();
+        Boolean menu_show_media_play 			= prefs.getmenushowmediaplay();
+        Boolean menu_show_media_previous 		= prefs.getmenushowmediaprevious();
+        Boolean menu_show_battery_status 		= prefs.getmenushowbatterystatus();
         if (menu_show_notifications)
         {        
 	        menu_button_notifications_id = menu_button_count;
@@ -210,7 +211,11 @@ public class LiveViewThread extends Thread
         	menu_button_findphone_id = menu_button_count;
         	menu_button_count += 1;
         }
-        
+        if (menu_show_battery_status)
+        {
+        	menu_button_battery_status_id = menu_button_count;
+        	menu_button_count += 1;
+        }
         menu_state = 0;
     }
     
@@ -375,26 +380,18 @@ public class LiveViewThread extends Thread
         	DeviceStatus status = (DeviceStatus) event;
             Log.d(TAG, "Acknowledging status: "+status.toString());
             sendCall(new DeviceStatusAck());
+            menu_state = 0; //Reset menu state when screen turns off
             break;
         case MessageConstants.MSG_SETVIBRATE_ACK:
-            Log.d(TAG, "Acknowledging set vibrate.");
-            sendCall(new SetVibrateAck());
-            break;
-        case MessageConstants.MSG_SETLED_ACK:
-            Log.d(TAG, "Acknowledging set led.");
-            sendCall(new SetLedAck());
-            break;
-        case MessageConstants.MSG_CLEARDISPLAY_ACK:
-            Log.d(TAG, "Acknowledging clear display.");
-            sendCall(new ClearDisplayAck());
-            break;
-        case MessageConstants.MSG_DISPLAYBITMAP_ACK:
-            Log.d(TAG, "Acknowledging display bitmap.");
-            sendCall(new DisplayBitmapAck());
-            break;
+        	Log.d(TAG, "Got setvibrate ack.");
+        	break;
         case MessageConstants.MSG_DISPLAYPANEL_ACK:
-            Log.d(TAG, "Acknowledging display panel.");
-            sendCall(new DisplayPanelAck());
+            Log.d(TAG, "Got display panel ack.");
+            if ((parentService.MediaInfoNeedsUpdate == true)&&(menu_state==1))
+            {
+            	draw_media_menu();
+            	parentService.MediaInfoNeedsUpdate = false;
+            }
             break;
         case MessageConstants.MSG_GETMENUITEMS:
             Log.d(TAG, "Sending menu items...");
@@ -425,6 +422,11 @@ public class LiveViewThread extends Thread
 		            sendCall(new MenuItem((byte) menu_button_findphone_id, false, new UShort((short) 0),
 		                    "Find my phone", menuImage_phone));
 	            }
+	            if (menu_button_battery_status_id>=0)
+	            {
+		            sendCall(new MenuItem((byte) menu_button_battery_status_id, false, new UShort((short) (get_battery_status()*100)),
+		                    "Battery", menuImage_battery));
+	            }	            
 	            Log.d(TAG, "Menu items sent, menu_state is 0.");
             }
             else
@@ -532,6 +534,16 @@ public class LiveViewThread extends Thread
             }
             else
             {
+            	
+            	if (nav.getNavType() == MessageConstants.NAVTYPE_RIGHT)
+            	{
+            		Log.w(TAG, "RECEIVED NAVTYPE RIGHT");
+            	}
+            	if (nav.getNavType() == MessageConstants.NAVTYPE_LEFT)
+            	{
+            		Log.w(TAG, "RECEIVED NAVTYPE LEFT");
+            	}
+            	
             	switch (menu_state)
             	{
 	            	case 0:
@@ -542,29 +554,20 @@ public class LiveViewThread extends Thread
 			        			{
 			        				case MessageConstants.NAVACTION_LONGPRESS:
 			        					Log.d(TAG, "Long press on select key.");
-			        					sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
-		        	          	    	/* Media menu */
-		        	          	    	/* Note to other developers:
-		        	          	    	 * How can I read the left and right key from the Liveview while there are
-		        	          	    	 * zero menu items (mode 1)?
-		        	          	    	 */
-		        	          	    	//if(enable_media_menu)
-		        	          	    	//{
+		        	          	    	if(enable_media_menu)
+		        	          	    	{
+		        	          	    		sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
 											menu_state = 1;
-											sendCall(new SetMenuSize((byte) 0));
-											sendCall(new ClearDisplay());
 											draw_media_menu();
-		        	          	    	//}
+											//sendCall(new SetMenuSize((byte) 0));
+		        	          	    	}
 			        	         	break;
 			        				default:
 			        					Log.d(TAG, "Navigation error: unknown action with select button!");
 			        	         		sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));  
 			        	         	break;
 		    					}	        	         	    
-		        				case MessageConstants.NAVTYPE_MENUSELECT:
-	    							Intent buttonIntent = null;
-	    							int keycode = 0;	 
-	    							
+		        				case MessageConstants.NAVTYPE_MENUSELECT:    							
 	    							boolean hasdonesomething = false;
 	    							if (nav.getMenuItemId()==menu_button_findphone_id)
 	    							{
@@ -573,7 +576,7 @@ public class LiveViewThread extends Thread
 				            			v.vibrate(300);
 				            			Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 				            			Ringtone r = RingtoneManager.getRingtone(parentService.getApplicationContext(), notification);
-				            			r.setStreamType(AudioManager.STREAM_ALARM); /* Needs to be tested first */
+				            			r.setStreamType(AudioManager.STREAM_ALARM);
 				            			r.play();
 				            			Log.d(TAG, "Find my phone: done, returning to menu.");
 				            			sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL)); 
@@ -582,45 +585,35 @@ public class LiveViewThread extends Thread
 	    							if (nav.getMenuItemId()==menu_button_media_next_id)
 	    							{
 	    									Log.d(TAG, "MEDIA: Next");
-	    		            				keycode = KeyEvent.KEYCODE_MEDIA_NEXT;
-	    					                //Log.d(TAG, "Broadcasting ACTION_MEDIA_BUTTON with ACTION_DOWN and then ACTION_UP with " + keycode);
-	    					                buttonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-	    					                buttonIntent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, keycode));
-	    					                parentService.sendOrderedBroadcast(buttonIntent, null);
-	    					                buttonIntent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP, keycode));
-	    					                parentService.sendOrderedBroadcast(buttonIntent, null);	            				
+	    									emulate_media(KeyEvent.KEYCODE_MEDIA_NEXT);       				
 	    		            				sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
 	    		            				hasdonesomething = true;
 	    							}
 	    							if (nav.getMenuItemId()==menu_button_media_play_id)
 	    							{
 	    									Log.d(TAG, "MEDIA: Play / Pause");
-	    									keycode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
-	    					                //Log.d(TAG, "Broadcasting ACTION_MEDIA_BUTTON with ACTION_DOWN and then ACTION_UP with " +	keycode);
-	    					                buttonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-	    					                buttonIntent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, keycode));
-	    					                parentService.sendOrderedBroadcast(buttonIntent, null);
-	    					                buttonIntent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP, keycode));
-	    					                parentService.sendOrderedBroadcast(buttonIntent, null);
+	    									emulate_media(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
 	    				            	   sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
 	    				            	   hasdonesomething = true;
 	    							}
 	    							if (nav.getMenuItemId()==menu_button_media_previous_id)
 	    							{
 	    									Log.d(TAG, "MEDIA: Previous");
-	    									keycode = KeyEvent.KEYCODE_MEDIA_PREVIOUS;
-	    					                //Log.d(TAG, "Broadcasting ACTION_MEDIA_BUTTON with ACTION_DOWN and then ACTION_UP with " +	keycode);
-	    					                buttonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
-	    					                buttonIntent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, keycode));
-	    					                parentService.sendOrderedBroadcast(buttonIntent, null);
-	    					                buttonIntent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP, keycode));
-	    					                parentService.sendOrderedBroadcast(buttonIntent, null);
+	    									emulate_media(KeyEvent.KEYCODE_MEDIA_PREVIOUS);
 	    				            	   sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
 	    				            	   hasdonesomething = true;
 	    							}
+	    							if (nav.getMenuItemId()==menu_button_battery_status_id)
+	    							{
+	    									Log.d(TAG, "Show battery status.");
+	    									sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
+	    									menu_state = 2;
+	    									draw_battery_status();
+	    									hasdonesomething = true;
+	    							}
 									if (hasdonesomething == false)
 									{
-											Log.d(TAG, "Navigation error: unknown menu id!");
+											Log.d(TAG, "Navigation error: unknown menu id "+nav.getMenuItemId()+"!");
 		    	        	         		sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
 	    							}
 	    					break;
@@ -652,26 +645,61 @@ public class LiveViewThread extends Thread
 			        			{
 			        				case MessageConstants.NAVACTION_LONGPRESS:
 			        					Log.d(TAG, "Long press on select key while in media menu.");
+			        					menu_state = 0;
 			        					sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
-			        	          		menu_state = 0;
 			        	          		Log.d(TAG, "Returning to main menu.");
-			        	          		sendCall(new SetMenuSize((byte) 5));
+			        	          		//sendCall(new SetMenuSize((byte) menu_button_count));
 			        	         	break;
+			        				case MessageConstants.NAVACTION_PRESS:
+			        					emulate_media(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
+			        					draw_media_menu();
+					        			sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
+					        			Log.d(TAG, "Navigation: Play / pause from media menu.");
+			        				break;
 			        				default:
 			        					String message = "Navigation error: unknown action with select button while in media menu ("+nav.getNavAction()+")!";
 			    		                Log.e(TAG, message);
 			    		                LiveViewDbHelper.logMessage(parentService, message);
-			        	         		sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));  
+			    		                sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
 			        	         	break;
 		    					}	
 			        		break;
+			        		case MessageConstants.NAVTYPE_UP:
+			        			action_volume_up();
+			        			sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
+			        			draw_media_menu();
+			        			Log.d(TAG, "Navigation: Volume up from media menu.");
+			        		break;
+			        		case MessageConstants.NAVTYPE_DOWN:
+			        			action_volume_down();
+			        			sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
+			        			draw_media_menu();
+			        			Log.d(TAG, "Navigation: Volume down from media menu.");
+			        		break;
+			        		case MessageConstants.NAVTYPE_LEFT:
+			        			emulate_media(KeyEvent.KEYCODE_MEDIA_PREVIOUS);
+			        			sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
+			        			draw_media_menu();
+			        			Log.d(TAG, "Navigation: Previous track from media menu.");
+			        		break;
+			        		case MessageConstants.NAVTYPE_RIGHT:
+			        			emulate_media(KeyEvent.KEYCODE_MEDIA_NEXT);
+			        			sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
+			        			draw_media_menu();
+			        			Log.d(TAG, "Navigation: Next track from media menu.");
+			        		break;
 	        				default:
-			         	    	String message = "Error: Navigation: unknown button while in media menu!";
+			         	    	String message = "Error: Navigation: unknown button while in media menu! ("+nav.getNavType()+")";
 				                Log.e(TAG, message);
 				                LiveViewDbHelper.logMessage(parentService, message);
-			         	    	sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
+				                sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
 			         	    break;
 			            }
+	            	break;
+	            	case 2:
+	            		Log.e(TAG, "Menu state 2: Battery stats. Returning to main menu.");
+	            		menu_state = 0;
+	            		sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
 	            	break;
 					default:
 						String message = "Error: Navigation: unknown menu state!";
@@ -686,26 +714,33 @@ public class LiveViewThread extends Thread
             	String message = "Error: Unknown event (" + event.getId() + ")!";
                 Log.e(TAG, message);
                 LiveViewDbHelper.logMessage(parentService, message);
+                sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));	
             break;
         }
     }
-    public void draw_media_menu() throws IOException {
+    public void draw_media_menu() throws IOException
+    {
 		  Log.d(TAG, "Drawing media menu.");         		  
           AudioManager amgr = (AudioManager) parentService.getSystemService(Context.AUDIO_SERVICE);
           boolean playing = amgr.isMusicActive();
           if (playing)
           {
         		Log.d(TAG, "A song is playing.");
-        		sendCall(new DisplayPanel(parentService.getMediaInfoTrack(), "Artist: " + parentService.getMediaInfoArtist()+" Album: "+ parentService.getMediaInfoAlbum(), menuImage_media_isplaying, false));
+        		sendCall(new DisplayPanel(parentService.getMediaInfoTrack(), "Artist: " + parentService.getMediaInfoArtist()+" Album: "+ parentService.getMediaInfoAlbum(), bgImage_media_isplaying, false));
         		//sendCall(new DisplayBitmap((byte) 34, (byte) 34, menuImage_media_isplaying));
         		//sendCall(new DisplayPanel("HEADER", "FOOTER", menuImage_media_isplaying, false));
           }
           else
           {
         		Log.d(TAG, "Nope, there is no music playing.");
-        		sendCall(new DisplayPanel("Not playing...", "RN+ MEDIA MENU TEST", menuImage_media_isnotplaying, false));
+        		sendCall(new DisplayPanel("There is no music playing.", "", bgImage_media_isnotplaying, false));
         		//sendCall(new DisplayBitmap((byte) 34, (byte) 34, menuImage_media_isnotplaying));
           }  
+    }
+    
+    public void draw_battery_status() throws IOException
+    {      		  
+		  sendCall(new DisplayPanel("Battery status", (get_battery_status()*100)+"%", menuImage_battery, false)); 
     }
     
     public void action_volume_up()
@@ -753,6 +788,25 @@ public class LiveViewThread extends Thread
                 LiveViewDbHelper.logMessage(parentService, message);
             }
         }
+    }
+    
+    public float get_battery_status() //This function was added by jkorp (user on XDA)
+    {
+    	IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+    	Intent batteryStatus = parentService.registerReceiver(null, ifilter);
+    	int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+    	int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+    	float batteryPct = level / (float)scale;
+    	return batteryPct;
+    }
+    
+    public void emulate_media(int keycode)
+    {
+        Intent buttonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        buttonIntent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, keycode));
+        parentService.sendOrderedBroadcast(buttonIntent, null);
+        buttonIntent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP, keycode));
+        parentService.sendOrderedBroadcast(buttonIntent, null);
     }
     
     public boolean isLooping()
