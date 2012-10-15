@@ -38,7 +38,7 @@
     <string name="prefs_enablestandbyaccess_title">Standby access</string>
     <string name="prefs_enablestandbyaccess_summary">Activate a second thread that sends messages to the liveview while in standby.</string>
     <string name="prefs_mediaenablemenu_key">media.enablemenu</string>
-    <string name="prefs_mediaenablemenu_title">(DEBUG) Media menu</string>
+    <string name="prefs_mediaenablemenu_title">Media menu</string>
     <string name="prefs_mediaenablemenu_summary">Enable media menu on long press of action key. (Does not accept input yet)</string>
     <string name="notify_service_running">LiveView connected.</string>
     <string name="menu_viewlog">View log</string>

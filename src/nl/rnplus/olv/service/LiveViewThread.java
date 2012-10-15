@@ -522,6 +522,7 @@ public class LiveViewThread extends Thread
         	 * sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
              */
             Navigation nav = (Navigation) event;
+            Log.d(TAG, "Received navigation packet (isInAlert: "+nav.isInAlert()+" and getNavType: "+nav.getNavType()+").");
             if (nav.isInAlert())
             {
         		Log.d(TAG, "User pressed button in alert. Wiping all the notifications from the liveview...");
@@ -547,13 +548,13 @@ public class LiveViewThread extends Thread
 		        	          	    	 * How can I read the left and right key from the Liveview while there are
 		        	          	    	 * zero menu items (mode 1)?
 		        	          	    	 */
-		        	          	    	if(enable_media_menu)
-		        	          	    	{
-											//menu_state = 1;
-											//sendCall(new SetMenuSize((byte) 0));
-											//sendCall(new ClearDisplay());
+		        	          	    	//if(enable_media_menu)
+		        	          	    	//{
+											menu_state = 1;
+											sendCall(new SetMenuSize((byte) 0));
+											sendCall(new ClearDisplay());
 											draw_media_menu();
-		        	          	    	}
+		        	          	    	//}
 			        	         	break;
 			        				default:
 			        					Log.d(TAG, "Navigation error: unknown action with select button!");
