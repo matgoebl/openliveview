@@ -61,12 +61,6 @@
         <provider
             android:name="nl.rnplus.olv.data.LiveViewDataProvider"
             android:authorities="nl.rnplus.olv" />
-
-        <activity
-            android:name="nl.rnplus.olv.HackActivity"
-            android:label="@string/title_activity_hack"
-            android:launchMode="singleInstance">
-         </activity>  
             
         <activity
             android:name="nl.rnplus.olv.MainActivity"

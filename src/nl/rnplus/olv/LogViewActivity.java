@@ -51,6 +51,7 @@ public class LogViewActivity extends ListActivity {
         switch (item.getItemId()) {
         case R.id.menu_clearlog:
             clearLog();
+            finish();
             break;
         default:
             throw new IllegalArgumentException("Unknown menu item: "

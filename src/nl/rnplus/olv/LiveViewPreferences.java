@@ -76,13 +76,12 @@ public class LiveViewPreferences extends PreferenceActivity {
      * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
      */
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        case R.id.menu_viewlog:
-            startActivity(new Intent(this, LogViewActivity.class));
-            break;
-        case R.id.menu_hacks:
-            startActivity(new Intent(this, HackActivity.class));
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+        	case R.id.menu_viewlog:
+        		startActivity(new Intent(this, LogViewActivity.class));
             break;
         }
         return true;

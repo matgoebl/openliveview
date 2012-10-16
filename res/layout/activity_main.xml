@@ -33,4 +33,24 @@
         android:layout_below="@+id/textViewWelcome"
         android:layout_marginTop="15dp"
         android:text="@string/main_help_text" />
+
+    <Button
+        android:id="@+id/logbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/buttonFinish"
+        android:layout_alignBottom="@+id/buttonFinish"
+        android:layout_alignRight="@+id/textHelp"
+        android:text="@string/menu_viewlog" 
+        android:onClick="open_log"/>
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:text="@string/prefs_version_summary"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
 </RelativeLayout>

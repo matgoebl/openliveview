@@ -1,7 +1,12 @@
 package nl.rnplus.olv.service;
 
+import java.io.IOException;
+
 import nl.rnplus.olv.content.ContentNotification;
 import nl.rnplus.olv.content.manager.SMSNotificationManager;
+import nl.rnplus.olv.messages.MessageConstants;
+import nl.rnplus.olv.messages.calls.SetScreenMode;
+import nl.rnplus.olv.messages.calls.SetVibrate;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -13,19 +18,19 @@ import android.util.Log;
 /**
  * This service hosts and controls the thread communicating with the LiveView
  * device.
- * 
- * @author Robert (xperimental@solidproject.de);
- * Changed by Renze Nicolai (RN+)
- */
-public class LiveViewService extends Service {
+ **/
+public class LiveViewService extends Service
+{
 
 	public final			String ACTION_RECEIVE_SMS	= "android.provider.Telephony.SMS_RECEIVED";
     public static final	String ACTION_START 		= "start";
     public static final	String ACTION_STOP 			= "stop";
     
     final public static String SHOW_NOTIFICATION = "OLV_ADD_NOTIFICATION";
+    final public static String STANDBY_COMMAND   = "OLV_STANDBY_COMMAND";
 
     private LiveViewThread workerThread = null;
+    //private LiveViewStandbyThread standbyThread = null;
     
     byte NotificationUnreadCount     = 0;
     byte NotificationTotalCount      = 0;
@@ -36,19 +41,21 @@ public class LiveViewService extends Service {
     Boolean NotificationNeedsUpdate = true;
     
     BroadcastReceiver notification_receiver = new ShowNotificationReceiver();
+    BroadcastReceiver standby_receiver = new StandbyCommandReceiver();
 
     /*
      * (non-Javadoc)
      * @see android.app.Service#onBind(android.content.Intent)
      */
     @Override
-    public IBinder onBind(Intent intent) {
-        // TODO Auto-generated method stub
+    public IBinder onBind(Intent intent)
+    {
         return null;
     }
     
     @Override
-    public void onCreate() {    
+    public void onCreate()
+    {    
     	for (int cid = 0; cid < 100; cid++)
     	{
     		NotificationContent[100-cid] = "Empty";
@@ -56,6 +63,7 @@ public class LiveViewService extends Service {
     	}
     	registerReceiver(notification_receiver,  new IntentFilter(SHOW_NOTIFICATION));
     	registerReceiver(notification_receiver,  new IntentFilter(ACTION_RECEIVE_SMS));
+    	registerReceiver(standby_receiver, new IntentFilter(STANDBY_COMMAND));
     	
     	/* Added in version 1.0.0.3: Mediaplayer information receiver */
     	IntentFilter mediaintentfilter = new IntentFilter();
@@ -68,9 +76,11 @@ public class LiveViewService extends Service {
     }
     
     @Override
-    public void onDestroy() {    
+    public void onDestroy()
+    {    
     	unregisterReceiver(notification_receiver);
     	unregisterReceiver(media_receiver);
+    	unregisterReceiver(standby_receiver);
     }    
 
     /*
@@ -78,11 +88,14 @@ public class LiveViewService extends Service {
      * @see android.app.Service#onStartCommand(android.content.Intent, int, int)
      */
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public int onStartCommand(Intent intent, int flags, int startId)
+    {
         String action = intent.getAction();
-        if (ACTION_START.equals(action)) {
+        if (ACTION_START.equals(action))
+        {
             startThread();
-        } else if (ACTION_STOP.equals(action)) {
+        } else if (ACTION_STOP.equals(action))
+        {
             stopThread();
         }
         return START_NOT_STICKY;
@@ -93,22 +106,34 @@ public class LiveViewService extends Service {
      * is a thread running that has already been stopped then a new thread is
      * started.
      */
-    private void startThread() {
-        if (workerThread == null || !workerThread.isLooping()) {
-
+    private void startThread()
+    {
+        if (workerThread == null || !workerThread.isLooping())
+        {
             workerThread = new LiveViewThread(this);
             workerThread.start();
         }
+        /*if (standbyThread == null || !standbyThread.isLooping())
+        {
+        	standbyThread = new LiveViewStandbyThread(this);
+        	standbyThread.start();
+        }*/
     }
 
     /**
      * Signals the current worker thread to stop itself. If no worker thread is
      * available then nothing is done.
      */
-    private void stopThread() {
-        if (workerThread != null && workerThread.isAlive()) {
+    private void stopThread()
+    {
+        if (workerThread != null && workerThread.isAlive())
+        {
             workerThread.stopLoop();
         }
+        /*if (standbyThread != null && standbyThread.isAlive())
+        {
+            standbyThread.stopLoop();
+        }*/
         stopSelf();
     }
     
@@ -119,19 +144,23 @@ public class LiveViewService extends Service {
     //String [] NotificationContent   = new String [101];
     //Boolean NotificationNeedsUpdate = true;
 
-    public String getNotificationContent(int id) {
+    public String getNotificationContent(int id)
+    {
         return NotificationContent[id];
     }
 
-    public void setNotificationContent(int id, String NotificationContents) {
+    public void setNotificationContent(int id, String NotificationContents)
+    {
         this.NotificationContent[id] = NotificationContents;
     }
     
-    public String getNotificationTitle(int id) {
+    public String getNotificationTitle(int id)
+    {
         return NotificationTitle[id];
     }
 
-    public void setNotificationTitle(int id, String NotificationTitleVal) {
+    public void setNotificationTitle(int id, String NotificationTitleVal)
+    {
         this.NotificationTitle[id] = NotificationTitleVal;
     } 
     
@@ -139,42 +168,51 @@ public class LiveViewService extends Service {
         return NotificationTime[id];
     }
 
-    public void setNotificationTime(int id, int NotificationTimeVal) {
+    public void setNotificationTime(int id, int NotificationTimeVal)
+    {
         this.NotificationTime[id] = NotificationTimeVal;
     }    
 
-    public String getNotificationType(int id) {
+    public String getNotificationType(int id)
+    {
         return NotificationType[id];
     }
 
-    public void setNotificationType(int id, String NotificationTypeVal) {
+    public void setNotificationType(int id, String NotificationTypeVal)
+    {
         this.NotificationType[id] = NotificationTypeVal;
     }    
     
-    public Boolean getNotificationNeedsUpdate() {
+    public Boolean getNotificationNeedsUpdate()
+    {
         return NotificationNeedsUpdate;
     }
 
-    public void setNotificationNeedsUpdate(Boolean NotificationNeedsUpdate) {
+    public void setNotificationNeedsUpdate(Boolean NotificationNeedsUpdate)
+    {
         this.NotificationNeedsUpdate = NotificationNeedsUpdate;
     }
 
-    public int getNotificationUnreadCount() {
+    public int getNotificationUnreadCount()
+    {
         return NotificationUnreadCount;
     }
 
-    public void setNotificationUnreadCount(byte NotificationUnreadCount) {
+    public void setNotificationUnreadCount(byte NotificationUnreadCount)
+    {
         this.NotificationUnreadCount = NotificationUnreadCount;
     }
     
-    public int getNotificationTotalCount() {
+    public int getNotificationTotalCount()
+    {
         return NotificationTotalCount;
     }
 
-    public void setNotificationTotalCount(byte NotificationTotalCount) {
+    public void setNotificationTotalCount(byte NotificationTotalCount)
+    {
         this.NotificationTotalCount = NotificationTotalCount;
     }
-    
+        
     public class ShowNotificationReceiver extends BroadcastReceiver  
     {  
         @Override  
@@ -225,28 +263,33 @@ public class LiveViewService extends Service {
     String MediaInfoTrack  = "";
     String MediaInfoAlbum  = "";
     
-    public Boolean getMediaInfoNeedsUpdate() {
+    public Boolean getMediaInfoNeedsUpdate()
+    {
         return MediaInfoNeedsUpdate;
     }
 
-    public void setMediaInfoNeedsUpdate(Boolean NotificationNeedsUpdate) {
+    public void setMediaInfoNeedsUpdate(Boolean NotificationNeedsUpdate)
+    {
         this.MediaInfoNeedsUpdate = NotificationNeedsUpdate;
     }
     
-    public String getMediaInfoArtist() {
+    public String getMediaInfoArtist()
+    {
         return MediaInfoArtist;
     }
     
-    public String getMediaInfoTrack() {
+    public String getMediaInfoTrack()
+    {
         return MediaInfoTrack;
     }
     
-    public String getMediaInfoAlbum() {
+    public String getMediaInfoAlbum()
+    {
         return MediaInfoAlbum;
     }
     
-    private BroadcastReceiver media_receiver = new BroadcastReceiver() {
-
+    private BroadcastReceiver media_receiver = new BroadcastReceiver()
+    {
     	@Override
     	public void onReceive(Context context, Intent intent)
     	{
@@ -260,5 +303,46 @@ public class LiveViewService extends Service {
     	Log.d("Music",MediaInfoArtist+":"+MediaInfoAlbum+":"+MediaInfoTrack);
     	}
     	};
-    
+    	
+        public class StandbyCommandReceiver extends BroadcastReceiver  
+        {  
+            @Override  
+            public void onReceive(Context context, Intent intent)  
+            {  
+            	if (workerThread.getLiveViewStatus()==0)
+            	{
+	            	//if (intent.getAction().equals(ACTION_RECEIVE_SMS))
+		    		try
+		    		{
+		    			Log.w("DEBUG", intent.getExtras().getString("command"));
+		    			if (intent.getExtras().getString("command").contains("vibrate"))
+		    			{
+		    				Log.w("DEBUG", "DID VIBRATE");
+		    				int vdelay = intent.getExtras().getInt("delay");
+		    				int vtime = intent.getExtras().getInt("time");
+		    				workerThread.sendCall(new SetVibrate(vdelay, vtime));
+		    			}
+		    			else
+		    			{
+		    				if (intent.getExtras().getString("command").contains("awaken"))
+		    				{
+		    					Log.w("DEBUG", "Awaken.");
+		    					workerThread.sendCall(new SetScreenMode((byte) MessageConstants.BRIGHTNESS_MAX));
+		    					workerThread.draw_battery_status();
+		    				}
+		    				else
+		    				{
+		    					Log.w("DEBUG", "Unknown command.");
+		    				}
+		    			}
+		    		}
+		    		catch (IOException e)
+		            {
+		                Log.e("StandbyCommandReceiver", "ERROR: " + e.getMessage());
+		                return;
+		            }
+            	}
+            	Log.w("StandbyCommandReceiver", "Executed command.");
+            }  
+        }      	
 }

@@ -92,6 +92,7 @@ public class LiveViewThread extends Thread
     
     /* Menu variables */
     private						Integer					menu_state						= 0;
+    private						byte					device_status					= 0;
     private						byte					last_menu_id					= 0;
     private						byte					alertId							= 0;
     private						byte					menu_button_count				= 0;
@@ -121,11 +122,12 @@ public class LiveViewThread extends Thread
         Intent notificationIntent = new Intent(parentService, MainActivity.class);
         PendingIntent pi_content = PendingIntent.getActivity(parentService, 0, notificationIntent, 0);
         
-    	//Pending intent 2: Find the LiveView (currently does not do what it should do, only for testing!)
-    	Intent bci = new Intent("SHOW_NOTIFICATION");
+    	//Pending intent 2: Find the LiveView
+    	Intent bci = new Intent("OLV_STANDBY_COMMAND");
     	Bundle bcb = new Bundle();
-    	bcb.putString("contents", "This is a test.");
-    	bcb.putString("title", "Test");
+    	bcb.putString("command", "vibrate");
+    	bcb.putInt("delay", 0);
+    	bcb.putInt("time", 1000);
     	long time = System.currentTimeMillis();
     	bcb.putLong("timestamp", time);
     	bci.putExtras(bcb);
@@ -155,7 +157,7 @@ public class LiveViewThread extends Thread
 	        .setContentText(contentText)
 	        .setSmallIcon(R.drawable.ic_liveview)
 	        .setContentIntent(pi_content)
-	        //.addAction(R.drawable.ic_menu_find, parentService.getString(R.string.notification_findliveview), pi_findliveview)
+	        .addAction(R.drawable.ic_menu_find, parentService.getString(R.string.notification_findliveview), pi_findliveview)
 	        .addAction(R.drawable.ic_menu_manage, parentService.getString(R.string.notification_settings), pi_opensettings)
 	        //.setLargeIcon(icon)
 	        .build();
@@ -225,19 +227,23 @@ public class LiveViewThread extends Thread
      * @param imageFileName Image file name
      * @return byte[] for the image file
      */
-	private byte[] loadImageByteArray(LiveViewService parentService, String imageFileName) {
-		try {
+	private byte[] loadImageByteArray(LiveViewService parentService, String imageFileName)
+	{
+		try
+		{
 			InputStream stream = parentService.getAssets().open(imageFileName);
             ByteArrayOutputStream arrayStream = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
-            while (stream.available() > 0) {
+            while (stream.available() > 0)
+            {
                 int read = stream.read(buffer);
                 arrayStream.write(buffer, 0, read);
             }
             stream.close();
             return arrayStream.toByteArray();
-            //Log.d(TAG, "Icon size: " + menuImage.length);
-        } catch (IOException e) {
+        }
+		catch (IOException e)
+		{
             String message = "Error reading icon " + imageFileName + " : " + e.getMessage();
 			Log.e(TAG, message);
             throw new RuntimeException(message, e);
@@ -249,22 +255,26 @@ public class LiveViewThread extends Thread
      * @see java.lang.Thread#run()
      */
     @Override
-    public void run() {
+    public void run()
+    {
         parentService.startForeground(SERVICE_NOTIFY, notification);
 
         Log.d(TAG, "Starting LiveView thread.");
         startUpTime = System.currentTimeMillis();
         serverSocket = null;
-        try {
+        try
+        {
             Log.d(TAG, "Starting server...");
-            serverSocket = btAdapter.listenUsingRfcommWithServiceRecord(
-                    "LiveView", SERIAL);
-        } catch (IOException e) {
+            serverSocket = btAdapter.listenUsingRfcommWithServiceRecord("LiveView", SERIAL);
+        }
+        catch (IOException e)
+        {
             Log.e(TAG, "Error starting BT server: " + e.getMessage());
             return;
         }
                 
-        try {
+        try
+        {
             Log.d(TAG, "Listening for LV...");
             clientSocket = serverSocket.accept();
             EventReader reader = new EventReader(clientSocket.getInputStream());
@@ -275,13 +285,17 @@ public class LiveViewThread extends Thread
             Log.d(TAG, "LV connected.");
             sendCall(new CapsRequest());
             Log.d(TAG, "Message sent.");
-            do {
-                try {
+            do
+            {
+                try
+                {
                     LiveViewEvent response = reader.readMessage();
 	                sendCall(new MessageAck(response.getId()));
 	                Log.d(TAG, "Got message: " + response);
 	                processEvent(response);
-                } catch (DecodeException e) {
+                }
+                catch (DecodeException e)
+                {
                 		Log.e(TAG, "Error decoding message: " + e.getMessage());
                 }
                 /* Notifications */
@@ -380,6 +394,7 @@ public class LiveViewThread extends Thread
             Log.d(TAG, "Acknowledging status: "+status.toString());
             sendCall(new DeviceStatusAck());
             menu_state = 0; //Reset menu state when screen turns off
+            device_status = status.getStatus();
             break;
         case MessageConstants.MSG_SETVIBRATE_ACK:
         	Log.d(TAG, "Got setvibrate ack.");
@@ -449,7 +464,7 @@ public class LiveViewThread extends Thread
             }
             if (alert.getAlertAction()==MessageConstants.ALERTACTION_LAST)
             {
-            	if (last_menu_id == 0)
+            	if (last_menu_id == menu_button_notifications_id)
             	{
             		alertId = (byte) (parentService.getNotificationTotalCount()-1);
             	}
@@ -461,7 +476,7 @@ public class LiveViewThread extends Thread
             if (alert.getAlertAction()==MessageConstants.ALERTACTION_NEXT)
             {
             	alertId += 1;
-            	if (last_menu_id == 0)
+            	if (last_menu_id == menu_button_notifications_id)
             	{
                 	if (alertId > (byte) parentService.getNotificationTotalCount()-1)
                 	{
@@ -476,7 +491,7 @@ public class LiveViewThread extends Thread
             if (alert.getAlertAction()==MessageConstants.ALERTACTION_PREV)
             {
             	alertId -= 1;
-            	if (last_menu_id == 0)
+            	if (last_menu_id == menu_button_notifications_id)
             	{
 	            	if (alertId < 0)
 	            	{
@@ -764,7 +779,7 @@ public class LiveViewThread extends Thread
      * @throws IOException
      *             If the message could not be sent successfully.
      */
-    private void sendCall(LiveViewCall call) throws IOException {
+    void sendCall(LiveViewCall call) throws IOException {
         if (clientSocket == null) {
             throw new IOException("No client connected!");
         } else {
@@ -811,6 +826,11 @@ public class LiveViewThread extends Thread
     public boolean isLooping()
     {
         return serverSocket != null;
+    }
+    
+    public byte getLiveViewStatus()
+    {
+        return device_status;
     }
 
 }

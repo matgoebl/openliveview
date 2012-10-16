@@ -27,4 +27,8 @@ public class MainActivity extends Activity {
     	Intent myIntent = new Intent(this, LiveViewPreferences.class);
     	this.startActivity(myIntent);
     }
+    public void open_log(View view)
+    {
+    	startActivity(new Intent(this, LogViewActivity.class));
+    }
 }
