@@ -16,7 +16,7 @@ import android.view.accessibility.AccessibilityEvent;
 public class GetNotificationService extends AccessibilityService {
 
 	private static final String LOG_TAG = "OLV Notification service (Pre Jelly Bean)";
-	final public static String SHOW_NOTIFICATION = "SHOW_NOTIFICATION";	
+	final public static String SHOW_NOTIFICATION = "OLV_ADD_NOTIFICATION";	
 		
 	@Override
 	public void onServiceConnected() {

@@ -23,7 +23,7 @@ public class LiveViewService extends Service {
     public static final	String ACTION_START 		= "start";
     public static final	String ACTION_STOP 			= "stop";
     
-    final public static String SHOW_NOTIFICATION = "SHOW_NOTIFICATION";
+    final public static String SHOW_NOTIFICATION = "OLV_ADD_NOTIFICATION";
 
     private LiveViewThread workerThread = null;
     
