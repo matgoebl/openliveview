@@ -31,4 +31,8 @@ public class MainActivity extends Activity {
     {
     	startActivity(new Intent(this, LogViewActivity.class));
     }
+    public void open_plugin_manager(View view)
+    {
+    	startActivity(new Intent(this, PluginManagerActivity.class));
+    }
 }
