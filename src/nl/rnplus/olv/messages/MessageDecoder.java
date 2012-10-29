@@ -1,16 +1,10 @@
 package nl.rnplus.olv.messages;
 //EDIT BY RN+ : ADDED MSG_CLEARDISPLAY_ACK and MSG_DISPLAYBITMAP_ACK
 
-import java.nio.ByteBuffer;
-
-import nl.rnplus.olv.messages.events.CapsResponse;
-import nl.rnplus.olv.messages.events.DeviceStatus;
-import nl.rnplus.olv.messages.events.GetAlert;
-import nl.rnplus.olv.messages.events.GetMenuItems;
-import nl.rnplus.olv.messages.events.GetTime;
-import nl.rnplus.olv.messages.events.Navigation;
-import nl.rnplus.olv.messages.events.ResultEvent;
 import android.util.Log;
+import nl.rnplus.olv.messages.events.*;
+
+import java.nio.ByteBuffer;
 
 public final class MessageDecoder {
 
@@ -19,36 +13,36 @@ public final class MessageDecoder {
     private static LiveViewEvent newInstanceForId(byte id)
             throws DecodeException {
         switch (id) {
-        case MessageConstants.MSG_GETCAPS_RESP:
-            return new CapsResponse();
-        case MessageConstants.MSG_SETVIBRATE_ACK:
-        	return new ResultEvent(id);
-        case MessageConstants.MSG_CLEARDISPLAY_ACK:
-        	return new ResultEvent(id);
-        case MessageConstants.MSG_DISPLAYBITMAP_ACK:
-        	return new ResultEvent(id);
-        case MessageConstants.MSG_SETSCREENMODE_ACK:
-        	return new ResultEvent(id);
-        case MessageConstants.MSG_DISPLAYPANEL_ACK:
-        	return new ResultEvent(id);
-        case MessageConstants.MSG_SETLED_ACK:
-            return new ResultEvent(id);
-        case MessageConstants.MSG_GETTIME:
-            return new GetTime();
-        case MessageConstants.MSG_GETMENUITEMS:
-            return new GetMenuItems();
-        case MessageConstants.MSG_GETALERT: //Added by RN+
-            return new GetAlert();
-        case MessageConstants.MSG_DEVICESTATUS:
-            return new DeviceStatus();
-        case MessageConstants.MSG_NAVIGATION:
-            return new Navigation();
-        default:
-            throw new DecodeException("No message found matching ID: " + id);
+            case MessageConstants.MSG_GETCAPS_RESP:
+                return new CapsResponse();
+            case MessageConstants.MSG_SETVIBRATE_ACK:
+                return new ResultEvent(id);
+            case MessageConstants.MSG_CLEARDISPLAY_ACK:
+                return new ResultEvent(id);
+            case MessageConstants.MSG_DISPLAYBITMAP_ACK:
+                return new ResultEvent(id);
+            case MessageConstants.MSG_SETSCREENMODE_ACK:
+                return new ResultEvent(id);
+            case MessageConstants.MSG_DISPLAYPANEL_ACK:
+                return new ResultEvent(id);
+            case MessageConstants.MSG_SETLED_ACK:
+                return new ResultEvent(id);
+            case MessageConstants.MSG_GETTIME:
+                return new GetTime();
+            case MessageConstants.MSG_GETMENUITEMS:
+                return new GetMenuItems();
+            case MessageConstants.MSG_GETALERT: //Added by RN+
+                return new GetAlert();
+            case MessageConstants.MSG_DEVICESTATUS:
+                return new DeviceStatus();
+            case MessageConstants.MSG_NAVIGATION:
+                return new Navigation();
+            default:
+                throw new DecodeException("No message found matching ID: " + id);
         }
     }
 
-    public static final LiveViewEvent decode(byte[] message, int length)
+    public static LiveViewEvent decode(byte[] message, int length)
             throws DecodeException {
         if (length < 4) {
             Log.w(TAG, "Got empty message!");

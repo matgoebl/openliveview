@@ -34,7 +34,7 @@ public class ConfigWizardActivity extends Activity {
         btAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
-    public void finish_setup(View view) {
+    public void finishSetup(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Choose your LiveView device");
         fillDevices();
@@ -59,7 +59,7 @@ public class ConfigWizardActivity extends Activity {
         devicelist.show();
     }
 
-    public void open_bluetooth_settings(View view) {
+    public void openBluetoothSettings(View view) {
         Intent settingsIntent = new Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS);
         startActivity(settingsIntent);
     }

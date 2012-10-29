@@ -13,24 +13,23 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Prefs prefs = new Prefs(this);
-        Boolean setupcompleted = prefs.getSetupCompleted();
-        if (setupcompleted == false) {
+        if (!prefs.getSetupCompleted()) {
             Intent myIntent = new Intent(this, ConfigWizardActivity.class);
             this.startActivity(myIntent);
             finish();
         }
     }
 
-    public void open_settings(View view) {
+    public void openSettings(View view) {
         Intent myIntent = new Intent(this, LiveViewPreferences.class);
         this.startActivity(myIntent);
     }
 
-    public void open_log(View view) {
+    public void openLog(View view) {
         startActivity(new Intent(this, LogViewActivity.class));
     }
 
-    public void open_plugin_manager(View view) {
+    public void openPluginManager(View view) {
         startActivity(new Intent(this, PluginManagerActivity.class));
     }
 }

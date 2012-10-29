@@ -92,15 +92,13 @@ public class LiveViewThread extends Thread {
         protected DateFormat initialValue() {
             return SimpleDateFormat.getDateTimeInstance(SimpleDateFormat.SHORT, SimpleDateFormat.SHORT, Locale.getDefault());
         }
-
-        ;
     };
 
     public LiveViewThread(LiveViewService parentService) {
         super("LiveViewThread");
         this.parentService = parentService;
 
-        int sdk = Integer.valueOf(Build.VERSION.SDK_INT);
+        int sdk = Build.VERSION.SDK_INT;
 
         //Pending intent 1: Open the mainActivity
         Intent notificationIntent = new Intent(parentService, MainActivity.class);
@@ -267,12 +265,12 @@ public class LiveViewThread extends Thread {
                 Boolean enable_notification_buzzer = prefs.getenablenotificationbuzzer();
 
                 if (update_unread_count_when_menu_opens && parentService.getNotificationNeedsUpdate()) {
-                    if (enable_notification_buzzer == false) {
+                    if (!enable_notification_buzzer) {
                         parentService.setNotificationNeedsUpdate(false);
                     }
                     if (parentService.getNotificationUnreadCount() > 0) {
                         if (menu_button_notifications_id >= 0) {
-                            sendCall(new MenuItem((byte) menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
+                            sendCall(new MenuItem(menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
                                     "Notifications", menuImage_notification));
                         }
                     }
@@ -330,7 +328,7 @@ public class LiveViewThread extends Thread {
                 Log.d(TAG, "LV capabilities: " + caps.toString());
                 Log.d(TAG, "LV Version: " + caps.getSoftwareVersion());
                 if (menu_state == 0) {
-                    sendCall(new SetMenuSize((byte) menu_button_count));
+                    sendCall(new SetMenuSize(menu_button_count));
                 } else {
                     sendCall(new SetMenuSize((byte) 0));
                 }
@@ -352,7 +350,7 @@ public class LiveViewThread extends Thread {
                 break;
             case MessageConstants.MSG_DISPLAYPANEL_ACK:
                 Log.d(TAG, "Got display panel ack.");
-                if ((parentService.MediaInfoNeedsUpdate == true) && (menu_state == 1)) {
+                if ((parentService.MediaInfoNeedsUpdate) && (menu_state == 1)) {
                     draw_media_menu();
                     parentService.MediaInfoNeedsUpdate = false;
                 }
@@ -361,27 +359,27 @@ public class LiveViewThread extends Thread {
                 Log.d(TAG, "Sending menu items...");
                 if (menu_state == 0) {
                     if (menu_button_notifications_id >= 0) {
-                        sendCall(new MenuItem((byte) menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
+                        sendCall(new MenuItem(menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
                                 "Notifications", menuImage_notification));
                     }
                     if (menu_button_media_next_id >= 0) {
-                        sendCall(new MenuItem((byte) menu_button_media_next_id, false, new UShort((short) 0),
+                        sendCall(new MenuItem(menu_button_media_next_id, false, new UShort((short) 0),
                                 "Next", menuImage_right));
                     }
                     if (menu_button_media_play_id >= 0) {
-                        sendCall(new MenuItem((byte) menu_button_media_play_id, false, new UShort((short) 0),
+                        sendCall(new MenuItem(menu_button_media_play_id, false, new UShort((short) 0),
                                 "Play / Pause", menuImage_music));
                     }
                     if (menu_button_media_previous_id >= 0) {
-                        sendCall(new MenuItem((byte) menu_button_media_previous_id, false, new UShort((short) 0),
+                        sendCall(new MenuItem(menu_button_media_previous_id, false, new UShort((short) 0),
                                 "Previous", menuImage_left));
                     }
                     if (menu_button_findphone_id >= 0) {
-                        sendCall(new MenuItem((byte) menu_button_findphone_id, false, new UShort((short) 0),
+                        sendCall(new MenuItem(menu_button_findphone_id, false, new UShort((short) 0),
                                 "Find my phone", menuImage_phone));
                     }
                     if (menu_button_battery_status_id >= 0) {
-                        sendCall(new MenuItem((byte) menu_button_battery_status_id, false, new UShort((short) (get_battery_status() * 100)),
+                        sendCall(new MenuItem(menu_button_battery_status_id, false, new UShort((short) (get_battery_status() * 100)),
                                 "Battery", menuImage_battery));
                     }
                     Log.d(TAG, "Menu items sent, menu_state is 0.");
@@ -432,12 +430,16 @@ public class LiveViewThread extends Thread {
                 {
                     Log.d(TAG, "Notifications alert (ID: " + alertId + ") Time:" + parentService.getNotificationTime(alertId));
                     if (parentService.getNotificationTotalCount() > 0) {
-                        if (parentService.getNotificationType(alertId) == "SMS") {
+                        if (parentService.getNotificationType(alertId).equals("SMS")) {
                             String notificationTimeString = sdf.get().format(new Date(parentService.getNotificationTime(alertId)));
-                            sendCall(new GetAlertResponse((byte) parentService.getNotificationTotalCount(), (byte) parentService.getNotificationUnreadCount(), alertId, (String) notificationTimeString, (String) parentService.getNotificationTitle(alertId), (String) parentService.getNotificationContent(alertId), menuImage));
+                            sendCall(new GetAlertResponse((byte) parentService.getNotificationTotalCount(),
+                                    (byte) parentService.getNotificationUnreadCount(), alertId, notificationTimeString,
+                                    parentService.getNotificationTitle(alertId), parentService.getNotificationContent(alertId), menuImage));
                         } else {
                             String notificationTimeString = sdf.get().format(new Date(parentService.getNotificationTime(alertId)));
-                            sendCall(new GetAlertResponse((byte) parentService.getNotificationTotalCount(), (byte) parentService.getNotificationUnreadCount(), alertId, (String) notificationTimeString, (String) parentService.getNotificationTitle(alertId), (String) parentService.getNotificationContent(alertId), menuImage_notification));
+                            sendCall(new GetAlertResponse((byte) parentService.getNotificationTotalCount(),
+                                    (byte) parentService.getNotificationUnreadCount(), alertId, notificationTimeString,
+                                    parentService.getNotificationTitle(alertId), parentService.getNotificationContent(alertId), menuImage_notification));
                         }
                     } else {
                         sendCall(new GetAlertResponse(0, 0, alertId, "", "No notifications", "", menuImage_notification));
@@ -449,7 +451,7 @@ public class LiveViewThread extends Thread {
                 parentService.setNotificationUnreadCount((byte) 0);
                 break;
             case MessageConstants.MSG_NAVIGATION:            /* Some random lines of code that I want to remember for later use:
-			 * sendCall(new SetScreenMode((byte) MessageConstants.BRIGHTNESS_DIM));
+             * sendCall(new SetScreenMode((byte) MessageConstants.BRIGHTNESS_DIM));
         	 * sendCall(new SetLed(Color.GREEN,1,500));
         	 * sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
              */
@@ -527,7 +529,7 @@ public class LiveViewThread extends Thread {
                                         draw_battery_status();
                                         hasdonesomething = true;
                                     }
-                                    if (hasdonesomething == false) {
+                                    if (!hasdonesomething) {
                                         Log.d(TAG, "Navigation error: unknown menu id " + nav.getMenuItemId() + "!");
                                         sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
                                     }
@@ -696,8 +698,7 @@ public class LiveViewThread extends Thread {
         Intent batteryStatus = parentService.registerReceiver(null, ifilter);
         int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-        float batteryPct = level / (float) scale;
-        return batteryPct;
+        return level / (float) scale;
     }
 
     public void emulate_media(int keycode) {
