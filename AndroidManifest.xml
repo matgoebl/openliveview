@@ -11,9 +11,10 @@
     <uses-permission android:name="android.permission.READ_CONTACTS"/><!-- Needed for "SMS receiver" -->
 	<uses-permission android:name="android.permission.RECEIVE_SMS"/><!-- Needed for "SMS receiver" -->
 	<uses-permission android:name="android.permission.READ_SMS"/><!-- Needed for "SMS receiver" -->
-	<uses-permission android:name="android.permission.INTERNET"/><!-- Needed for "Donation link" -->
+	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/><!-- Needed on some devices -->
 	
 	<uses-feature android:name="android.hardware.telephony" android:required="false" /><!-- Needed for "SMS receiver" but not required -->
+	<uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
     <application
         android:icon="@drawable/icon"
@@ -44,13 +45,18 @@
         <service
             android:name="nl.rnplus.olv.service.GetNotificationService"
             android:description="@string/accessibility_service_description"
-            android:enabled="@bool/not_need_bind_accessibility_service_permission">
+            android:enabled="@bool/not_need_bind_accessibility_service_permission"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
         </service>
+        
+        
 
-        <receiver android:name="nl.rnplus.olv.service.BTReceiver" >
+        <receiver
+            android:name="nl.rnplus.olv.service.BTReceiver"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
@@ -60,9 +66,8 @@
 
         <provider
             android:name="nl.rnplus.olv.data.LiveViewDataProvider"
-            android:authorities="nl.rnplus.olv" />
-        <!-- THIS KIND OF ACCESS WILL AND SHOULD BE REMOVED -->
-        <!-- CURRENTLY NO PERSONAL DATA IS STORED IN THE DATABASE -->
+            android:authorities="nl.rnplus.olv"
+            android:exported="false"/>
             
         <activity
             android:name="nl.rnplus.olv.MainActivity"

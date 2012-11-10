@@ -52,10 +52,6 @@
     <string name="prefs_updateunreadcountwhenmenuopens_title">Update unread items counter</string>
     <string name="prefs_updateunreadcountwhenmenuopens_summary">Update unread items counter every time the menu opens.</string>
 
-    <string name="prefs_enablestandbyaccess_key">system.enablestandbyaccess</string>
-    <string name="prefs_enablestandbyaccess_title">Standby access</string>
-    <string name="prefs_enablestandbyaccess_summary">Activate a second thread that sends messages to the liveview while in standby.</string>
-
     <string name="prefs_mediaenablemenu_key">media.enablemenu</string>
     <string name="prefs_mediaenablemenu_title">Media menu</string>
     <string name="prefs_mediaenablemenu_summary">Enable media menu on long press of action key.</string>
@@ -73,7 +69,7 @@
     <string name="prefs_cat_olvversion_title">Other stuff</string>
 
     <string name="prefs_version_title">Version</string>
-    <string name="prefs_version_summary">1.0.0.7</string>    
+    <string name="prefs_version_summary">1.0.0.8</string>    
         
     <string name="accessibility_service_description">This service will display your notifications on the connected LiveView device.</string>
 
@@ -94,4 +90,8 @@
 	<string name="notification_settings">Settings</string>
 	
 	<string name="plugin_manager_no_plugins_installed">No plugins installed yet.</string>
+	
+	<string name="etc_content_desc">image</string>
+	
+	<string name="error_not_supported_text">OpenLiveView could not read from the list of connected Bluetooth devices. This probably means that your Android rom does not implement the Bluetooth functionality needed by OpenLiveView, please ask for help at http://openliveview.googlecode.com</string>
 </resources>

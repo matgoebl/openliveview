@@ -13,20 +13,25 @@ import android.net.Uri;
  * Provides transparent device-wide access to the OpenLiveView database.
  * 
  * @author Xperimental
+ * 
+ * (Now limited to access from olv itself by placing android:exported="false" in AndroidManifest.xml)
  */
-public class LiveViewDataProvider extends ContentProvider {
+public class LiveViewDataProvider extends ContentProvider
+{
 
     private static final int MATCH_LOG = 1;
 
     private static final UriMatcher uriMatcher;
     private static final HashMap<String, String> logProjection;
 
-    static {
+    static
+    {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(LiveViewData.AUTHORITY, "log", MATCH_LOG);
 
         logProjection = new HashMap<String, String>();
-        for (String column : LiveViewData.Log.DEFAULT_PROJECTION) {
+        for (String column : LiveViewData.Log.DEFAULT_PROJECTION)
+        {
             logProjection.put(column, column);
         }
     }

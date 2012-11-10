@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import nl.rnplus.olv.content.ContentNotification;
 import nl.rnplus.olv.content.manager.SMSNotificationManager;
+import nl.rnplus.olv.data.LiveViewDbHelper;
 import nl.rnplus.olv.messages.MessageConstants;
 import nl.rnplus.olv.messages.calls.SetScreenMode;
 import nl.rnplus.olv.messages.calls.SetVibrate;
@@ -13,6 +14,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 /**
@@ -21,13 +24,15 @@ import android.util.Log;
  **/
 public class LiveViewService extends Service
 {
-
+	private static final String TAG = "LiveViewService";
 	public final			String ACTION_RECEIVE_SMS	= "android.provider.Telephony.SMS_RECEIVED";
     public static final	String ACTION_START 		= "start";
     public static final	String ACTION_STOP 			= "stop";
     
     final public static String SHOW_NOTIFICATION = "OLV_ADD_NOTIFICATION";
-    final public static String STANDBY_COMMAND   = "OLV_STANDBY_COMMAND";
+    final public static String PLUGIN_COMMAND   = "nl.rnplus.olv.plugin.command";
+    
+    private LiveViewService myself;
 
     private LiveViewThread workerThread = null;
     //private LiveViewStandbyThread standbyThread = null;
@@ -41,8 +46,10 @@ public class LiveViewService extends Service
     Boolean NotificationNeedsUpdate = true;
     
     BroadcastReceiver notification_receiver = new ShowNotificationReceiver();
-    BroadcastReceiver standby_receiver = new StandbyCommandReceiver();
-
+    BroadcastReceiver plugin_receiver = new PluginCommandReceiver();
+    
+    MyPhoneStateListener phoneListener=new MyPhoneStateListener();
+    
     /*
      * (non-Javadoc)
      * @see android.app.Service#onBind(android.content.Intent)
@@ -56,6 +63,7 @@ public class LiveViewService extends Service
     @Override
     public void onCreate()
     {    
+    	myself = this;
     	for (int cid = 0; cid < 100; cid++)
     	{
     		NotificationContent[100-cid] = "Empty";
@@ -63,7 +71,7 @@ public class LiveViewService extends Service
     	}
     	registerReceiver(notification_receiver,  new IntentFilter(SHOW_NOTIFICATION));
     	registerReceiver(notification_receiver,  new IntentFilter(ACTION_RECEIVE_SMS));
-    	registerReceiver(standby_receiver, new IntentFilter(STANDBY_COMMAND));
+    	registerReceiver(plugin_receiver, new IntentFilter(PLUGIN_COMMAND));
     	
     	/* Added in version 1.0.0.3: Mediaplayer information receiver */
     	IntentFilter mediaintentfilter = new IntentFilter();
@@ -73,6 +81,10 @@ public class LiveViewService extends Service
     	mediaintentfilter.addAction("com.android.music.queuechanged");
     	registerReceiver(media_receiver, mediaintentfilter);
     	
+    	TelephonyManager telephonyManager
+    	=(TelephonyManager)getSystemService(TELEPHONY_SERVICE);
+    	telephonyManager.listen(phoneListener, PhoneStateListener.LISTEN_CALL_STATE);
+    	
     }
     
     @Override
@@ -80,7 +92,7 @@ public class LiveViewService extends Service
     {    
     	unregisterReceiver(notification_receiver);
     	unregisterReceiver(media_receiver);
-    	unregisterReceiver(standby_receiver);
+    	unregisterReceiver(plugin_receiver);
     }    
 
     /*
@@ -113,11 +125,6 @@ public class LiveViewService extends Service
             workerThread = new LiveViewThread(this);
             workerThread.start();
         }
-        /*if (standbyThread == null || !standbyThread.isLooping())
-        {
-        	standbyThread = new LiveViewStandbyThread(this);
-        	standbyThread.start();
-        }*/
     }
 
     /**
@@ -130,20 +137,9 @@ public class LiveViewService extends Service
         {
             workerThread.stopLoop();
         }
-        /*if (standbyThread != null && standbyThread.isAlive())
-        {
-            standbyThread.stopLoop();
-        }*/
         stopSelf();
     }
     
-    
-    //byte NotificationUnreadCount     = 0;
-    //byte NotificationTotalCount      = 0;
-    //String [] NotificationTitle     = new String [101];
-    //String [] NotificationContent   = new String [101];
-    //Boolean NotificationNeedsUpdate = true;
-
     public String getNotificationContent(int id)
     {
         return NotificationContent[id];
@@ -293,56 +289,116 @@ public class LiveViewService extends Service
     	@Override
     	public void onReceive(Context context, Intent intent)
     	{
-    	String action = intent.getAction();
-    	String cmd = intent.getStringExtra("command");
+    	//String action = intent.getAction();
+    	//String cmd = intent.getStringExtra("command");
     	//Log.d("mIntentReceiver.onReceive ", action + " / " + cmd);
     	MediaInfoArtist = intent.getStringExtra("artist");
     	MediaInfoAlbum = intent.getStringExtra("album");
     	MediaInfoTrack = intent.getStringExtra("track");
     	MediaInfoNeedsUpdate = true;
-    	Log.d("Music",MediaInfoArtist+":"+MediaInfoAlbum+":"+MediaInfoTrack);
+    	Log.d("OLV Music","Artist: "+MediaInfoArtist+", Album: "+MediaInfoAlbum+" and Track: "+MediaInfoTrack);
     	}
     	};
     	
-        public class StandbyCommandReceiver extends BroadcastReceiver  
+        public class PluginCommandReceiver extends BroadcastReceiver  
         {  
             @Override  
             public void onReceive(Context context, Intent intent)  
             {  
-            	if (workerThread.getLiveViewStatus()==0)
-            	{
-	            	//if (intent.getAction().equals(ACTION_RECEIVE_SMS))
-		    		try
-		    		{
-		    			Log.w("DEBUG", intent.getExtras().getString("command"));
-		    			if (intent.getExtras().getString("command").contains("vibrate"))
-		    			{
-		    				Log.w("DEBUG", "DID VIBRATE");
-		    				int vdelay = intent.getExtras().getInt("delay");
-		    				int vtime = intent.getExtras().getInt("time");
-		    				workerThread.sendCall(new SetVibrate(vdelay, vtime));
-		    			}
-		    			else
-		    			{
-		    				if (intent.getExtras().getString("command").contains("awaken"))
-		    				{
-		    					Log.w("DEBUG", "Awaken.");
-		    					workerThread.sendCall(new SetScreenMode((byte) MessageConstants.BRIGHTNESS_MAX));
-		    					workerThread.draw_battery_status();
-		    				}
-		    				else
-		    				{
-		    					Log.w("DEBUG", "Unknown command.");
-		    				}
-		    			}
-		    		}
-		    		catch (IOException e)
-		            {
-		                Log.e("StandbyCommandReceiver", "ERROR: " + e.getMessage());
-		                return;
-		            }
-            	}
-            	Log.w("StandbyCommandReceiver", "Executed command.");
+            	Log.w("PLUGIN DEBUG", "Received intent, current LiveView status is: "+workerThread.getLiveViewStatus());
+            	Log.w("PLUGIN DEBUG", "Command: "+intent.getExtras().getString("command"));
+	    		try
+	    		{
+	    			switch (workerThread.getLiveViewStatus()){
+	            		case MessageConstants.DEVICESTATUS_OFF:
+	    		    			if (intent.getExtras().getString("command").contains("vibrate"))
+	    		    			{
+	    		    				Log.w("PLUGIN DEBUG", "Sent vibration.");
+	    		    				int vdelay = intent.getExtras().getInt("delay");
+	    		    				int vtime = intent.getExtras().getInt("time");
+	    		    				workerThread.sendCall(new SetVibrate(vdelay, vtime));
+	    		    			}
+	    		    			else
+	    		    			{
+	    		    				if (intent.getExtras().getString("command").contains("awaken"))
+	    		    				{
+	    		    					Log.w("PLUGIN DEBUG", "Sent awaken. -->THIS COMMAND WILL BE CHANGED / REMOVED <--");
+	    		    					workerThread.sendCall(new SetScreenMode((byte) MessageConstants.BRIGHTNESS_MAX));
+	    		    					workerThread.draw_plugin_loading();
+	    		    				}
+	    		    				else
+	    		    				{
+	    		                        String message = "Error: Plugin command receiver: Unknown command.";
+	    		                        Log.e(TAG, message);
+	    		                        LiveViewDbHelper.logMessage(myself, message);
+	    		    	                return;
+	    		    				}
+	    		    			}
+	            			break;
+	            		case MessageConstants.DEVICESTATUS_ON:
+    		    			if (intent.getExtras().getString("command").contains("vibrate"))
+    		    			{
+    		    				Log.w("PLUGIN DEBUG", "Sent vibration.");
+    		    				int vdelay = intent.getExtras().getInt("delay");
+    		    				int vtime = intent.getExtras().getInt("time");
+    		    				workerThread.sendCall(new SetVibrate(vdelay, vtime));
+    		    			}
+	            			break;
+	            		case MessageConstants.DEVICESTATUS_MENU:
+    		    			if (intent.getExtras().getString("command").contains("vibrate"))
+    		    			{
+    		    				Log.w("PLUGIN DEBUG", "Sent vibration.");
+    		    				int vdelay = intent.getExtras().getInt("delay");
+    		    				int vtime = intent.getExtras().getInt("time");
+    		    				workerThread.sendCall(new SetVibrate(vdelay, vtime));
+    		    			}
+	            			break;
+	            		default:
+	                        String message = "Error: Unknown device state!";
+	                        Log.e(TAG, message);
+	                        LiveViewDbHelper.logMessage(myself, message);
+	            			break;
+	            	}
+	    		}
+	    		catch (IOException e)
+	            {
+                    String message = "Error: IOException in plugin command receiver: " + e.getMessage();
+                    Log.e(TAG, message);
+                    LiveViewDbHelper.logMessage(myself, message);
+                    e.printStackTrace();
+	                return;
+	            }
             }  
-        }      	
+        }  
+        
+        public class MyPhoneStateListener extends PhoneStateListener {
+        	Context context;
+        	@Override
+        	public void onCallStateChanged(int state,String incomingNumber){
+	        	Log.e("PhoneCallStateNotified", "Incoming number "+incomingNumber);
+	        	try {
+		        	if (state == TelephonyManager.CALL_STATE_RINGING)
+		        	{
+		        		if (workerThread.getLiveViewStatus()==MessageConstants.DEVICESTATUS_OFF)
+		        		{
+								workerThread.sendCall(new SetScreenMode((byte) MessageConstants.BRIGHTNESS_MAX));
+								workerThread.drawCallStatus(state, "Incoming call", incomingNumber);
+		        		}
+		        	}
+		        	if (state == TelephonyManager.CALL_STATE_IDLE)
+		        	{
+		        		Log.e("PhoneCallStateNotified", "Opgehangen / Geweigerd of gemist.");
+		        	}
+		        	if (state == TelephonyManager.CALL_STATE_OFFHOOK)
+		        	{
+		        		Log.e("PhoneCallStateNotified", "Opgenomen, er is een gesprek bezig.");
+		        	} 
+				} catch (IOException e) {
+	                String message = "Error: IOException in incoming call receiver: " + e.getMessage();
+	                Log.e(TAG, message);
+	                LiveViewDbHelper.logMessage(myself, message);
+					e.printStackTrace();
+				}	
+        	}
+        } 
 }

@@ -22,10 +22,10 @@ public class LogViewActivity extends ListActivity {
     protected void onResume() {
         super.onResume();
 
-        Cursor cursor = managedQuery(LiveViewData.Log.CONTENT_URI, null, null,
+		Cursor cursor = managedQuery(LiveViewData.Log.CONTENT_URI, null, null,
                 null, null);
 
-        SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
+		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
                 android.R.layout.two_line_list_item, cursor, new String[] {
                         LiveViewData.Log.DATETIME, LiveViewData.Log.MESSAGE },
                 new int[] { android.R.id.text1, android.R.id.text2 });
