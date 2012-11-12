@@ -2,6 +2,7 @@ package nl.rnplus.olv.data;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -73,8 +74,16 @@ public class LiveViewDbHelper extends SQLiteOpenHelper
         values.put(LiveViewData.Notifications.TITLE, title);
         values.put(LiveViewData.Notifications.CONTENT, content);
         values.put(LiveViewData.Notifications.TYPE, type);
-        db.insert(LiveViewData.Log.TABLE, LiveViewData.Log._ID, values);
+        db.insert(LiveViewData.Log.TABLE, LiveViewData.Notifications._ID, values);
         db.close();
     }
+    
+	public static Cursor getAllNotifications(Context context)
+	    {
+	    	LiveViewDbHelper helper = new LiveViewDbHelper(context);
+	    	SQLiteDatabase db = helper.getReadableDatabase();
+	    	Cursor cur=db.rawQuery("SELECT * FROM "+LiveViewData.Notifications.TABLE,new String [] {});     
+	     return cur;
+	    }
 
 }

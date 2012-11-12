@@ -12,8 +12,6 @@ import android.preference.ListPreference;
 import android.view.View;
 import android.widget.Toast;
 import nl.rnplus.olv.data.Prefs;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

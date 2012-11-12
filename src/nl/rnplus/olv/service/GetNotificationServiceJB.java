@@ -16,6 +16,9 @@ import android.view.accessibility.AccessibilityEvent;
 
 import java.util.List;
 
+import nl.rnplus.olv.data.LiveViewDbConstants;
+import nl.rnplus.olv.data.LiveViewDbHelper;
+
 public class GetNotificationServiceJB extends AccessibilityService {
 
     private static final String LOG_TAG = "OLV Notification service (Jelly Bean)";
@@ -50,9 +53,14 @@ public class GetNotificationServiceJB extends AccessibilityService {
                         bcb.putLong("timestamp", time);
                         bci.putExtras(bcb);
                         sendBroadcast(bci);
-                        Log.w(LOG_TAG, "The notification was sent to the LiveView service.");
+                        LiveViewDbHelper.addNotification(this, "Notification", aNotificationList.toString(), LiveViewDbConstants.NTF_ANDROID, time);
+                        String message = "Notification sent to LiveView: "+aNotificationList.toString();
+                        Log.v(LOG_TAG, message);
+                        LiveViewDbHelper.logMessage(this, message);
                     } catch (IllegalArgumentException e) {
-                        Log.w(LOG_TAG, "Error while reading notifications!");
+                        String message = "Error while reading notifications!";
+                        Log.e(LOG_TAG, message);
+                        LiveViewDbHelper.logMessage(this, message);
                     }
                 }
                 //This code can get more info out of a notification, but it is very unstable:
@@ -103,13 +111,17 @@ public class GetNotificationServiceJB extends AccessibilityService {
                 } */
                 break;
             default:
-                Log.w(LOG_TAG, "Error: unknown event type (" + eventType + ")");
+                String message = "Error: unknown event type (" + eventType + ")";
+                Log.e(LOG_TAG, message);
+                LiveViewDbHelper.logMessage(this, message);                
         }
     }
 
     @Override
     public void onInterrupt() {
-        Log.w(LOG_TAG, "OnInterrupt() triggered in NotificationService.");
+        String message = "OnInterrupt() triggered in NotificationService.";
+        Log.v(LOG_TAG, message);
+        LiveViewDbHelper.logMessage(this, message);              
     }
 
 }

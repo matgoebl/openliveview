@@ -61,4 +61,14 @@
             android:onClick="openPluginManager"
             android:text="@string/main_plugin_manager_btn_text"/>
 
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/pluginmanagerbutton"
+        android:layout_alignLeft="@+id/pluginmanagerbutton"
+        android:layout_alignRight="@+id/pluginmanagerbutton"
+        android:onClick="showAllStoredNotifications"
+        android:text="SHOW ALL STORED NOTIFICATIONS" />
+
 </RelativeLayout>

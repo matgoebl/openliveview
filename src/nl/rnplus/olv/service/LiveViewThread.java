@@ -124,7 +124,6 @@ public class LiveViewThread extends Thread {
         i_opensettings.setClass(parentService, LiveViewPreferences.class);
         PendingIntent pi_opensettings = PendingIntent.getActivity(parentService, 0, i_opensettings, 0);
 
-
         if (sdk < Build.VERSION_CODES.JELLY_BEAN) //Use deprecated notification code when running on android versions older than Jelly Bean.
         {
             notification = new Notification(R.drawable.icon, "LiveView connected...", System.currentTimeMillis());
@@ -148,7 +147,6 @@ public class LiveViewThread extends Thread {
         }
         btAdapter = BluetoothAdapter.getDefaultAdapter();
 
-
         menuImage = loadImageByteArray(parentService, "menu_blank.png");
         menuImage_notification = loadImageByteArray(parentService, "menu_notification.png");
         menuImage_phone = loadImageByteArray(parentService, "menu_phone.png");
@@ -160,8 +158,7 @@ public class LiveViewThread extends Thread {
         menuImage_battery = loadImageByteArray(parentService, "menu_battery.png");
         /* menuImage_plus = loadImageByteArray(parentService, "menu_plus.png");
         menuImage_min = loadImageByteArray(parentService, "menu_min.png"); */
-        
-        /* Testing code for dynamic menu */
+
         menu_button_count = 0;
 
         Prefs prefs = new Prefs(parentService);
@@ -467,10 +464,11 @@ public class LiveViewThread extends Thread {
                 }
                 parentService.setNotificationUnreadCount((byte) 0);
                 break;
-            case MessageConstants.MSG_NAVIGATION:            /* Some random lines of code that I want to remember for later use:
+            case MessageConstants.MSG_NAVIGATION:
+            /* Some random lines of code that I want to remember for later use:
              * sendCall(new SetScreenMode((byte) MessageConstants.BRIGHTNESS_DIM));
-                 * sendCall(new SetLed(Color.GREEN,1,500));
-                 * sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
+        	 * sendCall(new SetLed(Color.GREEN,1,500));
+        	 * sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
              */
                 Navigation nav = (Navigation) event;
                 Log.d(TAG, "Received navigation packet (isInAlert: " + nav.isInAlert() + " and getNavType: " + nav.getNavType() + ").");
