@@ -64,9 +64,10 @@ public final class LiveViewData
         public static final String TITLE = "title";
         public static final String CONTENT = "content";
         public static final String TYPE = "type";
+        public static final String READ = "read";
         public static final String SCHEMA = "CREATE TABLE " + TABLE + " ("
         		+ _ID + " INTEGER PRIMARY KEY, " + TIMESTAMP + " INTEGER, "
-                + CONTENT + " TEXT, "+ TITLE + " TEXT, " + TYPE + " INTEGER)";
+                + CONTENT + " TEXT, "+ TITLE + " TEXT, " + TYPE + " INTEGER, " + READ + " INTEGER)";
 
         public static final String[] DEFAULT_PROJECTION = new String[]
         		{

@@ -38,40 +38,79 @@ public class MainActivity extends Activity {
         startActivity(new Intent(this, PluginManagerActivity.class));
     }
     
+    public void addTestNotification(View view) {
+    	LiveViewDbHelper.addNotification(this, "test_title", "test_content", 0, System.currentTimeMillis());
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Info");
+        builder.setMessage("Added test notification to the database.");
+        builder.setPositiveButton("Close", null);
+        builder.show(); 
+    }
+    public void deleteAllNotifications(View view) {
+    	try {
+	    	LiveViewDbHelper.deleteAllNotifications(this);
+	    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	        builder.setTitle("Info");
+	        builder.setMessage("All stored notifications deleted.");
+	        builder.setPositiveButton("Close", null);
+	        builder.show(); 
+    	} catch(Exception e) {
+	        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	        builder.setTitle("Error");
+	        builder.setMessage(e.toString());
+	        builder.setPositiveButton("Close", null);
+	        builder.show();   		
+    	}
+    }
+    
     public void showAllStoredNotifications(View view) {
         //For debugging the notification database
     	try {
-    		LiveViewDbHelper.addNotification(this, "test_title", "test_content", 0, System.currentTimeMillis());
 	    	Cursor notifications = LiveViewDbHelper.getAllNotifications(this);
-	    	String notificationcontents = "";
+	    	
 	    	int contentcolumn = -1;
-	    	notificationcontents += "L: "+LiveViewData.Notifications.CONTENT+" --- ";
 	    	for (int i = 0; i < notifications.getColumnCount(); i++)
 	    	{
 	    		if (notifications.getColumnName(i).contains(LiveViewData.Notifications.CONTENT))
 	    		{
 	    			contentcolumn = i;
 	    		}
-	    		notificationcontents += "C: "+notifications.getColumnName(i)+" --- ";
 	    	}
-	    	notifications.moveToFirst();
 	    	if (contentcolumn>=0)
 	    	{
-		    	do {
-		    		notificationcontents += notifications.getString(contentcolumn)+" --- ";
-		    		notifications.moveToNext();
-		    	} while (notifications.isLast()==false);
+	    		if (notifications.getCount()>0)
+	    		{
+	    			notifications.moveToFirst();
+	    			String notificationcontents = "";
+		    		for (int i = 0; i < notifications.getCount(); i++)
+			    	{
+			    		notificationcontents += "("+(i+1)+"/"+notifications.getCount()+") "+notifications.getString(contentcolumn)+"\n";
+			    		notifications.moveToNext();
+			    	}
+			        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			        builder.setTitle("Stored notifications");
+			        builder.setMessage(notificationcontents);
+			        builder.setPositiveButton("Close", null);
+			        builder.show();
+	    		}
+	    		else
+	    		{
+			        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			        builder.setTitle("Database empty");
+			        builder.setMessage("There are currently no notifications in the database.");
+			        builder.setPositiveButton("Close", null);
+			        builder.show();
+	    		}
 	    	}
 	    	else
 	    	{
-	    		notificationcontents += "Database error: Column not found.";
+		        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		        builder.setTitle("Database error");
+		        builder.setMessage("Column not found.");
+		        builder.setPositiveButton("Close", null);
+		        builder.show();
 	    	}
 	    	notifications.close();
-	        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-	        builder.setTitle("Stored notifications");
-	        builder.setMessage(notificationcontents);
-	        builder.setPositiveButton("Close", null);
-	        builder.show();
     	} catch(Exception e) {
 	        AlertDialog.Builder builder = new AlertDialog.Builder(this);
 	        builder.setTitle("Error");

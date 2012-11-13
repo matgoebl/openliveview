@@ -7,6 +7,7 @@
 package nl.rnplus.olv.service;
 
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -30,6 +31,7 @@ import android.view.KeyEvent;
 import nl.rnplus.olv.LiveViewPreferences;
 import nl.rnplus.olv.MainActivity;
 import nl.rnplus.olv.R;
+import nl.rnplus.olv.data.LiveViewDbConstants;
 import nl.rnplus.olv.data.LiveViewDbHelper;
 import nl.rnplus.olv.data.Prefs;
 import nl.rnplus.olv.messages.*;
@@ -266,6 +268,7 @@ public class LiveViewThread extends Thread {
                     Log.e(TAG, "Error decoding message: " + e.getMessage());
                 }
                 /* Notifications */
+                /*
                 Prefs prefs = new Prefs(parentService);
                 Boolean update_unread_count_when_menu_opens = prefs.getUpdateUnreadCountWhenMenuOpens();
                 Boolean enable_notification_buzzer = prefs.getenablenotificationbuzzer();
@@ -287,7 +290,7 @@ public class LiveViewThread extends Thread {
                         sendCall(new SetLed(Color.GREEN, 0, 1000));
                         sendCall(new SetVibrate(0, 200));
                     }
-                }
+                } */
             } while (true);
         } catch (IOException e) {
             String msg = e.getMessage();
@@ -350,6 +353,7 @@ public class LiveViewThread extends Thread {
                 sendCall(new DeviceStatusAck());
                 menu_state = 0; //Reset menu state when screen turns off
                 device_status = status.getStatus();
+                updateNotifications();
                 sendEvent("devicestatus", "", device_status, "");
                 break;
             case MessageConstants.MSG_SETVIBRATE_ACK:
@@ -444,7 +448,8 @@ public class LiveViewThread extends Thread {
                 {
                     Log.d(TAG, "Notifications alert (ID: " + alertId + ") Time:" + parentService.getNotificationTime(alertId));
                     if (parentService.getNotificationTotalCount() > 0) {
-                        if (parentService.getNotificationType(alertId).equals("SMS")) {
+                    	parentService.refreshNotificationCursor();
+                        if (parentService.getNotificationType(alertId)==LiveViewDbConstants.NTF_SMS) {
                             String notificationTimeString = sdf.get().format(new Date(parentService.getNotificationTime(alertId)));
                             sendCall(new GetAlertResponse((byte) parentService.getNotificationTotalCount(),
                                     (byte) parentService.getNotificationUnreadCount(), alertId, notificationTimeString,
@@ -462,7 +467,6 @@ public class LiveViewThread extends Thread {
                     Log.d(TAG, "Unknown alert. Display demo. (id: " + last_menu_id + ")");
                     sendCall(new GetAlertResponse(20, 4, alertId, "ID: " + alertId, "HEADER", "01234567890123456789012345678901234567890123456789", menuImage));
                 }
-                parentService.setNotificationUnreadCount((byte) 0);
                 break;
             case MessageConstants.MSG_NAVIGATION:
             /* Some random lines of code that I want to remember for later use:
@@ -474,8 +478,13 @@ public class LiveViewThread extends Thread {
                 Log.d(TAG, "Received navigation packet (isInAlert: " + nav.isInAlert() + " and getNavType: " + nav.getNavType() + ").");
                 if (nav.isInAlert()) {
                     Log.d(TAG, "User pressed button in alert. Wiping all the notifications from the liveview...");
-                    parentService.setNotificationUnreadCount((byte) 0);
-                    parentService.setNotificationTotalCount((byte) 0);
+                	try {
+            	    	LiveViewDbHelper.deleteAllNotifications(parentService);
+                	} catch(Exception e) {
+                		String message = "Error while deleting all notifications from the database: "+e.getMessage();
+                        Log.e(TAG, message);
+                        LiveViewDbHelper.logMessage(parentService, message); 		
+                	}
                     sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
                 } else {
                 	sendEvent("navigation", "", nav.getNavType(), "");
@@ -762,5 +771,37 @@ public class LiveViewThread extends Thread {
         bcb.putLong("timestamp", time);
         bci.putExtras(bcb);
         parentService.sendBroadcast(bci);
+    }
+    
+    public void updateNotifications(){
+		try {
+			/*
+		        Prefs prefs = new Prefs(parentService);
+		        Boolean update_unread_count_when_menu_opens = prefs.getUpdateUnreadCountWhenMenuOpens();
+		        Boolean enable_notification_buzzer = prefs.getenablenotificationbuzzer();
+		        if (update_unread_count_when_menu_opens && parentService.getNotificationNeedsUpdate()) {
+		            if (!enable_notification_buzzer) {
+		                parentService.setNotificationNeedsUpdate(false);
+		            }
+		            if (parentService.getNotificationUnreadCount() > 0) {
+		                if (menu_button_notifications_id >= 0) {
+		                    sendCall(new MenuItem(menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
+		                            "Notifications", menuImage_notification));
+		                }
+		            }
+		        }
+		        if (enable_notification_buzzer && parentService.getNotificationNeedsUpdate()) {
+		            parentService.setNotificationNeedsUpdate(false);
+		            if (parentService.getNotificationUnreadCount() > 0) {
+		                sendCall(new SetLed(Color.GREEN, 0, 1000));
+		                sendCall(new SetVibrate(0, 200));
+		        	}
+		        }
+		    */
+	    } catch(Exception e) {
+	        String message = "Error while updating notifications: " + e.getMessage();
+	        Log.e(TAG, message);
+	        LiveViewDbHelper.logMessage(parentService, message);    	
+	    }
     }
 }

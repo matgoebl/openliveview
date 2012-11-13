@@ -9,15 +9,15 @@ import android.database.sqlite.SQLiteOpenHelper;
 /**
  * Database currently holds logs and notifications.
  * 
- * @author Xperimental
- * Renze Nicolai: Added notifications
+ * Log database by: Xperimental
+ * Notification database by: Renze Nicolai
  */
 public class LiveViewDbHelper extends SQLiteOpenHelper
 {
 
     private static final String DB_NAME = "liveview.db";
 
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 2;
 
     public LiveViewDbHelper(Context context)
     {
@@ -70,11 +70,22 @@ public class LiveViewDbHelper extends SQLiteOpenHelper
         LiveViewDbHelper helper = new LiveViewDbHelper(context);
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(LiveViewData.Notifications.TIMESTAMP, timestamp); //System.currentTimeMillis()
+        values.put(LiveViewData.Notifications.TIMESTAMP, timestamp);
         values.put(LiveViewData.Notifications.TITLE, title);
         values.put(LiveViewData.Notifications.CONTENT, content);
         values.put(LiveViewData.Notifications.TYPE, type);
-        db.insert(LiveViewData.Log.TABLE, LiveViewData.Notifications._ID, values);
+        values.put(LiveViewData.Notifications.READ, 0);
+        db.insert(LiveViewData.Notifications.TABLE, LiveViewData.Notifications._ID, values);
+        db.close();
+    }
+    
+    public static void setNotificationRead(Context context, Integer id)
+    {
+        LiveViewDbHelper helper = new LiveViewDbHelper(context);
+        SQLiteDatabase db = helper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(LiveViewData.Notifications.READ, 1);
+        db.update(LiveViewData.Notifications.TABLE,  values, LiveViewData.Notifications._ID + "="+id, null);
         db.close();
     }
     
@@ -82,8 +93,18 @@ public class LiveViewDbHelper extends SQLiteOpenHelper
 	    {
 	    	LiveViewDbHelper helper = new LiveViewDbHelper(context);
 	    	SQLiteDatabase db = helper.getReadableDatabase();
-	    	Cursor cur=db.rawQuery("SELECT * FROM "+LiveViewData.Notifications.TABLE,new String [] {});     
+	    	Cursor cur=db.rawQuery("SELECT * FROM "+LiveViewData.Notifications.TABLE,new String [] {});    
+	    	//db.close();
 	     return cur;
 	    }
+	
+	public static Cursor deleteAllNotifications(Context context)
+    {
+    	LiveViewDbHelper helper = new LiveViewDbHelper(context);
+    	SQLiteDatabase db = helper.getWritableDatabase();  
+    	db.delete(LiveViewData.Notifications.TABLE, null, null);
+    	db.close();
+     return null;
+    }
 
 }

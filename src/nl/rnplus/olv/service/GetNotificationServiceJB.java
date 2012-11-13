@@ -45,14 +45,18 @@ public class GetNotificationServiceJB extends AccessibilityService {
                 for (CharSequence aNotificationList : notificationList) {
                     Log.w(LOG_TAG, "The notification: " + aNotificationList);
                     try {
+                    	Long time = System.currentTimeMillis();
+                    	/*
                         Intent bci = new Intent(SHOW_NOTIFICATION);
                         Bundle bcb = new Bundle();
                         bcb.putString("contents", aNotificationList.toString());
                         bcb.putString("title", "Notification");
+                        bcb.putInt("type", LiveViewDbConstants.NTF_ANDROID);
                         long time = System.currentTimeMillis();
                         bcb.putLong("timestamp", time);
                         bci.putExtras(bcb);
                         sendBroadcast(bci);
+                        */
                         LiveViewDbHelper.addNotification(this, "Notification", aNotificationList.toString(), LiveViewDbConstants.NTF_ANDROID, time);
                         String message = "Notification sent to LiveView: "+aNotificationList.toString();
                         Log.v(LOG_TAG, message);
@@ -63,52 +67,6 @@ public class GetNotificationServiceJB extends AccessibilityService {
                         LiveViewDbHelper.logMessage(this, message);
                     }
                 }
-                //This code can get more info out of a notification, but it is very unstable:
-                /*
-                Notification notification = (Notification) event.getParcelableData();
-                RemoteViews views = notification.contentView;
-                Class secretClass = views.getClass();
-
-                try {
-                    Map<Integer, String> text = new HashMap<Integer, String>();
-
-                    Field outerFields[] = secretClass.getDeclaredFields();
-                    for (int i = 0; i < outerFields.length; i++) {
-                        if (!outerFields[i].getName().equals("mActions")) continue;
-
-                        outerFields[i].setAccessible(true);
-
-                        ArrayList<Object> actions = (ArrayList<Object>) outerFields[i]
-                                .get(views);
-                        for (Object action : actions) {
-                            Field innerFields[] = action.getClass().getDeclaredFields();
-
-                            Object value = null;
-                            Integer type = null;
-                            Integer viewId = null;
-                            for (Field field : innerFields) {
-                                field.setAccessible(true);
-                                if (field.getName().equals("value")) {
-                                    value = field.get(action);
-                                } else if (field.getName().equals("type")) {
-                                    type = field.getInt(action);
-                                } else if (field.getName().equals("viewId")) {
-                                    viewId = field.getInt(action);
-                                }
-                            }
-
-                            if (type == 9 || type == 10) {
-                                text.put(viewId, value.toString());
-                            }
-                        }
-
-                        Log.w(LOG_TAG, "title is: " + text.get(16908310));
-                        Log.w(LOG_TAG, "info is: " + text.get(16909082));
-                        Log.w(LOG_TAG, "text is: " + text.get(16908358));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } */
                 break;
             default:
                 String message = "Error: unknown event type (" + eventType + ")";

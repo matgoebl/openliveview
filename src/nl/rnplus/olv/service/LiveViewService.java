@@ -4,15 +4,19 @@ import java.io.IOException;
 
 import nl.rnplus.olv.content.ContentNotification;
 import nl.rnplus.olv.content.manager.SMSNotificationManager;
+import nl.rnplus.olv.data.LiveViewData;
+import nl.rnplus.olv.data.LiveViewDbConstants;
 import nl.rnplus.olv.data.LiveViewDbHelper;
 import nl.rnplus.olv.messages.MessageConstants;
 import nl.rnplus.olv.messages.calls.SetScreenMode;
 import nl.rnplus.olv.messages.calls.SetVibrate;
+import android.app.AlertDialog;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.os.IBinder;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -25,9 +29,9 @@ import android.util.Log;
 public class LiveViewService extends Service
 {
 	private static final String TAG = "LiveViewService";
-	public final			String ACTION_RECEIVE_SMS	= "android.provider.Telephony.SMS_RECEIVED";
-    public static final	String ACTION_START 		= "start";
-    public static final	String ACTION_STOP 			= "stop";
+	public final String ACTION_RECEIVE_SMS = "android.provider.Telephony.SMS_RECEIVED";
+    public static final	String ACTION_START = "start";
+    public static final String ACTION_STOP = "stop";
     
     final public static String SHOW_NOTIFICATION = "OLV_ADD_NOTIFICATION";
     final public static String PLUGIN_COMMAND   = "nl.rnplus.olv.plugin.command";
@@ -35,15 +39,14 @@ public class LiveViewService extends Service
     private LiveViewService myself;
 
     private LiveViewThread workerThread = null;
-    //private LiveViewStandbyThread standbyThread = null;
     
-    byte NotificationUnreadCount     = 0;
-    byte NotificationTotalCount      = 0;
-    String [] NotificationTitle     = new String [101];
-    String [] NotificationContent   = new String [101];
-    String [] NotificationType      = new String [101];
-    long [] NotificationTime       = new long [101];
     Boolean NotificationNeedsUpdate = true;
+    Cursor notification_cursor = null;    
+    int contentcolumn = -1;
+    int titlecolumn = -1;
+    int typecolumn = -1;
+    int timecolumn = -1;
+    int readcolumn = -1;
     
     BroadcastReceiver notification_receiver = new ShowNotificationReceiver();
     BroadcastReceiver plugin_receiver = new PluginCommandReceiver();
@@ -64,16 +67,84 @@ public class LiveViewService extends Service
     public void onCreate()
     {    
     	myself = this;
-    	for (int cid = 0; cid < 100; cid++)
-    	{
-    		NotificationContent[100-cid] = "Empty";
-    		NotificationTitle[100-cid] = "Empty";
+    	
+    	try {
+	    	notification_cursor = LiveViewDbHelper.getAllNotifications(this);
+	    	for (int i = 0; i < notification_cursor.getColumnCount(); i++)
+	    	{
+	    		if (notification_cursor.getColumnName(i).contains(LiveViewData.Notifications.CONTENT))
+	    		{
+	    			contentcolumn = i;
+	    		}
+	    	}
+	    	if (contentcolumn<0)
+	    	{
+	    		String message = "Database error in service: " + "Database corrupt, content column not found!";
+		        Log.e(TAG, message);
+		        LiveViewDbHelper.logMessage(this, message);    
+	    	}
+	    	for (int i = 0; i < notification_cursor.getColumnCount(); i++)
+	    	{
+	    		if (notification_cursor.getColumnName(i).contains(LiveViewData.Notifications.TITLE))
+	    		{
+	    			titlecolumn = i;
+	    		}
+	    	}
+	    	if (titlecolumn<0)
+	    	{
+	    		String message = "Database error in service: " + "Database corrupt, title column not found!";
+		        Log.e(TAG, message);
+		        LiveViewDbHelper.logMessage(this, message);    
+	    	}
+	    	for (int i = 0; i < notification_cursor.getColumnCount(); i++)
+	    	{
+	    		if (notification_cursor.getColumnName(i).contains(LiveViewData.Notifications.TYPE))
+	    		{
+	    			typecolumn = i;
+	    		}
+	    	}
+	    	if (typecolumn<0)
+	    	{
+	    		String message = "Database error in service: " + "Database corrupt, type column not found!";
+		        Log.e(TAG, message);
+		        LiveViewDbHelper.logMessage(this, message);    
+	    	}
+	    	for (int i = 0; i < notification_cursor.getColumnCount(); i++)
+	    	{
+	    		if (notification_cursor.getColumnName(i).contains(LiveViewData.Notifications.TIMESTAMP))
+	    		{
+	    			timecolumn = i;
+	    		}
+	    	}
+	    	if (timecolumn<0)
+	    	{
+	    		String message = "Database error in service: " + "Database corrupt, time column not found!";
+		        Log.e(TAG, message);
+		        LiveViewDbHelper.logMessage(this, message);    
+	    	}
+	    	for (int i = 0; i < notification_cursor.getColumnCount(); i++)
+	    	{
+	    		if (notification_cursor.getColumnName(i).contains(LiveViewData.Notifications.READ))
+	    		{
+	    			readcolumn = i;
+	    		}
+	    	}
+	    	if (readcolumn<0)
+	    	{
+	    		String message = "Database error in service: " + "Database corrupt, read column not found!";
+		        Log.e(TAG, message);
+		        LiveViewDbHelper.logMessage(this, message);    
+	    	}
+    	} catch(Exception e) {
+    		String message = "Database error in service: " + e.getMessage();
+	        Log.e(TAG, message);
+	        LiveViewDbHelper.logMessage(this, message);    
     	}
+    	
     	registerReceiver(notification_receiver,  new IntentFilter(SHOW_NOTIFICATION));
     	registerReceiver(notification_receiver,  new IntentFilter(ACTION_RECEIVE_SMS));
     	registerReceiver(plugin_receiver, new IntentFilter(PLUGIN_COMMAND));
-    	
-    	/* Added in version 1.0.0.3: Mediaplayer information receiver */
+
     	IntentFilter mediaintentfilter = new IntentFilter();
     	mediaintentfilter.addAction("com.android.music.metachanged");
     	mediaintentfilter.addAction("com.android.music.playstatechanged");
@@ -93,6 +164,14 @@ public class LiveViewService extends Service
     	unregisterReceiver(notification_receiver);
     	unregisterReceiver(media_receiver);
     	unregisterReceiver(plugin_receiver);
+    	try {
+    		notification_cursor.close();
+    	} catch(Exception e) {
+    		String message = "Database error in service (onDestroy): " + e.getMessage();
+	        Log.e(TAG, message);
+	        LiveViewDbHelper.logMessage(this, message);    
+    	}
+    	
     }    
 
     /*
@@ -142,71 +221,108 @@ public class LiveViewService extends Service
     
     public String getNotificationContent(int id)
     {
-        return NotificationContent[id];
-    }
-
-    public void setNotificationContent(int id, String NotificationContents)
-    {
-        this.NotificationContent[id] = NotificationContents;
+    	try {
+	    	notification_cursor.moveToPosition(id);
+	    	LiveViewDbHelper.setNotificationRead(myself, id);
+	        return notification_cursor.getString(contentcolumn);
+    	} catch(Exception e) {
+    		String message = "Database error in service: " + e.getMessage();
+	        Log.e(TAG, message);
+	        LiveViewDbHelper.logMessage(this, message);    
+	        return "No data.";
+    	}
     }
     
     public String getNotificationTitle(int id)
     {
-        return NotificationTitle[id];
+    	try {
+	    	notification_cursor.moveToPosition(id);
+	        return notification_cursor.getString(titlecolumn);
+    	} catch(Exception e) {
+    		String message = "Database error in service: " + e.getMessage();
+	        Log.e(TAG, message);
+	        LiveViewDbHelper.logMessage(this, message);    
+	        return "No data.";
+    	}
     }
-
-    public void setNotificationTitle(int id, String NotificationTitleVal)
-    {
-        this.NotificationTitle[id] = NotificationTitleVal;
-    } 
     
     public long getNotificationTime(int id) {
-        return NotificationTime[id];
+    	try {
+	    	notification_cursor.moveToPosition(id);
+	        return notification_cursor.getLong(timecolumn);
+    	} catch(Exception e) {
+    		String message = "Database error in service: " + e.getMessage();
+	        Log.e(TAG, message);
+	        LiveViewDbHelper.logMessage(this, message);    
+	        return 0;
+    	}
+    }
+ 
+
+    public int getNotificationType(int id)
+    {
+    	try {
+	    	notification_cursor.moveToPosition(id);
+	        return notification_cursor.getInt(typecolumn);
+    	} catch(Exception e) {
+    		String message = "Database error in service: " + e.getMessage();
+	        Log.e(TAG, message);
+	        LiveViewDbHelper.logMessage(this, message);    
+	        return LiveViewDbConstants.NTF_GENERIC;
+    	}
     }
 
-    public void setNotificationTime(int id, int NotificationTimeVal)
-    {
-        this.NotificationTime[id] = NotificationTimeVal;
-    }    
-
-    public String getNotificationType(int id)
-    {
-        return NotificationType[id];
-    }
-
-    public void setNotificationType(int id, String NotificationTypeVal)
-    {
-        this.NotificationType[id] = NotificationTypeVal;
-    }    
     
+    /*
     public Boolean getNotificationNeedsUpdate()
     {
         return NotificationNeedsUpdate;
     }
+    */
 
+    /*
     public void setNotificationNeedsUpdate(Boolean NotificationNeedsUpdate)
     {
         this.NotificationNeedsUpdate = NotificationNeedsUpdate;
     }
+    */
 
     public int getNotificationUnreadCount()
     {
-        return NotificationUnreadCount;
-    }
-
-    public void setNotificationUnreadCount(byte NotificationUnreadCount)
-    {
-        this.NotificationUnreadCount = NotificationUnreadCount;
+    	refreshNotificationCursor();
+    	int unreadCount = 0;
+    	try {
+			if (notification_cursor.getCount()>0)
+			{
+				notification_cursor.moveToFirst();
+				String notificationcontents = "";
+	    		for (int i = 0; i < notification_cursor.getCount(); i++)
+		    	{
+		    		if (notification_cursor.getInt(readcolumn)==0)
+		    		{
+		    			unreadCount++;
+		    		}
+		    		notification_cursor.moveToNext();
+		    	}
+		        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		        builder.setTitle("Stored notifications");
+		        builder.setMessage(notificationcontents);
+		        builder.setPositiveButton("Close", null);
+		        builder.show();
+			}
+    	} catch(Exception e) {
+    		String message = "Database error in service: " + e.getMessage();
+	        Log.e(TAG, message);
+	        LiveViewDbHelper.logMessage(this, message);    
+	        return LiveViewDbConstants.NTF_GENERIC;
+    	}
+        return unreadCount;
     }
     
     public int getNotificationTotalCount()
     {
-        return NotificationTotalCount;
-    }
-
-    public void setNotificationTotalCount(byte NotificationTotalCount)
-    {
-        this.NotificationTotalCount = NotificationTotalCount;
+    	refreshNotificationCursor();
+        return notification_cursor.getCount();
     }
         
     public class ShowNotificationReceiver extends BroadcastReceiver  
@@ -215,32 +331,14 @@ public class LiveViewService extends Service
         public void onReceive(Context context, Intent intent)  
         {  
         	NotificationNeedsUpdate = true;
-        	NotificationUnreadCount += 1;
-        	for (int cid = 0; cid < 100; cid++)
-        	{
-        		NotificationContent[100-cid] = NotificationContent[99-cid];
-        		NotificationTitle[100-cid] = NotificationTitle[99-cid];
-        		NotificationTime[100-cid] = NotificationTime[99-cid];
-        		NotificationType[100-cid] = NotificationType[99-cid];
-        	}
-        	if (NotificationTotalCount < 100)
-        	{
-        		NotificationTotalCount += 1;
-        	}
         	if (intent.getAction().equals(ACTION_RECEIVE_SMS))
         	{
             	ContentNotification notification = SMSNotificationManager.getNotificationContent(context, intent);
-            	NotificationContent[0] = notification.getContent();
-            	NotificationTitle[0] = notification.getTitle();
-            	NotificationTime[0]=notification.getTimestamp();
-            	NotificationType[0]= "SMS";
+            	LiveViewDbHelper.addNotification(myself, notification.getTitle(), notification.getContent(), LiveViewDbConstants.NTF_SMS, notification.getTimestamp());
         	}
         	else
         	{
-	        	NotificationContent[0] = intent.getExtras().getString("contents");
-	        	NotificationTitle[0] = intent.getExtras().getString("title");
-	        	NotificationTime[0] = intent.getExtras().getLong("timestamp");
-	        	NotificationType[0]= "GENERIC";
+            	LiveViewDbHelper.addNotification(myself, intent.getExtras().getString("title"), intent.getExtras().getString("contents"), intent.getExtras().getInt("type"),  intent.getExtras().getLong("timestamp"));
         	}
         	Log.w("ShowNotificationReceiver", "Added new notification.");
         }  
@@ -401,4 +499,21 @@ public class LiveViewService extends Service
 				}	
         	}
         } 
+        
+        public void refreshNotificationCursor(){
+        	try {
+        		notification_cursor.close();
+	    	} catch(Exception e) {
+	    		String message = "Database error in service (refresh: close): " + e.getMessage();
+		        Log.e(TAG, message);
+		        LiveViewDbHelper.logMessage(this, message);    
+	    	}
+        	try {
+        		notification_cursor = LiveViewDbHelper.getAllNotifications(myself);
+	    	} catch(Exception e) {
+	    		String message = "Database error in service (refresh: open): " + e.getMessage();
+		        Log.e(TAG, message);
+		        LiveViewDbHelper.logMessage(this, message);    
+	    	}
+        }
 }
