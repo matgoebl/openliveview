@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import nl.rnplus.olv.data.LiveViewData;
 import nl.rnplus.olv.data.LiveViewDbHelper;
@@ -76,6 +77,22 @@ public class MainActivity extends Activity {
 	    			contentcolumn = i;
 	    		}
 	    	}
+	    	int readcolumn = -1;
+	    	for (int i = 0; i < notifications.getColumnCount(); i++)
+	    	{
+	    		if (notifications.getColumnName(i).contains(LiveViewData.Notifications.READ))
+	    		{
+	    			readcolumn = i;
+	    		}
+	    	}
+	    	if (readcolumn<0)
+	    	{
+		        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		        builder.setTitle("Warning");
+		        builder.setMessage("Database corrupt, read column not found!");
+		        builder.setPositiveButton("Close", null);
+		        builder.show();
+	    	}
 	    	if (contentcolumn>=0)
 	    	{
 	    		if (notifications.getCount()>0)
@@ -84,7 +101,7 @@ public class MainActivity extends Activity {
 	    			String notificationcontents = "";
 		    		for (int i = 0; i < notifications.getCount(); i++)
 			    	{
-			    		notificationcontents += "("+(i+1)+"/"+notifications.getCount()+") "+notifications.getString(contentcolumn)+"\n";
+			    		notificationcontents += "("+(i+1)+"/"+notifications.getCount()+") ("+notifications.getInt(readcolumn)+")"+notifications.getString(contentcolumn)+"\n";
 			    		notifications.moveToNext();
 			    	}
 			        AlertDialog.Builder builder = new AlertDialog.Builder(this);

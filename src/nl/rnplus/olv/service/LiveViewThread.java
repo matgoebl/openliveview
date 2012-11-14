@@ -25,6 +25,7 @@ import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -103,7 +104,7 @@ public class LiveViewThread extends Thread {
     public LiveViewThread(LiveViewService parentService) {
         super("LiveViewThread");
         this.parentService = parentService;
-
+        
         int sdk = Build.VERSION.SDK_INT;
 
         //Pending intent 1: Open the mainActivity
@@ -267,30 +268,6 @@ public class LiveViewThread extends Thread {
                 } catch (DecodeException e) {
                     Log.e(TAG, "Error decoding message: " + e.getMessage());
                 }
-                /* Notifications */
-                /*
-                Prefs prefs = new Prefs(parentService);
-                Boolean update_unread_count_when_menu_opens = prefs.getUpdateUnreadCountWhenMenuOpens();
-                Boolean enable_notification_buzzer = prefs.getenablenotificationbuzzer();
-
-                if (update_unread_count_when_menu_opens && parentService.getNotificationNeedsUpdate()) {
-                    if (!enable_notification_buzzer) {
-                        parentService.setNotificationNeedsUpdate(false);
-                    }
-                    if (parentService.getNotificationUnreadCount() > 0) {
-                        if (menu_button_notifications_id >= 0) {
-                            sendCall(new MenuItem(menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
-                                    "Notifications", menuImage_notification));
-                        }
-                    }
-                }
-                if (enable_notification_buzzer && parentService.getNotificationNeedsUpdate()) {
-                    parentService.setNotificationNeedsUpdate(false);
-                    if (parentService.getNotificationUnreadCount() > 0) {
-                        sendCall(new SetLed(Color.GREEN, 0, 1000));
-                        sendCall(new SetVibrate(0, 200));
-                    }
-                } */
             } while (true);
         } catch (IOException e) {
             String msg = e.getMessage();
@@ -359,6 +336,9 @@ public class LiveViewThread extends Thread {
             case MessageConstants.MSG_SETVIBRATE_ACK:
                 Log.d(TAG, "Got setvibrate ack.");
                 break;
+            case MessageConstants.MSG_SETLED_ACK:
+            	Log.d(TAG, "Got setled ack.");
+            	break;
             case MessageConstants.MSG_DISPLAYPANEL_ACK:
                 Log.d(TAG, "Got display panel ack.");
                 if ((parentService.MediaInfoNeedsUpdate) && (menu_state == 1)) {
@@ -775,29 +755,22 @@ public class LiveViewThread extends Thread {
     
     public void updateNotifications(){
 		try {
-			/*
+			
 		        Prefs prefs = new Prefs(parentService);
 		        Boolean update_unread_count_when_menu_opens = prefs.getUpdateUnreadCountWhenMenuOpens();
 		        Boolean enable_notification_buzzer = prefs.getenablenotificationbuzzer();
-		        if (update_unread_count_when_menu_opens && parentService.getNotificationNeedsUpdate()) {
-		            if (!enable_notification_buzzer) {
-		                parentService.setNotificationNeedsUpdate(false);
-		            }
-		            if (parentService.getNotificationUnreadCount() > 0) {
-		                if (menu_button_notifications_id >= 0) {
-		                    sendCall(new MenuItem(menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
-		                            "Notifications", menuImage_notification));
-		                }
-		            }
+		         
+		        if (update_unread_count_when_menu_opens && (device_status==MessageConstants.DEVICESTATUS_ON)) {
+	                if (menu_button_notifications_id >= 0) {
+	                    sendCall(new MenuItem(menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
+	                            "Notifications", menuImage_notification));
+	                }
 		        }
-		        if (enable_notification_buzzer && parentService.getNotificationNeedsUpdate()) {
-		            parentService.setNotificationNeedsUpdate(false);
-		            if (parentService.getNotificationUnreadCount() > 0) {
+		        
+		        if (enable_notification_buzzer && (parentService.getNotificationUnreadCount()>0) && (device_status==MessageConstants.DEVICESTATUS_ON)) {
 		                sendCall(new SetLed(Color.GREEN, 0, 1000));
 		                sendCall(new SetVibrate(0, 200));
-		        	}
 		        }
-		    */
 	    } catch(Exception e) {
 	        String message = "Error while updating notifications: " + e.getMessage();
 	        Log.e(TAG, message);

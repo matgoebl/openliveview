@@ -21,7 +21,7 @@ import nl.rnplus.olv.data.LiveViewDbHelper;
 
 public class GetNotificationServiceJB extends AccessibilityService {
 
-    private static final String LOG_TAG = "OLV Notification service (Jelly Bean)";
+    private static final String LOG_TAG = "OLV Notification service";
     final public static String SHOW_NOTIFICATION = "OLV_ADD_NOTIFICATION";
 
     @Override
@@ -32,7 +32,7 @@ public class GetNotificationServiceJB extends AccessibilityService {
         info.notificationTimeout = 100;
 
         this.setServiceInfo(info);
-        Log.w(LOG_TAG, "Service started!");
+        Log.d(LOG_TAG, "Service started! (JB)");
 
     }
 
@@ -43,7 +43,7 @@ public class GetNotificationServiceJB extends AccessibilityService {
             case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
                 List<CharSequence> notificationList = event.getText();
                 for (CharSequence aNotificationList : notificationList) {
-                    Log.w(LOG_TAG, "The notification: " + aNotificationList);
+                    //Log.d(LOG_TAG, "The notification: " + aNotificationList);
                     try {
                     	Long time = System.currentTimeMillis();
                     	/*
@@ -59,7 +59,7 @@ public class GetNotificationServiceJB extends AccessibilityService {
                         */
                         LiveViewDbHelper.addNotification(this, "Notification", aNotificationList.toString(), LiveViewDbConstants.NTF_ANDROID, time);
                         String message = "Notification sent to LiveView: "+aNotificationList.toString();
-                        Log.v(LOG_TAG, message);
+                        Log.d(LOG_TAG, message);
                         LiveViewDbHelper.logMessage(this, message);
                     } catch (IllegalArgumentException e) {
                         String message = "Error while reading notifications!";

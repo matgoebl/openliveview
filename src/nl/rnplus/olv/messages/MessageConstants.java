@@ -10,17 +10,17 @@ package nl.rnplus.olv.messages;
 public final class MessageConstants
 {
 
-    public static final byte MSG_GETCAPS 				= 1;
-    public static final byte MSG_GETCAPS_RESP 		= 2;
+    public static final byte MSG_GETCAPS = 1;
+    public static final byte MSG_GETCAPS_RESP = 2;
 
-    public static final byte MSG_DISPLAYTEXT 			= 3;
-    public static final byte MSG_DISPLAYTEXT_ACK 		= 4;
+    public static final byte MSG_DISPLAYTEXT = 3;
+    public static final byte MSG_DISPLAYTEXT_ACK = 4;
 
-    public static final byte MSG_DISPLAYPANEL 		= 5;
-    public static final byte MSG_DISPLAYPANEL_ACK 	= 6;
+    public static final byte MSG_DISPLAYPANEL = 5;
+    public static final byte MSG_DISPLAYPANEL_ACK = 6;
 
-    public static final byte MSG_DEVICESTATUS 		= 7;
-    public static final byte MSG_DEVICESTATUS_ACK 	= 8;
+    public static final byte MSG_DEVICESTATUS = 7;
+    public static final byte MSG_DEVICESTATUS_ACK = 8;
 
     public static final byte MSG_DISPLAYBITMAP 		= 19;
     public static final byte MSG_DISPLAYBITMAP_ACK 	= 20;

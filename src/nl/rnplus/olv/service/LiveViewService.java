@@ -221,8 +221,10 @@ public class LiveViewService extends Service
     
     public String getNotificationContent(int id)
     {
+    	Log.d("DEBUG", "getNotificationContent (for ID: "+id+")");
     	try {
 	    	notification_cursor.moveToPosition(id);
+	    	Log.d("DEBUG", "Setting notification is read for: "+id);
 	    	LiveViewDbHelper.setNotificationRead(myself, id);
 	        return notification_cursor.getString(contentcolumn);
     	} catch(Exception e) {
@@ -235,6 +237,7 @@ public class LiveViewService extends Service
     
     public String getNotificationTitle(int id)
     {
+    	Log.d("DEBUG", "getNotificationTitle (for ID: "+id+")");
     	try {
 	    	notification_cursor.moveToPosition(id);
 	        return notification_cursor.getString(titlecolumn);
@@ -247,6 +250,7 @@ public class LiveViewService extends Service
     }
     
     public long getNotificationTime(int id) {
+    	Log.d("DEBUG", "getNotificationTime (for ID: "+id+")");
     	try {
 	    	notification_cursor.moveToPosition(id);
 	        return notification_cursor.getLong(timecolumn);
@@ -261,6 +265,7 @@ public class LiveViewService extends Service
 
     public int getNotificationType(int id)
     {
+    	Log.d("DEBUG", "getNotificationType (for ID: "+id+")");
     	try {
 	    	notification_cursor.moveToPosition(id);
 	        return notification_cursor.getInt(typecolumn);
@@ -289,13 +294,13 @@ public class LiveViewService extends Service
 
     public int getNotificationUnreadCount()
     {
+    	Log.w("DEBUG", "getNotificationUnreadCount");
     	refreshNotificationCursor();
     	int unreadCount = 0;
     	try {
 			if (notification_cursor.getCount()>0)
 			{
 				notification_cursor.moveToFirst();
-				String notificationcontents = "";
 	    		for (int i = 0; i < notification_cursor.getCount(); i++)
 		    	{
 		    		if (notification_cursor.getInt(readcolumn)==0)
@@ -304,23 +309,20 @@ public class LiveViewService extends Service
 		    		}
 		    		notification_cursor.moveToNext();
 		    	}
-		        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		        builder.setTitle("Stored notifications");
-		        builder.setMessage(notificationcontents);
-		        builder.setPositiveButton("Close", null);
-		        builder.show();
 			}
     	} catch(Exception e) {
     		String message = "Database error in service: " + e.getMessage();
 	        Log.e(TAG, message);
-	        LiveViewDbHelper.logMessage(this, message);    
+	        LiveViewDbHelper.logMessage(myself, message);    
 	        return LiveViewDbConstants.NTF_GENERIC;
     	}
+    	Log.w("DEBUG", "unreadCount = "+unreadCount);
         return unreadCount;
     }
     
     public int getNotificationTotalCount()
     {
+    	Log.w("DEBUG", "getNotificationTotalCount");
     	refreshNotificationCursor();
         return notification_cursor.getCount();
     }
@@ -473,7 +475,7 @@ public class LiveViewService extends Service
         	Context context;
         	@Override
         	public void onCallStateChanged(int state,String incomingNumber){
-	        	Log.e("PhoneCallStateNotified", "Incoming number "+incomingNumber);
+        		if (incomingNumber.length()>0) Log.d("PhoneCallStateNotified", "Incoming number "+incomingNumber);
 	        	try {
 		        	if (state == TelephonyManager.CALL_STATE_RINGING)
 		        	{
@@ -482,14 +484,15 @@ public class LiveViewService extends Service
 								workerThread.sendCall(new SetScreenMode((byte) MessageConstants.BRIGHTNESS_MAX));
 								workerThread.drawCallStatus(state, "Incoming call", incomingNumber);
 		        		}
+		        		Log.d("PhoneCallStateNotified", "Status: RINGING");
 		        	}
 		        	if (state == TelephonyManager.CALL_STATE_IDLE)
 		        	{
-		        		Log.e("PhoneCallStateNotified", "Opgehangen / Geweigerd of gemist.");
+		        		Log.d("PhoneCallStateNotified", "Status: IDLE");
 		        	}
 		        	if (state == TelephonyManager.CALL_STATE_OFFHOOK)
 		        	{
-		        		Log.e("PhoneCallStateNotified", "Opgenomen, er is een gesprek bezig.");
+		        		Log.d("PhoneCallStateNotified", "Status: OFFHOOK");
 		        	} 
 				} catch (IOException e) {
 	                String message = "Error: IOException in incoming call receiver: " + e.getMessage();
@@ -501,6 +504,7 @@ public class LiveViewService extends Service
         } 
         
         public void refreshNotificationCursor(){
+        	Log.w("DEBUG", "refreshNotificationCursor");
         	try {
         		notification_cursor.close();
 	    	} catch(Exception e) {
