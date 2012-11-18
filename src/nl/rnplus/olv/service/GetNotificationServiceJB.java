@@ -68,7 +68,7 @@ public class GetNotificationServiceJB extends AccessibilityService {
         		            Bundle bcb2 = new Bundle();
         		            bcb2.putString("command", "notify");
         		            bcb2.putInt("delay", 0);
-        		            bcb2.putInt("time", 1000);
+        		            bcb2.putInt("time", 600);
         		            bcb2.putLong("timestamp", time);
         		            bci2.putExtras(bcb2);
         		            sendBroadcast(bci2);

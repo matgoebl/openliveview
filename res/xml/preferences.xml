@@ -5,14 +5,16 @@
     	<ListPreference android:key="@string/prefs_deviceaddress_key" android:summary="@string/prefs_deviceaddress_summary" android:title="@string/prefs_deviceaddress_title" android:icon="@drawable/ic_liveview" />
     </PreferenceCategory>
     
-    <PreferenceCategory android:title="@string/prefs_cat_menu_title">   
+    <PreferenceCategory android:title="@string/prefs_cat_features_title">
+        <CheckBoxPreference android:title="@string/prefs_incomingcallnotify_title" android:defaultValue="true" android:summary="@string/prefs_incomingcallnotify_summary" android:key="@string/prefs_incomingcallnotify_key" android:icon="@drawable/ic_menu_call"/>
+   		<CheckBoxPreference android:key="@string/prefs_mediaenablemenu_key" android:title="@string/prefs_mediaenablemenu_title" android:summary="@string/prefs_mediaenablemenu_summary" android:icon="@drawable/ic_menu_set_as" android:defaultValue="true" /></PreferenceCategory><PreferenceCategory android:title="@string/prefs_cat_menu_title">   
 	    <CheckBoxPreference android:key="@string/prefs_menu_notifications_visible_key" android:title="@string/prefs_menu_notifications_visible_title" android:summary="@string/prefs_menu_notifications_visible_summary" android:icon="@drawable/ic_menu_notifications" android:defaultValue="true"/>
 	    <CheckBoxPreference android:key="@string/prefs_menu_media_next_key" android:title="@string/prefs_menu_media_next_title" android:summary="@string/prefs_menu_media_next_summary" android:icon="@drawable/ic_media_next" android:defaultValue="true"/>
 	    <CheckBoxPreference android:key="@string/prefs_menu_media_play_key" android:title="@string/prefs_menu_media_play_title" android:summary="@string/prefs_menu_media_play_summary" android:icon="@drawable/ic_media_play" android:defaultValue="true"/>
 	    <CheckBoxPreference android:key="@string/prefs_menu_media_previous_key" android:title="@string/prefs_menu_media_previous_title" android:summary="@string/prefs_menu_media_previous_summary" android:icon="@drawable/ic_media_previous" android:defaultValue="true"/>
 	    <CheckBoxPreference android:key="@string/prefs_menu_find_my_phone_visible_key" android:summary="@string/prefs_menu_find_my_phone_visible_summary" android:title="@string/prefs_menu_find_my_phone_visible_title" android:defaultValue="true" android:icon="@drawable/ic_menu_mylocation" />
 	    <CheckBoxPreference android:key="@string/prefs_menu_battery_status_key" android:summary="@string/prefs_menu_battery_status_summary" android:title="@string/prefs_menu_battery_status_title" android:icon="@drawable/ic_menu_start_conversation" android:defaultValue="true"/>
-	    <CheckBoxPreference android:title="@string/prefs_menu_mediamenubutton_title" android:key="@string/prefs_menu_mediamenubutton_key" android:summary="@string/prefs_menu_mediamenubutton_summary" android:icon="@drawable/ic_menu_directions" android:defaultValue="false"/>
+	    <CheckBoxPreference android:title="@string/prefs_menu_mediamenubutton_title" android:key="@string/prefs_menu_mediamenubutton_key" android:summary="@string/prefs_menu_mediamenubutton_summary" android:icon="@drawable/ic_menu_set_as" android:defaultValue="false"/>
 	</PreferenceCategory>
     
     <PreferenceCategory android:title="@string/prefs_cat_actions_title"><ListPreference android:entryValues="@array/settings_updown_actions_value" android:title="@string/prefs_menu_updown_action_title" android:summary="@string/prefs_menu_updown_action_summary" android:key="@string/prefs_menu_updown_action_key" android:entries="@array/settings_updown_actions_name" android:icon="@drawable/ic_menu_updown_action" android:defaultValue="1"/></PreferenceCategory><PreferenceCategory android:title="@string/prefs_go_to_accessibility_title">
@@ -24,11 +26,11 @@
         </Preference>
     </PreferenceCategory>
         
-    <PreferenceCategory android:title="@string/prefs_cat_experimental_title">
+    <PreferenceCategory android:title="@string/prefs_cat_advanced_title">
         <CheckBoxPreference android:title="@string/prefs_enablenotificationbuzzer2_title" android:key="@string/prefs_enablenotificationbuzzer2_key" android:summary="@string/prefs_enablenotificationbuzzer2_summary" android:icon="@drawable/ic_menu_notifications" android:defaultValue="true"/>
         <CheckBoxPreference android:key="@string/prefs_enablenotificationbuzzer_key" android:title="@string/prefs_enablenotificationbuzzer_title" android:summary="@string/prefs_enablenotificationbuzzer_summary" android:icon="@drawable/ic_menu_notifications" android:defaultValue="false"/>
-        <CheckBoxPreference android:summary="@string/prefs_updateunreadcountwhenmenuopens_summary" android:title="@string/prefs_updateunreadcountwhenmenuopens_title" android:key="@string/prefs_updateunreadcountwhenmenuopens_key" android:icon="@drawable/ic_menu_notifications" android:defaultValue="true"/>
-        <CheckBoxPreference android:key="@string/prefs_mediaenablemenu_key" android:title="@string/prefs_mediaenablemenu_title" android:summary="@string/prefs_mediaenablemenu_summary" android:icon="@drawable/ic_media_play" android:defaultValue="true"/>     
+        <CheckBoxPreference android:summary="@string/prefs_updateunreadcountwhenmenuopens_summary" android:title="@string/prefs_updateunreadcountwhenmenuopens_title" android:key="@string/prefs_updateunreadcountwhenmenuopens_key" android:icon="@drawable/ic_menu_start_conversation" android:defaultValue="true"/>
+             
     </PreferenceCategory>
     
     <PreferenceCategory android:title="@string/prefs_cat_olvversion_title">
@@ -38,6 +40,7 @@
                 android:data="http://olv.rnplus.nl/" />
         </Preference>
     </PreferenceCategory>
+    
     
     
     

@@ -7,7 +7,6 @@
 package nl.rnplus.olv.service;
 
 import android.annotation.TargetApi;
-import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -25,7 +24,6 @@ import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -63,6 +61,7 @@ public class LiveViewThread extends Thread {
     private final byte[] menuImage;
     private final byte[] menuImage_notification;
     private final byte[] menuImage_phone;
+    private final byte[] menuImage_location;
     private final byte[] menuImage_music;
     private final byte[] menuImage_left;
     private final byte[] menuImage_right;
@@ -155,6 +154,7 @@ public class LiveViewThread extends Thread {
         menuImage = loadImageByteArray(parentService, "menu_blank.png");
         menuImage_notification = loadImageByteArray(parentService, "menu_notification.png");
         menuImage_phone = loadImageByteArray(parentService, "menu_phone.png");
+        menuImage_location = loadImageByteArray(parentService, "menu_location.png");
         menuImage_music = loadImageByteArray(parentService, "menu_music.png");
         menuImage_left = loadImageByteArray(parentService, "menu_left.png");
         menuImage_right = loadImageByteArray(parentService, "menu_right.png");
@@ -381,7 +381,7 @@ public class LiveViewThread extends Thread {
 	                    }
 	                    if (menu_button_findphone_id == current_id) {
 	                        sendCall(new MenuItem(menu_button_findphone_id, false, new UShort((short) 0),
-	                                "Find my phone", menuImage_phone));
+	                                "Find my phone", menuImage_location));
 	                    }
 	                    if (menu_button_battery_status_id == current_id) {
 	                        sendCall(new MenuItem(menu_button_battery_status_id, false, new UShort((short) (get_battery_status() * 100)),
@@ -639,7 +639,7 @@ public class LiveViewThread extends Thread {
                             }
                             break;
                         case 2:
-                            Log.e(TAG, "Menu state 2: Battery stats. Returning to main menu.");
+                            Log.e(TAG, "Menu state 2: Panel with information is visible. Returning to main menu.");
                             menu_state = 0;
                             sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
                             sendCall(new SetMenuSize(menu_button_count));
@@ -703,8 +703,14 @@ public class LiveViewThread extends Thread {
         sendCall(new SetMenuSize(menu_button_count));
     }
     
-    public void drawCallStatus(int state, String topline, String bottomline) throws IOException {
-        sendCall(new DisplayPanel(topline, bottomline, menuImage, true));
+    public void showIncomingCallScreen(int state, String topline, String bottomline) throws IOException {
+    	Prefs prefs = new Prefs(parentService);
+    	if (prefs.getEnableIncomingCallNotify())
+    	{
+	    	menu_state = 2;
+	    	sendCall(new SetScreenMode((byte) MessageConstants.BRIGHTNESS_MAX));
+	        sendCall(new DisplayPanel(topline, bottomline, menuImage_phone, true));
+    	}
     }
 
     public void action_volume_up() {

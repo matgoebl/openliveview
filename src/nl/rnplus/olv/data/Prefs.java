@@ -79,6 +79,10 @@ public class Prefs {
         return preferences.getBoolean("menu.mediamenuvisible", false);
     }    
     
+    public Boolean getEnableIncomingCallNotify() {
+        return preferences.getBoolean("system.incomingcallnotify", true);
+    }    
+    
     public void setMenuVibrationTime(int value) {
         Editor editor = preferences.edit();
         editor.putInt("menu.menuvibrationtime", value);

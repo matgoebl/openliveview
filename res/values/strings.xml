@@ -12,6 +12,8 @@
     <string name="prefs_cat_device_title">Device</string>
     <string name="prefs_cat_menu_title">Menu</string>
     <string name="prefs_cat_experimental_title">Experimental</string>
+    <string name="prefs_cat_features_title">Features</string>
+    <string name="prefs_cat_advanced_title">Advanced</string>
     
     <string name="prefs_deviceaddress_key">device.address</string>
     <string name="prefs_deviceaddress_title">LiveView device</string>
@@ -65,6 +67,10 @@
     <string name="prefs_menu_updown_action_title">Action of Up / Down key</string>
     <string name="prefs_menu_updown_action_summary">What should the up and down keys do while in the main menu?</string>       
 
+    <string name="prefs_incomingcallnotify_key">system.incomingcallnotify</string>
+    <string name="prefs_incomingcallnotify_title">Notify on incoming call</string>
+    <string name="prefs_incomingcallnotify_summary">Show a message on the liveview when you receive a call.</string>  
+    
     <string name="prefs_cat_actions_title">Actions</string>
     
 	<string name="prefs_menu_battery_status_key">menu.batterystatusvisible</string>
@@ -88,7 +94,7 @@
     <string name="prefs_cat_olvversion_title">Other stuff</string>
 
     <string name="prefs_version_title">Version</string>
-    <string name="prefs_version_summary">1.0.1.0</string>    
+    <string name="prefs_version_summary">1.0.1.1</string>    
         
     <string name="accessibility_service_description">This service will display your notifications on the connected LiveView device.</string>
 

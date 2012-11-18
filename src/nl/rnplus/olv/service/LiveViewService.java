@@ -497,8 +497,7 @@ public class LiveViewService extends Service
 		        	{
 		        		if (workerThread.getLiveViewStatus()==MessageConstants.DEVICESTATUS_OFF)
 		        		{
-								workerThread.sendCall(new SetScreenMode((byte) MessageConstants.BRIGHTNESS_MAX));
-								workerThread.drawCallStatus(state, "Incoming call", incomingNumber);
+								workerThread.showIncomingCallScreen(state, "Incoming call", incomingNumber);
 		        		}
 		        		Log.d("PhoneCallStateNotified", "Status: RINGING");
 		        	}

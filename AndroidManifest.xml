@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="nl.rnplus.olv"
-    android:versionCode="6"
+    android:versionCode="8"
     android:versionName="@string/prefs_version_summary" android:installLocation="internalOnly">
     
-    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="16" />
+    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17" />
 
     <uses-permission android:name="android.permission.BLUETOOTH" /> <!-- Needed for "Connection" -->
     <uses-permission android:name="android.permission.VIBRATE" /> <!-- Needed for "Find my phone" -->
@@ -14,11 +14,12 @@
 	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/><!-- Needed on some devices -->
 	
 	<uses-feature android:name="android.hardware.telephony" android:required="false" /><!-- Needed for "SMS receiver" but not required -->
+	<uses-feature android:name="android.hardware.touchscreen" android:required="false" />
 	<uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
     <application
         android:icon="@drawable/icon"
-        android:label="@string/app_name" android:hardwareAccelerated="true">
+        android:label="@string/app_name" android:hardwareAccelerated="true" android:allowBackup="true">
         <activity
             android:name=".LiveViewPreferences"
             android:label="@string/preferences_name"
