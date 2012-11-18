@@ -691,7 +691,7 @@ public class LiveViewThread extends Thread {
     }
 
     public void draw_battery_status() throws IOException {
-        sendCall(new DisplayPanel("Battery status", (get_battery_status() * 100) + "%", menuImage_battery, false));
+        sendCall(new DisplayPanel("Battery status", (Math.round(get_battery_status() * 100)) + "%", menuImage_battery, false));
     }
     
     public void draw_plugin_loading() throws IOException {

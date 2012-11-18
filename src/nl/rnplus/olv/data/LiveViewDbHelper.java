@@ -49,8 +49,12 @@ public class LiveViewDbHelper extends SQLiteOpenHelper
     {
         if (oldVersion != DB_VERSION)
         {
-            db.execSQL("DROP TABLE " + LiveViewData.Log.TABLE);
-            db.execSQL("DROP TABLE " + LiveViewData.Notifications.TABLE);
+        	try {
+	            db.execSQL("DROP TABLE " + LiveViewData.Log.TABLE);
+	            db.execSQL("DROP TABLE " + LiveViewData.Notifications.TABLE);
+        	} catch(Exception e) {
+        		Log.e("LiveViewDbHelper", "Could not delete all tables. "+e.toString());
+        	}
             onCreate(db);
         }
     }
