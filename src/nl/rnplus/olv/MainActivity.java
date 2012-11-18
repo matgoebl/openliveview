@@ -30,6 +30,11 @@ public class MainActivity extends Activity {
         Intent myIntent = new Intent(this, LiveViewPreferences.class);
         this.startActivity(myIntent);
     }
+    
+    public void openExpertSettings(View view) {
+        Intent myIntent = new Intent(this, ExpertConfigActivity.class);
+        this.startActivity(myIntent);
+    }
 
     public void openLog(View view) {
         startActivity(new Intent(this, LogViewActivity.class));

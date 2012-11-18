@@ -69,6 +69,7 @@ public class LiveViewThread extends Thread {
     private final byte[] bgImage_media_isplaying;
     private final byte[] bgImage_media_isnotplaying;
     private final byte[] menuImage_battery;
+    private final byte[] menuImage_plus;
 
     /* Communication */
     private final BluetoothAdapter btAdapter;
@@ -91,6 +92,7 @@ public class LiveViewThread extends Thread {
     private byte menu_button_findphone_id = -1;
     private byte menu_button_battery_status_id = -1;
     private byte menu_button_plugintest_id = -1;
+    private byte menu_button_mediamenu_id = -1;
     
     private String PLUGIN_COMMAND = "nl.rnplus.olv.plugin.command";
     private String PLUGIN_EVENT = "nl.rnplus.olv.plugin.event";
@@ -159,8 +161,8 @@ public class LiveViewThread extends Thread {
         bgImage_media_isplaying = loadImageByteArray(parentService, "jerry_music_pause_icn.png");
         bgImage_media_isnotplaying = loadImageByteArray(parentService, "jerry_music_play_icn.png");
         menuImage_battery = loadImageByteArray(parentService, "menu_battery.png");
-        /* menuImage_plus = loadImageByteArray(parentService, "menu_plus.png");
-        menuImage_min = loadImageByteArray(parentService, "menu_min.png"); */
+        menuImage_plus = loadImageByteArray(parentService, "menu_plus.png");
+        /* menuImage_min = loadImageByteArray(parentService, "menu_min.png"); */
 
         menu_button_count = 0;
 
@@ -171,6 +173,7 @@ public class LiveViewThread extends Thread {
         Boolean menu_show_media_play = prefs.getMenuShowMediaPlay();
         Boolean menu_show_media_previous = prefs.getMenuShowMediaPrevious();
         Boolean menu_show_battery_status = prefs.getMenuShowBatteryStatus();
+        Boolean menu_show_mediamenu_status = prefs.getMenuShowMediaMenuStatus();
         if (menu_show_notifications) {
             menu_button_notifications_id = menu_button_count;
             menu_button_count += 1;
@@ -196,8 +199,14 @@ public class LiveViewThread extends Thread {
             menu_button_count += 1;
         }
         
-        menu_button_plugintest_id = menu_button_count;
-        menu_button_count += 1;
+        if (menu_show_mediamenu_status) {
+        	menu_button_mediamenu_id = menu_button_count;
+            menu_button_count += 1;
+        }
+       
+        
+        //menu_button_plugintest_id = menu_button_count;
+        //menu_button_count += 1;
         
         menu_state = 0;
     }
@@ -314,9 +323,12 @@ public class LiveViewThread extends Thread {
                 Log.d(TAG, "LV capabilities: " + caps.toString());
                 Log.d(TAG, "LV Version: " + caps.getSoftwareVersion());
                 if (menu_state == 0) {
+                	if (prefs.getInitialMenuItemId()>menu_button_count) prefs.setInitialMenuItemId(menu_button_count);
+                	if (prefs.getInitialMenuItemId()<0) prefs.setInitialMenuItemId(0);
+                	if (prefs.getMenuVibrationTime()<0) prefs.setMenuVibrationTime(0);
+                	if (prefs.getMenuVibrationTime()>255) prefs.setMenuVibrationTime(255);
+                	sendCall(new SetMenuSettings(prefs.getMenuVibrationTime(), prefs.getInitialMenuItemId()));
                     sendCall(new SetMenuSize(menu_button_count));
-                } else {
-                    sendCall(new SetMenuSize((byte) 0));
                 }
                 sendCall(new SetVibrate(0, 100));
                 break;
@@ -328,9 +340,9 @@ public class LiveViewThread extends Thread {
                 DeviceStatus status = (DeviceStatus) event;
                 Log.d(TAG, "Acknowledging status: " + status.toString());
                 sendCall(new DeviceStatusAck());
-                menu_state = 0; //Reset menu state when screen turns off
+                //menu_state = 0; //Reset menu state when screen turns off
                 device_status = status.getStatus();
-                updateNotifications();
+                updateGuiAfterStandby();
                 sendEvent("devicestatus", "", device_status, "");
                 break;
             case MessageConstants.MSG_SETVIBRATE_ACK:
@@ -378,6 +390,10 @@ public class LiveViewThread extends Thread {
 	                    if (menu_button_plugintest_id == current_id) {
 	                        sendCall(new MenuItem(menu_button_plugintest_id, false, new UShort((short) 0),
 	                                "Plugin test", menuImage));
+	                    }
+	                    if (menu_button_mediamenu_id == current_id) {
+	                        sendCall(new MenuItem(menu_button_mediamenu_id, false, new UShort((short) 0),
+	                                "Media menu", menuImage_plus));
 	                    }
                 	}
                     Log.d(TAG, "Menu items sent, menu_state is 0.");
@@ -487,6 +503,7 @@ public class LiveViewThread extends Thread {
                                             break;
                                     }
                                 case MessageConstants.NAVTYPE_MENUSELECT:
+                                	Log.d(TAG, "Menuselect key triggered.");
                                     boolean hasdonesomething = false;
                                     if (nav.getMenuItemId() == menu_button_findphone_id) {
                                         Log.d(TAG, "Find my phone: generating noise and vibration...");
@@ -532,6 +549,13 @@ public class LiveViewThread extends Thread {
                                         draw_plugin_loading();
                                         hasdonesomething = true;
                                     }
+                                    if (nav.getMenuItemId() == menu_button_mediamenu_id) {
+                                        Log.d(TAG, "Media menu button.");
+                                        sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
+                                        menu_state = 1;
+                                        draw_media_menu();
+                                        hasdonesomething = true;
+                                    }
                                     if (!hasdonesomething) {
                                         Log.d(TAG, "Navigation error: unknown menu id " + nav.getMenuItemId() + "!");
                                         sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
@@ -565,8 +589,8 @@ public class LiveViewThread extends Thread {
                                             Log.d(TAG, "Long press on select key while in media menu.");
                                             menu_state = 0;
                                             sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
+                                            sendCall(new SetMenuSize(menu_button_count));
                                             Log.d(TAG, "Returning to main menu.");
-                                            //sendCall(new SetMenuSize((byte) menu_button_count));
                                             break;
                                         case MessageConstants.NAVACTION_PRESS:
                                             emulate_media(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
@@ -618,6 +642,7 @@ public class LiveViewThread extends Thread {
                             Log.e(TAG, "Menu state 2: Battery stats. Returning to main menu.");
                             menu_state = 0;
                             sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
+                            sendCall(new SetMenuSize(menu_button_count));
                             break;
                         case 3:
                             Log.e(TAG, "Menu state 3: Plugin");
@@ -671,6 +696,11 @@ public class LiveViewThread extends Thread {
     
     public void draw_plugin_loading() throws IOException {
         sendCall(new DisplayPanel("Please wait...", "Loading plugin...", menuImage_notification, false));
+    }
+    
+    public void open_menu_from_standby() throws IOException {
+        sendCall(new DisplayPanel("Please wait...", "Loading...", menuImage_notification, false));
+        sendCall(new SetMenuSize(menu_button_count));
     }
     
     public void drawCallStatus(int state, String topline, String bottomline) throws IOException {
@@ -753,18 +783,29 @@ public class LiveViewThread extends Thread {
         parentService.sendBroadcast(bci);
     }
     
-    public void updateNotifications(){
+    public void updateGuiAfterStandby(){
 		try {
 			
 		        Prefs prefs = new Prefs(parentService);
 		        Boolean update_unread_count_when_menu_opens = prefs.getUpdateUnreadCountWhenMenuOpens();
 		        Boolean enable_notification_buzzer = prefs.getenablenotificationbuzzer();
 		         
-		        if (update_unread_count_when_menu_opens && (device_status==MessageConstants.DEVICESTATUS_ON)) {
-	                if (menu_button_notifications_id >= 0) {
-	                    sendCall(new MenuItem(menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
-	                            "Notifications", menuImage_notification));
-	                }
+		        if (update_unread_count_when_menu_opens && (device_status==MessageConstants.DEVICESTATUS_ON)) {		        	
+		        	menu_state = 0; //Because that little piece of code commented out below this does not work.
+		        	
+		        	if (menu_state==0)
+		        	{
+		        		sendCall(new SetMenuSize(menu_button_count));
+		        	}
+		        	//if (menu_state==1)
+		        	//{
+		        		//sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
+		        		//draw_media_menu();
+		        	//}
+		        }
+		        else
+		        {
+		        	menu_state = 0; //Go to the menu without sending anything.
 		        }
 		        
 		        if (enable_notification_buzzer && (parentService.getNotificationUnreadCount()>0) && (device_status==MessageConstants.DEVICESTATUS_ON)) {

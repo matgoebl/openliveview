@@ -92,6 +92,17 @@ public class LiveViewDbHelper extends SQLiteOpenHelper
         db.close();
     }
     
+    public static void setAllNotificationsRead(Context context)
+    {
+    	Log.w("DEBUG", "setAllNotificationsRead");
+        LiveViewDbHelper helper = new LiveViewDbHelper(context);
+        SQLiteDatabase db = helper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(LiveViewData.Notifications.READ, 1);
+        db.update(LiveViewData.Notifications.TABLE,  values, "1", null);
+        db.close();
+    }
+    
 	public static Cursor getAllNotifications(Context context)
 	    {
 			Log.w("DEBUG", "getAllNotifications");

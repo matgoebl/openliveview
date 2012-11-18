@@ -88,7 +88,12 @@
             android:name="nl.rnplus.olv.PluginManagerActivity"
             android:label="@string/title_activity_plugin_manager"
             android:launchMode="singleInstance">
-        </activity>           
+        </activity>  
+        <activity
+            android:name="nl.rnplus.olv.ExpertConfigActivity"
+            android:label="@string/title_expert_settings_manager"
+            android:launchMode="singleInstance">
+        </activity>         
     </application>
 
 </manifest>

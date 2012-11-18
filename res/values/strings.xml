@@ -5,6 +5,7 @@
     <string name="title_activity_main">OpenLiveView</string>
     <string name="title_activity_plugin_manager">Installed plugins</string>
     <string name="title_activity_plugin_details">Plugin details</string>
+    <string name="title_expert_settings_manager">Advanced settings</string>
     
     <string name="preferences_name">OpenLiveView settings</string>
     
@@ -45,8 +46,12 @@
     <string name="prefs_donate_summary">Please help support the development of OpenLiveView!</string>
 
     <string name="prefs_enablenotificationbuzzer_key">system.enablenotificationbuzzer</string>
-    <string name="prefs_enablenotificationbuzzer_title">New message alert</string>
+    <string name="prefs_enablenotificationbuzzer_title">Message alert when opening menu</string>
     <string name="prefs_enablenotificationbuzzer_summary">Activate buzzer when opening menu while a notification is still unread.</string>
+    
+    <string name="prefs_enablenotificationbuzzer2_key">system.enablenotificationbuzzer2</string>
+    <string name="prefs_enablenotificationbuzzer2_title">Message alert</string>
+    <string name="prefs_enablenotificationbuzzer2_summary">Vibrate and blink when your phone receives a notification.</string>
 
     <string name="prefs_updateunreadcountwhenmenuopens_key">system.updateunreadcountwhenmenuopens</string>
     <string name="prefs_updateunreadcountwhenmenuopens_title">Update unread items counter</string>
@@ -61,15 +66,29 @@
     <string name="prefs_menu_updown_action_summary">What should the up and down keys do while in the main menu?</string>       
 
     <string name="prefs_cat_actions_title">Actions</string>
+    
 	<string name="prefs_menu_battery_status_key">menu.batterystatusvisible</string>
 	<string name="prefs_menu_battery_status_title">Battery status</string>
-
 	<string name="prefs_menu_battery_status_summary">Show the phones battery status.</string>
+	
+	<string name="prefs_menu_mediamenubutton_key">menu.mediamenuvisible</string>
+	<string name="prefs_menu_mediamenubutton_title">Media menu</string>
+	<string name="prefs_menu_mediamenubutton_summary">Show the media menu as a button.</string>
+	
+	<string name="prefs_menu_menuvibrationtime_key">menu.menuvibrationtime</string>
+	<string name="prefs_menu_menuvibrationtime_title">Menu vibration time</string>
+	<string name="prefs_menu_menuvibrationtime_summary">This does something with the vibration time when the menu opens.</string>
+	
+	<string name="prefs_menu_initialmenuitemid_key">menu.initialmenuitemid</string>
+	<string name="prefs_menu_initialmenuitemid_title">Initial menu item</string>
+	<string name="prefs_menu_initialmenuitemid_summary">With which item should the menu start? (Provide number from 0 to amount of menu items)</string>
+	
     <string name="notify_service_running">LiveView connected.</string>
+    
     <string name="prefs_cat_olvversion_title">Other stuff</string>
 
     <string name="prefs_version_title">Version</string>
-    <string name="prefs_version_summary">1.0.0.9</string>    
+    <string name="prefs_version_summary">1.0.1.0</string>    
         
     <string name="accessibility_service_description">This service will display your notifications on the connected LiveView device.</string>
 
@@ -77,7 +96,10 @@
     <string name="menu_viewlog">View log</string>
     
 	<string name="main_application_text">Welcome to OpenLiveView!</string>
-	<string name="main_settings_btn_text">Settings</string>
+	<string name="main_settings_btn_text">Main settings</string>
+	<string name="main_showallnotifications_btn_text">Show all notifications in the database</string>
+	<string name="main_wipeallnotifications_btn_text">Delete all notifications in the database</string>
+	<string name="main_expert_settings_btn_text">Advanced settings</string>
 	<string name="main_plugin_manager_btn_text">Manage plugins&#8230;</string>
 	<string name="main_logo_content_desc">OpenLiveView logo</string>
 	<string name="main_help_text">You can configure OpenLiveView by clicking the "Settings" button. Do not forget to enable the Accessibility service for receiving notifications.</string>
@@ -94,4 +116,10 @@
 	<string name="etc_content_desc">image</string>
 	
 	<string name="error_not_supported_text">OpenLiveView could not read from the list of connected Bluetooth devices. This probably means that your Android rom does not implement the Bluetooth functionality needed by OpenLiveView, please ask for help at http://openliveview.googlecode.com</string>
+
+	<string name="expertconfig_cancel">Cancel</string>
+	<string name="expertconfig_save">Save</string>
+	<string name="expertconfig_information">Behind \'initial menu item\' you can enter a number from 0 to the amount of menu items you activated. The value is corrected automatically if you enter an impossible value.
+	    Behind \'menu vibration time\' you can enter a value of 0 to 255. This value will be passed on tot the liveview using the menu settings command.
+	    I suggest you leave this value at 0.</string>
 </resources>

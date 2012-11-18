@@ -8,6 +8,7 @@ import nl.rnplus.olv.data.LiveViewData;
 import nl.rnplus.olv.data.LiveViewDbConstants;
 import nl.rnplus.olv.data.LiveViewDbHelper;
 import nl.rnplus.olv.messages.MessageConstants;
+import nl.rnplus.olv.messages.calls.SetLed;
 import nl.rnplus.olv.messages.calls.SetScreenMode;
 import nl.rnplus.olv.messages.calls.SetVibrate;
 import android.app.AlertDialog;
@@ -17,6 +18,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.IBinder;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -224,8 +226,9 @@ public class LiveViewService extends Service
     	Log.d("DEBUG", "getNotificationContent (for ID: "+id+")");
     	try {
 	    	notification_cursor.moveToPosition(id);
-	    	Log.d("DEBUG", "Setting notification is read for: "+id);
-	    	LiveViewDbHelper.setNotificationRead(myself, id);
+	    	//Log.d("DEBUG", "Setting notification is read for: "+id);
+	    	//LiveViewDbHelper.setNotificationRead(myself, id);
+	    	LiveViewDbHelper.setAllNotificationsRead(myself);
 	        return notification_cursor.getString(contentcolumn);
     	} catch(Exception e) {
     		String message = "Database error in service: " + e.getMessage();
@@ -309,6 +312,8 @@ public class LiveViewService extends Service
 		    		}
 		    		notification_cursor.moveToNext();
 		    	}
+			} else {
+				unreadCount = 0;
 			}
     	} catch(Exception e) {
     		String message = "Database error in service: " + e.getMessage();
@@ -420,19 +425,30 @@ public class LiveViewService extends Service
 	    		    			}
 	    		    			else
 	    		    			{
-	    		    				if (intent.getExtras().getString("command").contains("awaken"))
-	    		    				{
-	    		    					Log.w("PLUGIN DEBUG", "Sent awaken. -->THIS COMMAND WILL BE CHANGED / REMOVED <--");
-	    		    					workerThread.sendCall(new SetScreenMode((byte) MessageConstants.BRIGHTNESS_MAX));
-	    		    					workerThread.draw_plugin_loading();
-	    		    				}
-	    		    				else
-	    		    				{
-	    		                        String message = "Error: Plugin command receiver: Unknown command.";
-	    		                        Log.e(TAG, message);
-	    		                        LiveViewDbHelper.logMessage(myself, message);
-	    		    	                return;
-	    		    				}
+		    		    			if (intent.getExtras().getString("command").contains("notify"))
+		    		    			{
+		    		    				Log.w("PLUGIN DEBUG", "Sent vibration & blink.");
+		    		    				int vdelay = intent.getExtras().getInt("delay");
+		    		    				int vtime = intent.getExtras().getInt("time");
+		    		    				workerThread.sendCall(new SetVibrate(vdelay, vtime));
+		    		    				workerThread.sendCall(new SetLed(Color.GREEN, vdelay, vtime));
+		    		    			}
+		    		    			else
+		    		    			{
+		    		    				if (intent.getExtras().getString("command").contains("awaken"))
+		    		    				{
+		    		    					Log.w("PLUGIN DEBUG", "Sent awaken.");
+		    		    					workerThread.sendCall(new SetScreenMode((byte) MessageConstants.BRIGHTNESS_MAX));
+		    		    					workerThread.open_menu_from_standby();
+		    		    				}
+		    		    				else
+		    		    				{
+		    		                        String message = "Error: Plugin command receiver: Unknown command.";
+		    		                        Log.e(TAG, message);
+		    		                        LiveViewDbHelper.logMessage(myself, message);
+		    		    	                return;
+		    		    				}
+		    		    			}
 	    		    			}
 	            			break;
 	            		case MessageConstants.DEVICESTATUS_ON:

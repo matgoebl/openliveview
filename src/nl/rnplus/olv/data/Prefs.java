@@ -8,8 +8,6 @@ import nl.rnplus.olv.R;
 
 /**
  * Provides access to the preferences of this application.
- *
- * @author Robert &lt;xperimental@solidproject.de&gt;
  */
 public class Prefs {
 
@@ -30,35 +28,35 @@ public class Prefs {
     }
 
     public Boolean getMenuShowNotifications() {
-        return preferences.getBoolean("menu.notificationsvisible", false);
+        return preferences.getBoolean("menu.notificationsvisible", true);
     }
 
     public Boolean getMenuShowMediaNext() {
-        return preferences.getBoolean("menu.medianextvisible", false);
+        return preferences.getBoolean("menu.medianextvisible", true);
     }
 
     public Boolean getMenuShowMediaPlay() {
-        return preferences.getBoolean("menu.mediaplayvisible", false);
+        return preferences.getBoolean("menu.mediaplayvisible", true);
     }
 
     public Boolean getMenuShowMediaPrevious() {
-        return preferences.getBoolean("menu.mediapreviousvisible", false);
+        return preferences.getBoolean("menu.mediapreviousvisible", true);
     }
 
     public Boolean getenablenotificationbuzzer() {
         return preferences.getBoolean("system.enablenotificationbuzzer", false);
     }
-
-    public Boolean getEnableStandbyAccess() {
-        return preferences.getBoolean("system.enablestandbyaccess", false);
+    
+    public Boolean getenablenotificationbuzzer2() {
+        return preferences.getBoolean("system.enablenotificationbuzzer2", true);
     }
 
     public Boolean getEnableMediaMenu() {
-        return preferences.getBoolean("media.enablemenu", false);
+        return preferences.getBoolean("media.enablemenu", true);
     }
 
     public Boolean getMenuShowBatteryStatus() {
-        return preferences.getBoolean("menu.batterystatusvisible", false);
+        return preferences.getBoolean("menu.batterystatusvisible", true);
     }
 
     public Boolean getSetupCompleted() {
@@ -66,9 +64,33 @@ public class Prefs {
     }
 
     public Boolean getUpdateUnreadCountWhenMenuOpens() {
-        return preferences.getBoolean("system.updateunreadcountwhenmenuopens", false);
+        return preferences.getBoolean("system.updateunreadcountwhenmenuopens", true);
     }
-
+    
+    public int getMenuVibrationTime() {
+        return preferences.getInt("menu.menuvibrationtime", 0);
+    }
+    
+    public int getInitialMenuItemId() {
+        return preferences.getInt("menu.initialmenuitemid", 0);
+    }
+    
+    public Boolean getMenuShowMediaMenuStatus() {
+        return preferences.getBoolean("menu.mediamenuvisible", false);
+    }    
+    
+    public void setMenuVibrationTime(int value) {
+        Editor editor = preferences.edit();
+        editor.putInt("menu.menuvibrationtime", value);
+        editor.commit();
+    }
+    
+    public void setInitialMenuItemId(int value) {
+        Editor editor = preferences.edit();
+        editor.putInt("menu.initialmenuitemid", value);
+        editor.commit();
+    }
+    
     public void setSetupCompleted(Boolean value) {
         Editor editor = preferences.edit();
         editor.putBoolean("system.setupcompleted", value);
@@ -82,6 +104,6 @@ public class Prefs {
     }
 
     public int getMenuUpDownAction() {
-        return Integer.parseInt(preferences.getString("menu.menuupdownaction", "0"));
+        return Integer.parseInt(preferences.getString("menu.menuupdownaction", "1"));
     }
 }

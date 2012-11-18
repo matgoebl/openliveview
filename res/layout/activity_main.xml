@@ -43,53 +43,54 @@
         android:text="@string/menu_viewlog" />
 
     <Button
-        android:id="@+id/settingsbutton"
+        android:id="@+id/Button03"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/logbutton"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:onClick="openExpertSettings"
+        android:text="@string/main_expert_settings_btn_text" />
+
+    <Button
+        android:id="@+id/settingsbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/Button03"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:onClick="openSettings"
         android:text="@string/main_settings_btn_text" />
 
     <Button
-        android:id="@+id/pluginmanagerbutton"
+        android:id="@+id/Button02"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/settingsbutton"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:onClick="openPluginManager"
-        android:text="@string/main_plugin_manager_btn_text" />
+        android:onClick="deleteAllNotifications"
+        android:text="@string/main_wipeallnotifications_btn_text" />
 
     <Button
         android:id="@+id/button1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/pluginmanagerbutton"
+        android:layout_above="@+id/Button02"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:onClick="showAllStoredNotifications"
-        android:text="Show all notifications" />
+        android:text="@string/main_showallnotifications_btn_text" />
 
     <Button
-        android:id="@+id/Button01"
+        android:id="@+id/pluginmanagerbutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/button1"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:onClick="addTestNotification"
-        android:text="Add test notification" />
-
-    <Button
-        android:id="@+id/Button02"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/Button01"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:onClick="deleteAllNotifications"
-        android:text="Delete all notifications" />
+        android:onClick="openPluginManager"
+        android:text="@string/main_plugin_manager_btn_text"
+        android:visibility="gone"/>
 
 </RelativeLayout>
