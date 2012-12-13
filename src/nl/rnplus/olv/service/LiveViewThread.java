@@ -49,7 +49,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
 
-@TargetApi(16)
+@TargetApi(17)
 public class LiveViewThread extends Thread {
 
     /* Service constants */
@@ -65,10 +65,14 @@ public class LiveViewThread extends Thread {
     private final byte[] menuImage_music;
     private final byte[] menuImage_left;
     private final byte[] menuImage_right;
-    private final byte[] bgImage_media_isplaying;
-    private final byte[] bgImage_media_isnotplaying;
     private final byte[] menuImage_battery;
     private final byte[] menuImage_plus;
+    private final byte[] menuImage_debug;
+    private final byte[] bgImage_media_isplaying;
+    private final byte[] bgImage_media_isnotplaying;
+    private final byte[] bgImage_black;
+    private final byte[] bgImage_blank;
+    
 
     /* Communication */
     private final BluetoothAdapter btAdapter;
@@ -91,7 +95,11 @@ public class LiveViewThread extends Thread {
     private byte menu_button_findphone_id = -1;
     private byte menu_button_battery_status_id = -1;
     private byte menu_button_plugintest_id = -1;
+    private byte menu_button_debug_id = -1;
     private byte menu_button_mediamenu_id = -1;
+    
+    private byte debugx = 0;
+    private byte debugy = 0;
     
     private String PLUGIN_COMMAND = "nl.rnplus.olv.plugin.command";
     private String PLUGIN_EVENT = "nl.rnplus.olv.plugin.event";
@@ -162,6 +170,9 @@ public class LiveViewThread extends Thread {
         bgImage_media_isnotplaying = loadImageByteArray(parentService, "jerry_music_play_icn.png");
         menuImage_battery = loadImageByteArray(parentService, "menu_battery.png");
         menuImage_plus = loadImageByteArray(parentService, "menu_plus.png");
+        menuImage_debug = loadImageByteArray(parentService, "menu_debug.png");
+        bgImage_black = loadImageByteArray(parentService, "bg_black.png");
+        bgImage_blank = loadImageByteArray(parentService, "bg_blank.png");
         /* menuImage_min = loadImageByteArray(parentService, "menu_min.png"); */
 
         menu_button_count = 0;
@@ -207,6 +218,9 @@ public class LiveViewThread extends Thread {
         
         //menu_button_plugintest_id = menu_button_count;
         //menu_button_count += 1;
+        
+        menu_button_debug_id = menu_button_count;
+        menu_button_count += 1;
         
         menu_state = 0;
     }
@@ -267,7 +281,7 @@ public class LiveViewThread extends Thread {
             Log.d(TAG, "LV connected.");
             sendCall(new CapsRequest());
             Log.d(TAG, "Message sent.");
-            sendEvent("connectionstatus", "", 1, "connected");
+            sendEvent("connectionstatus".toString(), 1, 0, "connected".toString(), null);
             do {
                 try {
                     LiveViewEvent response = reader.readMessage();
@@ -343,7 +357,7 @@ public class LiveViewThread extends Thread {
                 //menu_state = 0; //Reset menu state when screen turns off
                 device_status = status.getStatus();
                 updateGuiAfterStandby();
-                sendEvent("devicestatus", "", device_status, "");
+                sendEvent("devicestatus", device_status, 0, null, null);
                 break;
             case MessageConstants.MSG_SETVIBRATE_ACK:
                 Log.d(TAG, "Got setvibrate ack.");
@@ -351,6 +365,9 @@ public class LiveViewThread extends Thread {
             case MessageConstants.MSG_SETLED_ACK:
             	Log.d(TAG, "Got setled ack.");
             	break;
+            case MessageConstants.MSG_DISPLAYBITMAP_ACK:
+            	Log.d(TAG, "Got displaybitmap ack.");
+            	break;	
             case MessageConstants.MSG_DISPLAYPANEL_ACK:
                 Log.d(TAG, "Got display panel ack.");
                 if ((parentService.MediaInfoNeedsUpdate) && (menu_state == 1)) {
@@ -394,6 +411,10 @@ public class LiveViewThread extends Thread {
 	                    if (menu_button_mediamenu_id == current_id) {
 	                        sendCall(new MenuItem(menu_button_mediamenu_id, false, new UShort((short) 0),
 	                                "Media menu", menuImage_plus));
+	                    }
+	                    if (menu_button_debug_id == current_id) {
+	                        sendCall(new MenuItem(menu_button_debug_id, false, new UShort((short) 0),
+	                                "Bitmap navigation test", menuImage_debug));
 	                    }
                 	}
                     Log.d(TAG, "Menu items sent, menu_state is 0.");
@@ -483,7 +504,6 @@ public class LiveViewThread extends Thread {
                 	}
                     sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
                 } else {
-                	sendEvent("navigation", "", nav.getNavType(), "");
                     switch (menu_state) {
                         case 0:
                             switch (nav.getNavType()) {
@@ -547,6 +567,13 @@ public class LiveViewThread extends Thread {
                                         sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
                                         menu_state = 3;
                                         draw_plugin_loading();
+                                        hasdonesomething = true;
+                                    }
+                                    if (nav.getMenuItemId() == menu_button_debug_id) {
+                                        Log.d(TAG, "DEBUG MENU OPENED");
+                                        sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
+                                        menu_state = 4;
+                                        debug1();
                                         hasdonesomething = true;
                                     }
                                     if (nav.getMenuItemId() == menu_button_mediamenu_id) {
@@ -644,12 +671,34 @@ public class LiveViewThread extends Thread {
                             sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
                             sendCall(new SetMenuSize(menu_button_count));
                             break;
-                        case 3:
-                            Log.e(TAG, "Menu state 3: Plugin");
+
+                        case 4:
+                            Log.e(TAG, "Menu state 4: Debug");
                             switch (nav.getNavType()) {
+                            case MessageConstants.NAVTYPE_SELECT:
+                                switch (nav.getNavAction()) {
+                                    case MessageConstants.NAVACTION_LONGPRESS:
+                                    	menu_state = 0;
+    	                                sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
+    	                                sendCall(new SetMenuSize(menu_button_count));
+                                    	break;
+                                }
+                                break;
+                    			case MessageConstants.NAVTYPE_UP:
+                    				debug2();
+                    				sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
+                    				break;
+                    			case MessageConstants.NAVTYPE_DOWN:
+                    				debug3();
+                    				sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
+                    				break;
+	                    		case MessageConstants.NAVTYPE_LEFT:
+	                    			debug4();
+	                    			sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
+	                    			break;
                         		case MessageConstants.NAVTYPE_RIGHT:
-	                                menu_state = 0;
-	                                sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
+                        			debug5();
+                        			sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
 	                            	break;
 	                            default:
 	                            	sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
@@ -695,7 +744,7 @@ public class LiveViewThread extends Thread {
     }
     
     public void draw_plugin_loading() throws IOException {
-        sendCall(new DisplayPanel("Please wait...", "Loading plugin...", menuImage_notification, false));
+        sendCall(new DisplayPanel("", "", menuImage, false));
     }
     
     public void open_menu_from_standby() throws IOException {
@@ -710,6 +759,10 @@ public class LiveViewThread extends Thread {
 	    	menu_state = 2;
 	    	sendCall(new SetScreenMode((byte) MessageConstants.BRIGHTNESS_MAX));
 	        sendCall(new DisplayPanel(topline, bottomline, menuImage_phone, true));
+    	}
+    	if (prefs.getEnableIncomingCallVibrate())
+    	{
+    		sendCall(new SetVibrate(0, 1000));
     	}
     }
 
@@ -776,17 +829,41 @@ public class LiveViewThread extends Thread {
         return device_status;
     }
 
-    public void sendEvent(String event, String plugin, int payload, String payload2) {
+    public void sendEvent(String event, int a, int b, String string1, String string2) {
         Intent bci = new Intent(PLUGIN_EVENT);
         Bundle bcb = new Bundle();
         bcb.putString("event", event);
-        bcb.putString("plugin", plugin);
-        bcb.putInt("payload1", payload);
-        bcb.putString("payload2", payload2);
+        bcb.putString("plugin", "nl.rnplus.nothing.here.yet");
+        bcb.putInt("p1", a);
+        bcb.putInt("p2", b);
+        if (string1==null) string1="no value";
+        if (string2==null) string2="no value";
+        bcb.putString("p3", (String) string1.toString());
+        bcb.putString("p4", (String) string2.toString());
         long time = System.currentTimeMillis();
         bcb.putLong("timestamp", time);
         bci.putExtras(bcb);
         parentService.sendBroadcast(bci);
+    }
+    
+    public void showNewAlert(String line1, String line2, int icon_type, byte[] img) {
+    	menu_state = 2;	
+		if (icon_type==1)
+		{
+			img = menuImage_notification;
+		}
+		if (icon_type==2)
+		{
+			img = menuImage;
+		}		
+        try {
+        	sendCall(new DisplayPanel(line1, line2, img, false));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			Log.e(TAG, "Error while showing alert! ("+e.toString()+")");
+			e.printStackTrace();
+		}
+    
     }
     
     public void updateGuiAfterStandby(){
@@ -823,5 +900,40 @@ public class LiveViewThread extends Thread {
 	        Log.e(TAG, message);
 	        LiveViewDbHelper.logMessage(parentService, message);    	
 	    }
+    }
+    
+    public void debug1() throws IOException {
+    	sendCall(new SetMenuSize((byte) 0));
+    	debugdraw();
+        Log.i(TAG, "DEBUG1");
+    }
+    public void debug2() throws IOException {
+    	debugdraw();
+    	debugy-=4;
+    	if (debugy<0) debugy = (byte) 0;
+        Log.i(TAG, "DEBUG2");
+    }
+    public void debug3() throws IOException {
+    	debugdraw();
+    	debugy+=4;
+    	if (debugy>128) debugy = (byte) 128;   	
+        Log.i(TAG, "DEBUG3");
+    }
+    public void debug4() throws IOException {
+    	debugdraw();
+    	debugx-=4;
+    	if (debugx<0) debugx = (byte) 0;    	
+        Log.i(TAG, "DEBUG4");
+    }
+    public void debug5() throws IOException {
+    	debugdraw();
+    	debugx+=4;
+    	if (debugx>128) debugx = (byte) 128;
+        Log.i(TAG, "DEBUG5");    	
+    }
+    public void debugdraw() throws IOException {
+    	//sendCall(new ClearDisplay());
+    	sendCall(new DisplayBitmap((byte) 0, (byte) 0, bgImage_blank));
+    	sendCall(new DisplayBitmap((byte) debugx, (byte) debugy, menuImage_battery));
     }
 }

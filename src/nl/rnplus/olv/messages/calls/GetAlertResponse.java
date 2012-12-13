@@ -40,9 +40,9 @@ public class GetAlertResponse extends LiveViewCall {
     @Override
     protected byte[] getPayload() {
     	try {
-	        byte[] timestamptextArray = timestampText.getBytes("iso-8859-1");
-	    	byte[] headertextArray = headerText.getBytes("iso-8859-1");
-	    	byte[] bodytextArray = bodyText.getBytes("iso-8859-1");        
+	        byte[] timestamptextArray = timestampText.getBytes("UTF-8");//iso-8859-1
+	    	byte[] headertextArray = headerText.getBytes("UTF-8");
+	    	byte[] bodytextArray = bodyText.getBytes("UTF-8");        
 	        int size = 20 + timestamptextArray.length + headertextArray.length + bodytextArray.length + image.length;
 	        ByteBuffer buffer = ByteBuffer.allocate(size);
 	        buffer.put((byte) 0);

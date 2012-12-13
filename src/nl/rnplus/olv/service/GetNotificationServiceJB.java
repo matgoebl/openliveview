@@ -47,7 +47,7 @@ public class GetNotificationServiceJB extends AccessibilityService {
                 for (CharSequence aNotificationList : notificationList) {
                     //Log.d(LOG_TAG, "The notification: " + aNotificationList);
                     try {
-                    	Long time = System.currentTimeMillis();
+                    	Long time = event.getEventTime();//System.currentTimeMillis();
                     	/*
                         Intent bci = new Intent(SHOW_NOTIFICATION);
                         Bundle bcb = new Bundle();
@@ -70,6 +70,10 @@ public class GetNotificationServiceJB extends AccessibilityService {
         		            bcb2.putInt("delay", 0);
         		            bcb2.putInt("time", 600);
         		            bcb2.putLong("timestamp", time);
+        		            bcb2.putInt("displaynotification", 1);
+        		            bcb2.putString("line1", "Notification");
+        		            bcb2.putString("line2", aNotificationList.toString());
+        		            bcb2.putInt("icon_type", 1);
         		            bci2.putExtras(bcb2);
         		            sendBroadcast(bci2);
         		        }

@@ -86,7 +86,7 @@ public class PluginManagerActivity extends ListActivity
 	}
 	
     protected void onListItemClick (ListView l, View v, int position, long id)
-    {
+    {/*
         Log.d( LOG_TAG, "onListItemClick: "+position );
 		String category = categories.get( position );
 		String packagename = pluginpackagename.get( position );
@@ -98,11 +98,12 @@ public class PluginManagerActivity extends ListActivity
                     servicename.replace("Service", "SettingsActivity") ); //Start <packagename>.<pluginname>SettingsActivity
 			intent.putExtra( BUNDLE_EXTRAS_CATEGORY, category );
 			startActivity( intent );
-		}
+		}*/
     }	
     
     private void fillPluginList()
     {
+    	/*
 		services = new ArrayList<HashMap<String,String>>();
 		categories = new ArrayList<String>();
 		pluginpackagename = new ArrayList<String>();
@@ -153,15 +154,17 @@ public class PluginManagerActivity extends ListActivity
 				if( firstCategory == null ) firstCategory = "";
 				categories.add( firstCategory );
 				pluginpackagename.add(sinfo.packageName);
-				pluginservicename.add(sinfo.name);
-                services.add( item );
+		//		pluginservicename.add(sinfo.name);
+        //        services.add( item );
                 
-            }
-        }
-		Log.d( LOG_TAG, "services: "+services );
-		Log.d( LOG_TAG, "categories: "+categories );
-		Log.d( LOG_TAG, "packagename: "+pluginpackagename );
-		Log.d( LOG_TAG, "servicename: "+pluginservicename );
+        //    }
+        //}
+		//Log.d( LOG_TAG, "services: "+services );
+		//Log.d( LOG_TAG, "categories: "+categories );
+		//Log.d( LOG_TAG, "packagename: "+pluginpackagename );
+		//Log.d( LOG_TAG, "servicename: "+pluginservicename );
+				
+				*/
     }
 
 	class PackageBroadcastReceiver extends BroadcastReceiver
@@ -171,9 +174,9 @@ public class PluginManagerActivity extends ListActivity
 		public void onReceive(Context context, Intent intent)
 		{
 			Log.d( LOG_TAG, "onReceive: "+intent );
-			services.clear();
-			fillPluginList();
-			itemAdapter.notifyDataSetChanged();
+			//services.clear();
+			//fillPluginList();
+			//itemAdapter.notifyDataSetChanged();
 		}
 	}
     

@@ -1,17 +1,18 @@
 package nl.rnplus.olv.service;
 
 import java.io.IOException;
+import java.util.Date;
 
 import nl.rnplus.olv.content.ContentNotification;
 import nl.rnplus.olv.content.manager.SMSNotificationManager;
 import nl.rnplus.olv.data.LiveViewData;
 import nl.rnplus.olv.data.LiveViewDbConstants;
 import nl.rnplus.olv.data.LiveViewDbHelper;
+import nl.rnplus.olv.data.Prefs;
 import nl.rnplus.olv.messages.MessageConstants;
 import nl.rnplus.olv.messages.calls.SetLed;
 import nl.rnplus.olv.messages.calls.SetScreenMode;
 import nl.rnplus.olv.messages.calls.SetVibrate;
-import android.app.AlertDialog;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -157,7 +158,6 @@ public class LiveViewService extends Service
     	TelephonyManager telephonyManager
     	=(TelephonyManager)getSystemService(TELEPHONY_SERVICE);
     	telephonyManager.listen(phoneListener, PhoneStateListener.LISTEN_CALL_STATE);
-    	
     }
     
     @Override
@@ -332,22 +332,25 @@ public class LiveViewService extends Service
         return notification_cursor.getCount();
     }
         
-    public class ShowNotificationReceiver extends BroadcastReceiver  
-    {  
+    public class ShowNotificationReceiver extends BroadcastReceiver {  
         @Override  
-        public void onReceive(Context context, Intent intent)  
-        {  
-        	NotificationNeedsUpdate = true;
-        	if (intent.getAction().equals(ACTION_RECEIVE_SMS))
-        	{
+        public void onReceive(Context context, Intent intent) {  
+        	if (intent.getAction().equals(ACTION_RECEIVE_SMS)) {
+            	NotificationNeedsUpdate = true;
             	ContentNotification notification = SMSNotificationManager.getNotificationContent(context, intent);
             	LiveViewDbHelper.addNotification(myself, notification.getTitle(), notification.getContent(), LiveViewDbConstants.NTF_SMS, notification.getTimestamp());
         	}
-        	else
-        	{
-            	LiveViewDbHelper.addNotification(myself, intent.getExtras().getString("title"), intent.getExtras().getString("contents"), intent.getExtras().getInt("type"),  intent.getExtras().getLong("timestamp"));
-        	}
-        	Log.w("ShowNotificationReceiver", "Added new notification.");
+        	else {
+        		String notificationContentFilter = (new Prefs(myself)).getNotificationFilter();  // Added by jkorp
+            	if (!notificationContentFilter.contains(intent.getExtras().getString("contents"))) {
+            		NotificationNeedsUpdate = true;
+            		LiveViewDbHelper.addNotification(myself, intent.getExtras().getString("title"), intent.getExtras().getString("contents"), intent.getExtras().getInt("type"),  intent.getExtras().getLong("timestamp"));
+            		Log.w("ShowNotificationReceiver", "Added new notification.");
+            	}
+            	else {
+            		Log.w("ShowNotificationReceiver", "Notification not added because of filter.");
+            	}
+            }
         }  
     }    
 /*
@@ -432,6 +435,20 @@ public class LiveViewService extends Service
 		    		    				int vtime = intent.getExtras().getInt("time");
 		    		    				workerThread.sendCall(new SetVibrate(vdelay, vtime));
 		    		    				workerThread.sendCall(new SetLed(Color.GREEN, vdelay, vtime));
+		    		    				if (intent.getExtras().getInt("displaynotification")==1)
+		    		    				{
+		    		    					String line1 = intent.getExtras().getString("line1");
+		    		    					String line2 = intent.getExtras().getString("line2");
+		    		    					if (line1==null) line1 = "";
+		    		    					if (line2==null) line2 = "";
+		    		    					int icon_type = intent.getExtras().getInt("icon_type");
+		    		    					if (icon_type>2)
+		    		    					{
+		    		    						icon_type=2;
+		    		    					}
+		    		    					byte[] img = intent.getExtras().getByteArray("icon");
+		    		    					workerThread.showNewAlert(line1, line2, icon_type, img);
+		    		    				}
 		    		    			}
 		    		    			else
 		    		    			{
@@ -491,8 +508,8 @@ public class LiveViewService extends Service
         	Context context;
         	@Override
         	public void onCallStateChanged(int state,String incomingNumber){
+        		try {
         		if (incomingNumber.length()>0) Log.d("PhoneCallStateNotified", "Incoming number "+incomingNumber);
-	        	try {
 		        	if (state == TelephonyManager.CALL_STATE_RINGING)
 		        	{
 		        		if (workerThread.getLiveViewStatus()==MessageConstants.DEVICESTATUS_OFF)
@@ -509,11 +526,11 @@ public class LiveViewService extends Service
 		        	{
 		        		Log.d("PhoneCallStateNotified", "Status: OFFHOOK");
 		        	} 
-				} catch (IOException e) {
-	                String message = "Error: IOException in incoming call receiver: " + e.getMessage();
+				} catch (Exception e) {
+	                String message = "Exception in incoming call receiver: " + e.getMessage();
 	                Log.e(TAG, message);
 	                LiveViewDbHelper.logMessage(myself, message);
-					e.printStackTrace();
+					//e.printStackTrace();
 				}	
         	}
         } 

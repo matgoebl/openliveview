@@ -25,7 +25,7 @@ public class DisplayBitmap extends LiveViewCall {
      */
     @Override
     protected byte[] getPayload() {
-        int size = 6 + image.length;
+        int size = 3 + image.length;
         ByteBuffer buffer = ByteBuffer.allocate(size);
         buffer.put((byte) x);
         buffer.put((byte) y);

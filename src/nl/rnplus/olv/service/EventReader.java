@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import android.util.Log;
+
 //import android.util.Log;
 
 import nl.rnplus.olv.messages.DecodeException;
@@ -82,6 +84,9 @@ public class EventReader {
                     state = ReaderState.PAYLOAD;
                     needRead = payloadSize;
                     break;
+                default:
+                	Log.e("OpenLiveView", "Something went wrong in EventReader.");
+                	break;
                 }
             }
         } while (needRead > 0);

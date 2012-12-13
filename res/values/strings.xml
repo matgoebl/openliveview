@@ -15,6 +15,15 @@
     <string name="prefs_cat_features_title">Features</string>
     <string name="prefs_cat_advanced_title">Advanced</string>
     
+    <string name="prefs_cat_media_title">Media</string>
+    <string name="prefs_cat_notifications_title">Notifications</string>
+    <string name="prefs_cat_other_title">Other features</string>
+    <string name="prefs_cat_phone_title">Incoming call</string>
+    
+    <string name="prefs_menu_notificationfilter_title">Notification filter</string>
+    
+    <string name="prefs_notifications_info">OpenLiveView can display the notifications your phone receives on your LiveView device. To enable OpenLiveView to read your notifications please enable the accessibility service. By clicking on the shortcut below you will be taken directly to the accesibility settings.</string>
+    
     <string name="prefs_deviceaddress_key">device.address</string>
     <string name="prefs_deviceaddress_title">LiveView device</string>
     <string name="prefs_deviceaddress_summary">Select your LiveView device from the list of paired Bluetooth devices.</string>
@@ -24,8 +33,8 @@
     <string name="prefs_menu_find_my_phone_visible_summary">Find your phone by making noise and vibrations.</string>
 
     <string name="prefs_menu_notifications_visible_key">menu.notificationsvisible</string>
-    <string name="prefs_menu_notifications_visible_title">Notifications</string>
-    <string name="prefs_menu_notifications_visible_summary">Show all notifications of your Android device. (Needs accessibility service to function!)</string>    
+    <string name="prefs_menu_notifications_visible_title">Menu item</string>
+    <string name="prefs_menu_notifications_visible_summary">Show a menu item that allows you to browse received notifications.</string>    
 
     <string name="prefs_menu_media_next_key">menu.medianextvisible</string>
     <string name="prefs_menu_media_next_title">Media: next</string>
@@ -52,8 +61,8 @@
     <string name="prefs_enablenotificationbuzzer_summary">Activate buzzer when opening menu while a notification is still unread.</string>
     
     <string name="prefs_enablenotificationbuzzer2_key">system.enablenotificationbuzzer2</string>
-    <string name="prefs_enablenotificationbuzzer2_title">Message alert</string>
-    <string name="prefs_enablenotificationbuzzer2_summary">Vibrate and blink when your phone receives a notification.</string>
+    <string name="prefs_enablenotificationbuzzer2_title">Alert</string>
+    <string name="prefs_enablenotificationbuzzer2_summary">Makes the LiveView vibrate and blink while displaying a notification the moment its received.</string>
 
     <string name="prefs_updateunreadcountwhenmenuopens_key">system.updateunreadcountwhenmenuopens</string>
     <string name="prefs_updateunreadcountwhenmenuopens_title">Update unread items counter</string>
@@ -69,7 +78,10 @@
 
     <string name="prefs_incomingcallnotify_key">system.incomingcallnotify</string>
     <string name="prefs_incomingcallnotify_title">Notify on incoming call</string>
-    <string name="prefs_incomingcallnotify_summary">Show a message on the liveview when you receive a call.</string>  
+    <string name="prefs_incomingcallnotify_summary">Show a message on the liveview when you receive a call.</string>
+    <string name="prefs_incomingcallvibrate_key">system.incomingcallvibrate</string>
+    <string name="prefs_incomingcallvibrate_title">Vibrate on incoming call</string>
+    <string name="prefs_incomingcallvibrate_summary">Vibrate the liveview when you receive a call.</string>  
     
     <string name="prefs_cat_actions_title">Actions</string>
     
@@ -94,7 +106,7 @@
     <string name="prefs_cat_olvversion_title">Other stuff</string>
 
     <string name="prefs_version_title">Version</string>
-    <string name="prefs_version_summary">1.0.1.2</string>    
+    <string name="prefs_version_summary">1.0.1.6</string>    
         
     <string name="accessibility_service_description">This service will display your notifications on the connected LiveView device.</string>
 

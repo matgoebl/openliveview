@@ -64,7 +64,7 @@ public class Prefs {
     }
 
     public Boolean getUpdateUnreadCountWhenMenuOpens() {
-        return preferences.getBoolean("system.updateunreadcountwhenmenuopens", true);
+        return preferences.getBoolean("system.updateunreadcountwhenmenuopens", false);
     }
     
     public int getMenuVibrationTime() {
@@ -81,6 +81,10 @@ public class Prefs {
     
     public Boolean getEnableIncomingCallNotify() {
         return preferences.getBoolean("system.incomingcallnotify", true);
+    } 
+    
+    public Boolean getEnableIncomingCallVibrate() {
+        return preferences.getBoolean("system.incomingcallvibrate", true);
     }    
     
     public void setMenuVibrationTime(int value) {
@@ -106,6 +110,16 @@ public class Prefs {
         editor.putString(keyDeviceAddress, address);
         editor.commit();
     }
+    
+    public void setNotificationFilter(String filter) {
+        Editor editor = preferences.edit();
+        editor.putString("system.notificationfilter", filter);
+        editor.commit();
+    }
+    
+    public String getNotificationFilter() {
+        return preferences.getString("system.notificationfilter", "");
+    }   
 
     public int getMenuUpDownAction() {
         return Integer.parseInt(preferences.getString("menu.menuupdownaction", "1"));
