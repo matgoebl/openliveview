@@ -219,8 +219,8 @@ public class LiveViewThread extends Thread {
         //menu_button_plugintest_id = menu_button_count;
         //menu_button_count += 1;
         
-        menu_button_debug_id = menu_button_count;
-        menu_button_count += 1;
+        //menu_button_debug_id = menu_button_count;
+        //menu_button_count += 1;
         
         menu_state = 0;
     }
