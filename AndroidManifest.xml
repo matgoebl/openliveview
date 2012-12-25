@@ -2,7 +2,7 @@
 <!-- Version 1.0.1.1 of OpenLiveView -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="nl.rnplus.olv"
-    android:versionCode="10"
+    android:versionCode="11"
     android:versionName="@string/prefs_version_summary" android:installLocation="internalOnly">
     
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17" />
@@ -28,11 +28,11 @@
             android:launchMode="singleInstance">
         </activity>
         <activity android:name=".LogViewActivity" />
-
+		<activity android:name="nl.rnplus.olv.NotificationViewActivity" />
         <service android:name=".service.LiveViewService" />
         
         <service
-            android:name=".service.GetNotificationServiceJB"
+            android:name="nl.rnplus.olv.service.GetNotificationService"
             android:description="@string/accessibility_service_description"
             android:enabled="@bool/need_bind_accessibility_service_permission"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
@@ -45,7 +45,7 @@
         </service>
         
         <service
-            android:name="nl.rnplus.olv.service.GetNotificationService"
+            android:name="nl.rnplus.olv.service.OldGetNotificationService"
             android:description="@string/accessibility_service_description"
             android:enabled="@bool/not_need_bind_accessibility_service_permission"
             android:exported="false">

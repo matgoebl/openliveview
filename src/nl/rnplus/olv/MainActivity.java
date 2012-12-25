@@ -2,11 +2,9 @@ package nl.rnplus.olv;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import nl.rnplus.olv.data.LiveViewData;
 import nl.rnplus.olv.data.LiveViewDbHelper;
@@ -39,6 +37,10 @@ public class MainActivity extends Activity {
     public void openLog(View view) {
         startActivity(new Intent(this, LogViewActivity.class));
     }
+    
+    public void openNotificationList(View view) {
+        startActivity(new Intent(this, NotificationViewActivity.class));
+    }
 
     public void openPluginManager(View view) {
         startActivity(new Intent(this, PluginManagerActivity.class));
@@ -52,6 +54,15 @@ public class MainActivity extends Activity {
         builder.setPositiveButton("Close", null);
         builder.show(); 
     }
+    
+    public void showAboutDialog(View view) {
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("About OpenLiveView");
+        builder.setMessage("Thank you for using OpenLiveView! This free and open source app was made possible thanks to the following people: Jan Korpegård, basty149, Exception13, Pedro Veloso and Renze Nicolai. Thank you all for your help.");
+        builder.setPositiveButton("Close", null);
+        builder.show(); 
+    }
+    
     public void deleteAllNotifications(View view) {
     	try {
 	    	LiveViewDbHelper.deleteAllNotifications(this);

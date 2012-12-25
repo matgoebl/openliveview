@@ -106,7 +106,7 @@
     <string name="prefs_cat_olvversion_title">Other stuff</string>
 
     <string name="prefs_version_title">Version</string>
-    <string name="prefs_version_summary">1.0.1.6</string>    
+    <string name="prefs_version_summary">1.0.1.7</string>    
         
     <string name="accessibility_service_description">This service will display your notifications on the connected LiveView device.</string>
 

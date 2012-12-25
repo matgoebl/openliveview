@@ -20,19 +20,28 @@ public class LiveViewDataProvider extends ContentProvider
 {
 
     private static final int MATCH_LOG = 1;
+    private static final int MATCH_NOTIFICATIONS = 2;
 
     private static final UriMatcher uriMatcher;
     private static final HashMap<String, String> logProjection;
+    private static final HashMap<String, String> notificationsProjection;
 
     static
     {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(LiveViewData.AUTHORITY, "log", MATCH_LOG);
+        uriMatcher.addURI(LiveViewData.AUTHORITY, "notifications", MATCH_NOTIFICATIONS);
 
         logProjection = new HashMap<String, String>();
         for (String column : LiveViewData.Log.DEFAULT_PROJECTION)
         {
             logProjection.put(column, column);
+        }
+        
+        notificationsProjection = new HashMap<String, String>();
+        for (String column : LiveViewData.Log.DEFAULT_PROJECTION)
+        {
+        	notificationsProjection.put(column, column);
         }
     }
 
@@ -53,6 +62,13 @@ public class LiveViewDataProvider extends ContentProvider
             getContext().getContentResolver().notifyChange(
                     LiveViewData.Log.CONTENT_URI, null);
             return count;
+        case MATCH_NOTIFICATIONS:
+            SQLiteDatabase db2 = dbHelper.getWritableDatabase();
+            int count2 = db2.delete(LiveViewData.Notifications.TABLE, null, null);
+            db2.close();
+            getContext().getContentResolver().notifyChange(
+                    LiveViewData.Notifications.CONTENT_URI, null);
+            return count2;
         default:
             throw new IllegalArgumentException("Unknown URI: " + uri);
         }
@@ -67,6 +83,8 @@ public class LiveViewDataProvider extends ContentProvider
         switch (uriMatcher.match(uri)) {
         case MATCH_LOG:
             return LiveViewData.Log.CONTENT_TYPE;
+        case MATCH_NOTIFICATIONS:
+            return LiveViewData.Notifications.CONTENT_TYPE;
         default:
             throw new IllegalArgumentException("Unknown URI: " + uri);
         }
@@ -99,6 +117,25 @@ public class LiveViewDataProvider extends ContentProvider
             getContext().getContentResolver().notifyChange(
                     LiveViewData.Log.CONTENT_URI, null);
             return LiveViewData.Log.CONTENT_URI;
+        case MATCH_NOTIFICATIONS:
+            if (values.containsKey(LiveViewData.Notifications.CONTENT) == false) {
+                throw new IllegalArgumentException("No content!");
+            }
+            if (values.containsKey(LiveViewData.Notifications.TIMESTAMP) == true) {
+                throw new IllegalArgumentException(
+                        "Timestamp will be set automatically!");
+            }
+            if (values.containsKey(LiveViewData.Notifications.DATETIME) == true) {
+                throw new IllegalArgumentException(
+                        "Datetime is no valid column!");
+            }
+            values.put(LiveViewData.Notifications.TIMESTAMP, System.currentTimeMillis());
+            SQLiteDatabase db2 = dbHelper.getWritableDatabase();
+            db2.insert(LiveViewData.Notifications.TABLE, LiveViewData.Notifications._ID, values);
+            db2.close();
+            getContext().getContentResolver().notifyChange(
+                    LiveViewData.Notifications.CONTENT_URI, null);
+            return LiveViewData.Notifications.CONTENT_URI;
         default:
             throw new IllegalArgumentException("Unknown URI: " + uri);
         }
@@ -132,6 +169,14 @@ public class LiveViewDataProvider extends ContentProvider
             c.setNotificationUri(getContext().getContentResolver(),
                     LiveViewData.Log.CONTENT_URI);
             return c;
+        case MATCH_NOTIFICATIONS:
+            SQLiteDatabase db2 = dbHelper.getReadableDatabase();
+            Cursor c2 = db2.query(LiveViewData.Notifications.TABLE,
+                    LiveViewData.Notifications.DEFAULT_PROJECTION, null, null, null,
+                    null, LiveViewData.Notifications.DEFAULT_ORDER);
+            c2.setNotificationUri(getContext().getContentResolver(),
+                    LiveViewData.Notifications.CONTENT_URI);
+            return c2;
         default:
             throw new IllegalArgumentException("Unknown URI: " + uri);
         }

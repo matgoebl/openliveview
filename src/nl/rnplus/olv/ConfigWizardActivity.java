@@ -8,7 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.preference.ListPreference;
+//import android.preference.ListPreference;
 import android.view.View;
 import android.widget.Toast;
 import nl.rnplus.olv.data.Prefs;
@@ -21,7 +21,7 @@ public class ConfigWizardActivity extends Activity {
     private int selected = -1;
     private AlertDialog devicelist;
     private BluetoothAdapter btAdapter;
-    private ListPreference devicePreference;
+    //private ListPreference devicePreference;
     private CharSequence[] choiceList;
     private CharSequence[] valueList;
 

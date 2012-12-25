@@ -345,10 +345,10 @@ public class LiveViewService extends Service
             	if (!notificationContentFilter.contains(intent.getExtras().getString("contents"))) {
             		NotificationNeedsUpdate = true;
             		LiveViewDbHelper.addNotification(myself, intent.getExtras().getString("title"), intent.getExtras().getString("contents"), intent.getExtras().getInt("type"),  intent.getExtras().getLong("timestamp"));
-            		Log.w("ShowNotificationReceiver", "Added new notification.");
+            		Log.w("ShowNotificationReceiver", "Added new notification (1).");
             	}
             	else {
-            		Log.w("ShowNotificationReceiver", "Notification not added because of filter.");
+            		Log.w("ShowNotificationReceiver", "Notification not added because of filter (1). Content: "+intent.getExtras().getString("contents"));
             	}
             }
         }  
