@@ -2,15 +2,23 @@ package nl.rnplus.olv;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.text.Editable;
 import android.view.View;
+import android.widget.EditText;
 import nl.rnplus.olv.data.LiveViewData;
+import nl.rnplus.olv.data.LiveViewDbConstants;
 import nl.rnplus.olv.data.LiveViewDbHelper;
 import nl.rnplus.olv.data.Prefs;
 
 public class MainActivity extends Activity {
+	
+	private MainActivity myself;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -22,6 +30,7 @@ public class MainActivity extends Activity {
             this.startActivity(myIntent);
             finish();
         }
+        myself = this;
     }
 
     public void openSettings(View view) {
@@ -46,13 +55,28 @@ public class MainActivity extends Activity {
         startActivity(new Intent(this, PluginManagerActivity.class));
     }
     
-    public void addTestNotification(View view) {
-    	LiveViewDbHelper.addNotification(this, "test_title", "test_content", 0, System.currentTimeMillis());
-    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Info");
-        builder.setMessage("Added test notification to the database.");
-        builder.setPositiveButton("Close", null);
-        builder.show(); 
+    public void addNote(View view) {
+		final EditText input = new EditText(this);
+		input.setText("");
+		new AlertDialog.Builder(MainActivity.this)
+		.setTitle("Add note")
+		.setMessage("Please enter the content of your note")
+		.setView(input)
+		.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+		    public void onClick(DialogInterface dialog, int whichButton) {
+		    	String value = input.getText().toString();
+				LiveViewDbHelper.addNotification(myself, "Note", value, LiveViewDbConstants.NTF_NOTE, System.currentTimeMillis());
+				AlertDialog.Builder builder = new AlertDialog.Builder(myself);
+				builder.setTitle("Info");
+				builder.setMessage("Your note is added to the database.");
+				builder.setPositiveButton("Close", null);
+				builder.show(); 
+		    }
+		}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+		    public void onClick(DialogInterface dialog, int whichButton) {
+		        // Do nothing.
+		    }
+		}).show();
     }
     
     public void showAboutDialog(View view) {
@@ -83,7 +107,8 @@ public class MainActivity extends Activity {
     public void showAllStoredNotifications(View view) {
         //For debugging the notification database
     	try {
-	    	Cursor notifications = LiveViewDbHelper.getAllNotifications(this);
+    		SQLiteDatabase db = LiveViewDbHelper.getReadableDb(this);
+	    	Cursor notifications = LiveViewDbHelper.getAllNotifications(this, db);
 	    	
 	    	int contentcolumn = -1;
 	    	for (int i = 0; i < notifications.getColumnCount(); i++)
@@ -144,6 +169,7 @@ public class MainActivity extends Activity {
 		        builder.show();
 	    	}
 	    	notifications.close();
+	    	LiveViewDbHelper.closeDb(db);
     	} catch(Exception e) {
 	        AlertDialog.Builder builder = new AlertDialog.Builder(this);
 	        builder.setTitle("Error");

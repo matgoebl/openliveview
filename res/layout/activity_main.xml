@@ -90,11 +90,21 @@
         android:id="@+id/pluginmanagerbutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/button1"
+        android:layout_above="@+id/button01"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:onClick="openPluginManager"
         android:text="@string/main_plugin_manager_btn_text"
         android:visibility="gone"/>
+
+    <Button
+        android:id="@+id/Button01"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button1"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:onClick="addNote"
+        android:text="@string/main_add_note_btn_text" />
 
 </RelativeLayout>

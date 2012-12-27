@@ -106,7 +106,7 @@
     <string name="prefs_cat_olvversion_title">Other stuff</string>
 
     <string name="prefs_version_title">Version</string>
-    <string name="prefs_version_summary">1.0.1.8</string>    
+    <string name="prefs_version_summary">1.0.1.9</string>    
         
     <string name="accessibility_service_description">This service will display your notifications on the connected LiveView device.</string>
 
@@ -121,7 +121,8 @@
 	<string name="main_plugin_manager_btn_text">Manage plugins&#8230;</string>
 	<string name="main_logo_content_desc">OpenLiveView logo</string>
 	<string name="main_help_text">You can configure OpenLiveView by clicking the "Settings" button. Do not forget to enable the Accessibility service for receiving notifications.</string>
-
+	<string name="main_add_note_btn_text">Add note...</string>
+	
 	<string name="wizard_finish_btn_text">Next ></string>
 	<string name="wizard_bluetooth_btn_text">Bluetooth</string>
 	<string name="wizard_intro_text">Please pair your LiveView using the bluetooth settings on your device. When you are done press next and choose your LiveView device from the list.</string>

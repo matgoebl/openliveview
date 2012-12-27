@@ -39,6 +39,7 @@ import nl.rnplus.olv.messages.events.CapsResponse;
 import nl.rnplus.olv.messages.events.DeviceStatus;
 import nl.rnplus.olv.messages.events.GetAlert;
 import nl.rnplus.olv.messages.events.Navigation;
+import nl.rnplus.olv.data.LiveViewDbConstants;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -97,6 +98,9 @@ public class LiveViewThread extends Thread {
     private byte menu_button_plugintest_id = -1;
     private byte menu_button_debug_id = -1;
     private byte menu_button_mediamenu_id = -1;
+    private byte menu_button_android_notifications_id = -1;
+    private byte menu_button_sms_id = -1;
+    private byte menu_button_notes_id = -1;
     
     private byte debugx = 0;
     private byte debugy = 0;
@@ -187,6 +191,12 @@ public class LiveViewThread extends Thread {
         Boolean menu_show_mediamenu_status = prefs.getMenuShowMediaMenuStatus();
         if (menu_show_notifications) {
             menu_button_notifications_id = menu_button_count;
+            menu_button_count += 1;
+            menu_button_android_notifications_id = menu_button_count;
+            menu_button_count += 1;
+            menu_button_sms_id = menu_button_count;
+            menu_button_count += 1;
+            menu_button_notes_id = menu_button_count;
             menu_button_count += 1;
         }
         if (menu_show_media_next) {
@@ -319,6 +329,25 @@ public class LiveViewThread extends Thread {
         parentService.stopForeground(true);
         parentService.stopSelf();
     }
+    
+    private byte[] getImageForNotification(int alertId, int type) {
+    	if (type==LiveViewDbConstants.ALL_NOTIFICATIONS) {
+    		type = parentService.getNotificationType(alertId);
+    	}
+    	if (type==LiveViewDbConstants.NTF_GENERIC) {
+    		return menuImage_notification;
+    	}
+    	if (type==LiveViewDbConstants.NTF_ANDROID) {
+    		return menuImage_debug;
+    	}
+    	if (type==LiveViewDbConstants.NTF_SMS) {
+    		return menuImage;
+    	}
+    	if (type==LiveViewDbConstants.NTF_NOTE) {
+    		return menuImage;
+    	}
+    	return menuImage_notification;
+    }
 
     /**
      * Process a message that was sent by the LiveView device.
@@ -378,43 +407,55 @@ public class LiveViewThread extends Thread {
             case MessageConstants.MSG_GETMENUITEMS:
                 Log.d(TAG, "Sending menu items...");
                 if (menu_state == 0) {
-                	for (int current_id = 0; current_id<=menu_button_count; current_id++)
+                	for (byte current_id = 0; current_id<=menu_button_count; current_id++)
                 	{
 	                    if (menu_button_notifications_id == current_id) {
-	                        sendCall(new MenuItem(menu_button_notifications_id, true, new UShort((short) (parentService.getNotificationUnreadCount())),
-	                                "Notifications", menuImage_notification));
+	                        sendCall(new MenuItem(current_id, true, new UShort((short) (parentService.getNotificationUnreadCount(LiveViewDbConstants.ALL_NOTIFICATIONS))),
+	                                "All notifications", menuImage_notification));
 	                    }
 	                    if (menu_button_media_next_id == current_id) {
-	                        sendCall(new MenuItem(menu_button_media_next_id, false, new UShort((short) 0),
+	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
 	                                "Next", menuImage_right));
 	                    }
 	                    if (menu_button_media_play_id == current_id) {
-	                        sendCall(new MenuItem(menu_button_media_play_id, false, new UShort((short) 0),
+	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
 	                                "Play / Pause", menuImage_music));
 	                    }
 	                    if (menu_button_media_previous_id == current_id) {
-	                        sendCall(new MenuItem(menu_button_media_previous_id, false, new UShort((short) 0),
+	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
 	                                "Previous", menuImage_left));
 	                    }
 	                    if (menu_button_findphone_id == current_id) {
-	                        sendCall(new MenuItem(menu_button_findphone_id, false, new UShort((short) 0),
+	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
 	                                "Find my phone", menuImage_location));
 	                    }
 	                    if (menu_button_battery_status_id == current_id) {
-	                        sendCall(new MenuItem(menu_button_battery_status_id, false, new UShort((short) (get_battery_status() * 100)),
+	                        sendCall(new MenuItem(current_id, false, new UShort((short) (get_battery_status() * 100)),
 	                                "Battery", menuImage_battery));
 	                    }
 	                    if (menu_button_plugintest_id == current_id) {
-	                        sendCall(new MenuItem(menu_button_plugintest_id, false, new UShort((short) 0),
+	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
 	                                "Plugin test", menuImage));
 	                    }
 	                    if (menu_button_mediamenu_id == current_id) {
-	                        sendCall(new MenuItem(menu_button_mediamenu_id, false, new UShort((short) 0),
+	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
 	                                "Media menu", menuImage_plus));
 	                    }
 	                    if (menu_button_debug_id == current_id) {
-	                        sendCall(new MenuItem(menu_button_debug_id, false, new UShort((short) 0),
+	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
 	                                "Bitmap navigation test", menuImage_debug));
+	                    }
+	                    if (menu_button_android_notifications_id == current_id) {
+	                        sendCall(new MenuItem(current_id, true, new UShort((short) parentService.getNotificationUnreadCount(LiveViewDbConstants.NTF_ANDROID)),
+	                                "Android notifications", menuImage_debug));
+	                    }
+	                    if (menu_button_sms_id == current_id) {
+	                        sendCall(new MenuItem(current_id, true, new UShort((short) parentService.getNotificationUnreadCount(LiveViewDbConstants.NTF_SMS)),
+	                                "SMS messages", menuImage_debug));
+	                    }
+	                    if (menu_button_notes_id == current_id) {
+	                        sendCall(new MenuItem(current_id, true, new UShort((short) parentService.getNotificationUnreadCount(LiveViewDbConstants.NTF_NOTE)),
+	                                "Notes", menuImage_debug));
 	                    }
                 	}
                     Log.d(TAG, "Menu items sent, menu_state is 0.");
@@ -431,58 +472,45 @@ public class LiveViewThread extends Thread {
                     alertId = 0;
                 }
                 last_menu_id = alert.getMenuItemId();
+                int type = LiveViewDbConstants.ALL_NOTIFICATIONS;
+                if (last_menu_id==menu_button_android_notifications_id){
+                	type = LiveViewDbConstants.NTF_ANDROID;
+                }
+                if (last_menu_id==menu_button_sms_id){
+                	type = LiveViewDbConstants.NTF_SMS;
+                }
+                if (last_menu_id==menu_button_notes_id){
+                	type = LiveViewDbConstants.NTF_NOTE;
+                }
                 if (alert.getAlertAction() == MessageConstants.ALERTACTION_FIRST) {
                     alertId = 0;
                 }
                 if (alert.getAlertAction() == MessageConstants.ALERTACTION_LAST) {
-                    if (last_menu_id == menu_button_notifications_id) {
-                        alertId = (byte) (parentService.getNotificationTotalCount() - 1);
-                    } else {
-                        alertId = 0;
-                    }
+                		alertId = (byte) (parentService.getNotificationTotalCount(type) - 1);
                 }
                 if (alert.getAlertAction() == MessageConstants.ALERTACTION_NEXT) {
                     alertId += 1;
-                    if (last_menu_id == menu_button_notifications_id) {
-                        if (alertId > (byte) parentService.getNotificationTotalCount() - 1) {
-                            alertId = 0;
-                        }
-                    } else {
+                    if (alertId > (byte) parentService.getNotificationTotalCount(type) - 1) {
                         alertId = 0;
                     }
                 }
                 if (alert.getAlertAction() == MessageConstants.ALERTACTION_PREV) {
                     alertId -= 1;
-                    if (last_menu_id == menu_button_notifications_id) {
-                        if (alertId < 0) {
-                            alertId = (byte) (parentService.getNotificationTotalCount() - 1);
-                        }
-                    } else {
-                        alertId = 0;
+                    if (alertId < 0) {
+                        alertId = (byte) (parentService.getNotificationTotalCount(type) - 1);
                     }
                 }
-                if (last_menu_id == 0) //Notifications (Date and time fixed by TpmKranz)
-                {
-                    Log.d(TAG, "Notifications alert (ID: " + alertId + ") Time:" + parentService.getNotificationTime(alertId));
-                    if (parentService.getNotificationTotalCount() > 0) {
-                    	parentService.refreshNotificationCursor();
-                        if (parentService.getNotificationType(alertId)==LiveViewDbConstants.NTF_SMS) {
-                            String notificationTimeString = sdf.get().format(new Date(parentService.getNotificationTime(alertId)));
-                            sendCall(new GetAlertResponse((byte) parentService.getNotificationTotalCount(),
-                                    (byte) parentService.getNotificationUnreadCount(), alertId, notificationTimeString,
-                                    parentService.getNotificationTitle(alertId), parentService.getNotificationContent(alertId), menuImage));
-                        } else {
-                            String notificationTimeString = sdf.get().format(new Date(parentService.getNotificationTime(alertId)));
-                            sendCall(new GetAlertResponse((byte) parentService.getNotificationTotalCount(),
-                                    (byte) parentService.getNotificationUnreadCount(), alertId, notificationTimeString,
-                                    parentService.getNotificationTitle(alertId), parentService.getNotificationContent(alertId), menuImage_notification));
-                        }
-                    } else {
-                        sendCall(new GetAlertResponse(0, 0, alertId, "", "No notifications", "", menuImage_notification));
-                    }
+                Log.d(TAG, "Notifications alert (ID: " + alertId + ") Time:" + parentService.getNotificationTime(alertId, type));
+                if (parentService.getNotificationTotalCount(type) > 0) {
+                	parentService.refreshNotificationCursor();
+                    String notificationTimeString = sdf.get().format(new Date(parentService.getNotificationTime(alertId, type)));
+                    sendCall(new GetAlertResponse((byte) parentService.getNotificationTotalCount(type),
+                            (byte) parentService.getNotificationUnreadCount(type), alertId, notificationTimeString,
+                            parentService.getNotificationTitle(alertId, type), parentService.getNotificationContent(alertId, type), getImageForNotification(alertId, type)));
+
+                    //if (parentService.getNotificationType(alertId)==LiveViewDbConstants.NTF_SMS)
                 } else {
-                    Log.d(TAG, "Unknown alert. Display demo. (id: " + last_menu_id + ")");
-                    sendCall(new GetAlertResponse(20, 4, alertId, "ID: " + alertId, "HEADER", "01234567890123456789012345678901234567890123456789", menuImage));
+                    sendCall(new GetAlertResponse(0, 0, alertId, "", "No notifications", "", menuImage_notification));
                 }
                 break;
             case MessageConstants.MSG_NAVIGATION:
@@ -570,10 +598,12 @@ public class LiveViewThread extends Thread {
                                         hasdonesomething = true;
                                     }
                                     if (nav.getMenuItemId() == menu_button_debug_id) {
-                                        Log.d(TAG, "DEBUG MENU OPENED");
+                                        //Log.d(TAG, "DEBUG MENU OPENED");
                                         sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
                                         menu_state = 4;
                                         debug1();
+                                    	//parentService.refreshNotificationCursor();
+                                    	//sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
                                         hasdonesomething = true;
                                     }
                                     if (nav.getMenuItemId() == menu_button_mediamenu_id) {
@@ -891,7 +921,7 @@ public class LiveViewThread extends Thread {
 		        	menu_state = 0; //Go to the menu without sending anything.
 		        }
 		        
-		        if (enable_notification_buzzer && (parentService.getNotificationUnreadCount()>0) && (device_status==MessageConstants.DEVICESTATUS_ON)) {
+		        if (enable_notification_buzzer && (parentService.getNotificationUnreadCount(LiveViewDbConstants.ALL_NOTIFICATIONS)>0) && (device_status==MessageConstants.DEVICESTATUS_ON)) {
 		                sendCall(new SetLed(Color.GREEN, 0, 1000));
 		                sendCall(new SetVibrate(0, 200));
 		        }

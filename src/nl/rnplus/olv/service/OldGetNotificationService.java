@@ -47,7 +47,7 @@ public class OldGetNotificationService extends AccessibilityService {
                 for (CharSequence aNotificationList : notificationList) {
                     //Log.d(LOG_TAG, "The notification: " + aNotificationList);
                     try {
-                    	Long time = event.getEventTime();//System.currentTimeMillis();
+                    	Long time = System.currentTimeMillis(); //event.getEventTime();
                     	/* 
                     	//Not needed since the notification can be added to the database directly.
                         Intent bci = new Intent(SHOW_NOTIFICATION);

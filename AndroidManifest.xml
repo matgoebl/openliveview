@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Version 1.0.1.8 of OpenLiveView -->
+<!-- Version 1.0.1.9 of OpenLiveView -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="nl.rnplus.olv"
-    android:versionCode="12"
+    android:versionCode="13"
     android:versionName="@string/prefs_version_summary" android:installLocation="internalOnly">
     
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17" />

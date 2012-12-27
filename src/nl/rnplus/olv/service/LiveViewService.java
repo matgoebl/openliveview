@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.IBinder;
 import android.telephony.PhoneStateListener;
@@ -51,6 +52,8 @@ public class LiveViewService extends Service
     int timecolumn = -1;
     int readcolumn = -1;
     
+    SQLiteDatabase globdb = null;
+    
     BroadcastReceiver notification_receiver = new ShowNotificationReceiver();
     BroadcastReceiver plugin_receiver = new PluginCommandReceiver();
     
@@ -72,7 +75,8 @@ public class LiveViewService extends Service
     	myself = this;
     	
     	try {
-	    	notification_cursor = LiveViewDbHelper.getAllNotifications(this);
+    		SQLiteDatabase db = LiveViewDbHelper.getReadableDb(this);
+	    	notification_cursor = LiveViewDbHelper.getAllNotifications(this, db);
 	    	for (int i = 0; i < notification_cursor.getColumnCount(); i++)
 	    	{
 	    		if (notification_cursor.getColumnName(i).contains(LiveViewData.Notifications.CONTENT))
@@ -138,6 +142,7 @@ public class LiveViewService extends Service
 		        Log.e(TAG, message);
 		        LiveViewDbHelper.logMessage(this, message);    
 	    	}
+	    	LiveViewDbHelper.closeDb(db);
     	} catch(Exception e) {
     		String message = "Database error in service: " + e.getMessage();
 	        Log.e(TAG, message);
@@ -221,15 +226,60 @@ public class LiveViewService extends Service
         stopSelf();
     }
     
-    public String getNotificationContent(int id)
-    {
-    	Log.d("DEBUG", "getNotificationContent (for ID: "+id+")");
+    public int getIdOfNotification(int notification, int type){
+    	int id = -1;
+    	int counter = 0;
+    	Log.w("DEBUG", "getIdOfNotification");
+    	refreshNotificationCursor();
+    	if (type==LiveViewDbConstants.ALL_NOTIFICATIONS){
+    		return notification;
+    	}
     	try {
-	    	notification_cursor.moveToPosition(id);
-	    	//Log.d("DEBUG", "Setting notification is read for: "+id);
-	    	//LiveViewDbHelper.setNotificationRead(myself, id);
-	    	LiveViewDbHelper.setAllNotificationsRead(myself);
-	        return notification_cursor.getString(contentcolumn);
+			if (notification_cursor.getCount()>0){
+				notification_cursor.moveToFirst();
+	    		for (int i = 0; i < notification_cursor.getCount(); i++){
+	    			if (type==notification_cursor.getInt(typecolumn)){
+	    				if (counter==notification)
+	    				{
+	    					id = notification_cursor.getPosition();
+	    				}
+	    				counter++;
+	    			}
+		    		notification_cursor.moveToNext();
+		    	}
+			} else {
+				id = -1;
+			}
+    	} catch(Exception e) {
+    		String message = "Database error in service: " + e.getMessage();
+	        Log.e(TAG, message);
+	        LiveViewDbHelper.logMessage(myself, message);    
+	        return LiveViewDbConstants.NTF_GENERIC;
+    	}
+    	return id;
+    }
+    
+    public String getNotificationContent(int notification, int type)
+    {
+    	String content = "";
+    	Log.d("DEBUG", "getNotificationContent (for notification "+notification+" of type "+type+")");
+    	try {
+    		int id = 0;
+    		if (type==LiveViewDbConstants.ALL_NOTIFICATIONS)
+    		{
+    			id = notification;
+    		}else{
+    			id = getIdOfNotification(notification, type); 
+    		}
+    		LiveViewDbHelper.setAllNotificationsRead(myself, type);
+    		if (id!=-1)
+    		{
+		    	notification_cursor.moveToPosition(id);
+		        content = notification_cursor.getString(contentcolumn);
+		        return content;
+    		}else{
+    			return "Could not find content.";
+    		}
     	} catch(Exception e) {
     		String message = "Database error in service: " + e.getMessage();
 	        Log.e(TAG, message);
@@ -238,12 +288,24 @@ public class LiveViewService extends Service
     	}
     }
     
-    public String getNotificationTitle(int id)
+    public String getNotificationTitle(int notification, int type)
     {
-    	Log.d("DEBUG", "getNotificationTitle (for ID: "+id+")");
+    	Log.d("DEBUG", "getNotificationTitle (for notification "+notification+")");
     	try {
-	    	notification_cursor.moveToPosition(id);
-	        return notification_cursor.getString(titlecolumn);
+    		int id = 0;
+    		if (type==LiveViewDbConstants.ALL_NOTIFICATIONS)
+    		{
+    			id = notification;
+    		}else{
+    			id = getIdOfNotification(notification, type); 
+    		}
+    		if (id!=-1)
+    		{
+		    	notification_cursor.moveToPosition(id);
+		        return notification_cursor.getString(titlecolumn);
+    		}else{
+    			return "Could not find title.";
+    		}
     	} catch(Exception e) {
     		String message = "Database error in service: " + e.getMessage();
 	        Log.e(TAG, message);
@@ -252,11 +314,23 @@ public class LiveViewService extends Service
     	}
     }
     
-    public long getNotificationTime(int id) {
-    	Log.d("DEBUG", "getNotificationTime (for ID: "+id+")");
+    public long getNotificationTime(int notification, int type) {
+    	Log.d("DEBUG", "getNotificationTime (for notification: "+notification+")");
     	try {
-	    	notification_cursor.moveToPosition(id);
-	        return notification_cursor.getLong(timecolumn);
+    		int id = 0;
+    		if (type==LiveViewDbConstants.ALL_NOTIFICATIONS)
+    		{
+    			id = notification;
+    		}else{
+    			id = getIdOfNotification(notification, type); 
+    		}
+    		if (id!=-1)
+    		{
+    			notification_cursor.moveToPosition(id);
+		        return notification_cursor.getLong(timecolumn);
+    		}else{
+    			return 0;
+    		}
     	} catch(Exception e) {
     		String message = "Database error in service: " + e.getMessage();
 	        Log.e(TAG, message);
@@ -295,20 +369,23 @@ public class LiveViewService extends Service
     }
     */
 
-    public int getNotificationUnreadCount()
+    public int getNotificationUnreadCount(int type)
     {
     	Log.w("DEBUG", "getNotificationUnreadCount");
     	refreshNotificationCursor();
     	int unreadCount = 0;
     	try {
-			if (notification_cursor.getCount()>0)
-			{
+			if (notification_cursor.getCount()>0){
 				notification_cursor.moveToFirst();
-	    		for (int i = 0; i < notification_cursor.getCount(); i++)
-		    	{
-		    		if (notification_cursor.getInt(readcolumn)==0)
-		    		{
-		    			unreadCount++;
+	    		for (int i = 0; i < notification_cursor.getCount(); i++){
+		    		if (notification_cursor.getInt(readcolumn)==0){
+		    			if (type==LiveViewDbConstants.ALL_NOTIFICATIONS){
+		    			    unreadCount++;
+		    			}else{
+		    				if (type==notification_cursor.getInt(typecolumn)){
+		    					unreadCount++;
+		    				}
+		    			}
 		    		}
 		    		notification_cursor.moveToNext();
 		    	}
@@ -325,12 +402,46 @@ public class LiveViewService extends Service
         return unreadCount;
     }
     
-    public int getNotificationTotalCount()
+    public int getNotificationTotalCount(int type)
     {
     	Log.w("DEBUG", "getNotificationTotalCount");
     	refreshNotificationCursor();
-        return notification_cursor.getCount();
+    	int totalCount = 0;
+    	if (type==LiveViewDbConstants.ALL_NOTIFICATIONS){
+    		return notification_cursor.getCount();
+    	}
+    	try {
+			if (notification_cursor.getCount()>0){
+				notification_cursor.moveToFirst();
+	    		for (int i = 0; i < notification_cursor.getCount(); i++){
+	    			if (type==LiveViewDbConstants.ALL_NOTIFICATIONS){
+	    			    totalCount++;
+	    			}else{
+	    				if (type==notification_cursor.getInt(typecolumn)){
+	    					totalCount++;
+	    				}
+	    			}
+		    		notification_cursor.moveToNext();
+		    	}
+			} else {
+				totalCount = 0;
+			}
+    	} catch(Exception e) {
+    		String message = "Database error in service: " + e.getMessage();
+	        Log.e(TAG, message);
+	        LiveViewDbHelper.logMessage(myself, message);    
+	        return LiveViewDbConstants.NTF_GENERIC;
+    	}
+    	Log.w("DEBUG", "totalCount = "+totalCount);
+        return totalCount;
     }
+    
+    /* public int getNotificationTotalCount()
+    {
+    	Log.w("DEBUG", "getNotificationTotalCount (NO TYPE)");
+    	refreshNotificationCursor();
+        return notification_cursor.getCount();
+    } */
         
     public class ShowNotificationReceiver extends BroadcastReceiver {  
         @Override  
@@ -544,8 +655,18 @@ public class LiveViewService extends Service
 		        Log.e(TAG, message);
 		        LiveViewDbHelper.logMessage(this, message);    
 	    	}
+    		try {
+    			if (globdb!=null)
+    			{
+    				LiveViewDbHelper.closeDb(globdb);
+    				Log.i(TAG, "Database closed!");
+    			}
+    		} catch(Exception e) {
+    			Log.e(TAG, "Database could not be closed!");
+    		}
         	try {
-        		notification_cursor = LiveViewDbHelper.getAllNotifications(myself);
+        		globdb = LiveViewDbHelper.getReadableDb(this);
+        		notification_cursor = LiveViewDbHelper.getAllNotifications(myself, globdb);
 	    	} catch(Exception e) {
 	    		String message = "Database error in service (refresh: open): " + e.getMessage();
 		        Log.e(TAG, message);

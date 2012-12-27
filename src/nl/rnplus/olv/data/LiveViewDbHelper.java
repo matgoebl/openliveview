@@ -83,6 +83,7 @@ public class LiveViewDbHelper extends SQLiteOpenHelper
         values.put(LiveViewData.Notifications.READ, 0);
         db.insert(LiveViewData.Notifications.TABLE, LiveViewData.Notifications._ID, values);
         db.close();
+        //deleteOldNotifications(context);
     }
     
     public static void setNotificationRead(Context context, Integer id)
@@ -96,25 +97,36 @@ public class LiveViewDbHelper extends SQLiteOpenHelper
         db.close();
     }
     
-    public static void setAllNotificationsRead(Context context)
+    public static void setAllNotificationsRead(Context context, int type)
     {
     	Log.w("DEBUG", "setAllNotificationsRead");
         LiveViewDbHelper helper = new LiveViewDbHelper(context);
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(LiveViewData.Notifications.READ, 1);
-        db.update(LiveViewData.Notifications.TABLE,  values, "1", null);
+        if (type==LiveViewDbConstants.ALL_NOTIFICATIONS){
+        	db.update(LiveViewData.Notifications.TABLE,  values, "1", null);
+        }else{
+        	db.update(LiveViewData.Notifications.TABLE,  values, LiveViewData.Notifications.TYPE + "="+type, null);
+        }
         db.close();
     }
     
-	public static Cursor getAllNotifications(Context context)
+    public static SQLiteDatabase getReadableDb(Context context){
+    	LiveViewDbHelper helper = new LiveViewDbHelper(context);
+    	SQLiteDatabase db = helper.getReadableDatabase();
+    	return db;
+    }
+    
+    public static void closeDb(SQLiteDatabase db){
+    	db.close();
+    }
+    
+	public static Cursor getAllNotifications(Context context, SQLiteDatabase db)
 	    {
 			Log.w("DEBUG", "getAllNotifications");
-	    	LiveViewDbHelper helper = new LiveViewDbHelper(context);
-	    	SQLiteDatabase db = helper.getReadableDatabase();
 	    	Cursor cur=db.rawQuery("SELECT * FROM "+LiveViewData.Notifications.TABLE+" ORDER BY "+LiveViewData.Notifications._ID+" DESC",new String [] {});    
-	    	//db.close();
-	     return cur;
+	    	return cur;
 	    }
 	
 	public static Cursor deleteAllNotifications(Context context)
@@ -125,6 +137,24 @@ public class LiveViewDbHelper extends SQLiteOpenHelper
     	db.delete(LiveViewData.Notifications.TABLE, null, null);
     	db.close();
      return null;
+    }
+	
+	public static Cursor deleteNotification(Context context, int id)
+    {
+		Log.w("DEBUG", "deleteNotification");
+    	LiveViewDbHelper helper = new LiveViewDbHelper(context);
+    	SQLiteDatabase db = helper.getWritableDatabase();  
+    	db.delete(LiveViewData.Notifications.TABLE, LiveViewData.Notifications._ID + "="+id, null);
+    	db.close();
+     return null;
+    }
+	
+	public static void deleteOldNotifications(Context context){
+		Log.w("DEBUG", "deleteOldNotifications");
+    	LiveViewDbHelper helper = new LiveViewDbHelper(context);
+    	SQLiteDatabase db = helper.getWritableDatabase();  
+    	db.delete(LiveViewData.Notifications.TABLE, LiveViewData.Notifications.READ + "= 1", null);
+    	db.close();
     }
 
 }
