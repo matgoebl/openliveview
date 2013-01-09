@@ -36,8 +36,8 @@ public class DisplayPanel extends LiveViewCall
     {
     	try
     	{
-	        byte[] headerTextArray = headerText.getBytes("UTF-8");//iso-8859-1
-	    	byte[] footerTextArray = footerText.getBytes("UTF-8");
+	        byte[] headerTextArray = headerText.getBytes("iso-8859-1");//iso-8859-1 (UTF-8 is not working)
+	    	byte[] footerTextArray = footerText.getBytes("iso-8859-1");
 	    	String unusedText = "";
 	    	byte[] unusedTextArray = unusedText.getBytes("iso-8859-1");
 	        int size = 15 + headerTextArray.length + footerTextArray.length + image.length;

@@ -64,27 +64,31 @@ public class GetNotificationService extends AccessibilityService {
                     	String notificationContentFilter = (new Prefs(this)).getNotificationFilter();
                     	String content = aNotificationList.toString();
                     	if (!notificationContentFilter.contains(content)) {
-	                        LiveViewDbHelper.addNotification(this, "Notification", aNotificationList.toString(), LiveViewDbConstants.NTF_ANDROID, time);
-	        		        Prefs prefs = new Prefs(this);
-	        		        Boolean enable_notification_buzzer2 = prefs.getenablenotificationbuzzer2();
-	        		        if (enable_notification_buzzer2)
-	        		        {
-	        		            Intent bci2 = new Intent(PLUGIN_COMMAND);
-	        		            Bundle bcb2 = new Bundle();
-	        		            bcb2.putString("command", "notify");
-	        		            bcb2.putInt("delay", 0);
-	        		            bcb2.putInt("time", 600);
-	        		            bcb2.putLong("timestamp", time);
-	        		            bcb2.putInt("displaynotification", 1);
-	        		            bcb2.putString("line1", "Notification");
-	        		            bcb2.putString("line2", aNotificationList.toString());
-	        		            bcb2.putInt("icon_type", 1);
-	        		            bci2.putExtras(bcb2);
-	        		            sendBroadcast(bci2);
-	        		        }
-	                        String message = "Notification sent to LiveView: "+aNotificationList.toString();
-	                        Log.d(LOG_TAG, message);
-	                        //LiveViewDbHelper.logMessage(this, message);
+                    		if (valid(event)) {
+		                        LiveViewDbHelper.addNotification(this, "Notification", aNotificationList.toString(), LiveViewDbConstants.NTF_ANDROID, time);
+		        		        Prefs prefs = new Prefs(this);
+		        		        Boolean enable_notification_buzzer2 = prefs.getenablenotificationbuzzer2();
+		        		        if (enable_notification_buzzer2)
+		        		        {
+		        		            Intent bci2 = new Intent(PLUGIN_COMMAND);
+		        		            Bundle bcb2 = new Bundle();
+		        		            bcb2.putString("command", "notify");
+		        		            bcb2.putInt("delay", 0);
+		        		            bcb2.putInt("time", 600);
+		        		            bcb2.putLong("timestamp", time);
+		        		            bcb2.putInt("displaynotification", 1);
+		        		            bcb2.putString("line1", "Notification");
+		        		            bcb2.putString("line2", aNotificationList.toString());
+		        		            bcb2.putInt("icon_type", 1);
+		        		            bci2.putExtras(bcb2);
+		        		            sendBroadcast(bci2);
+		        		        }
+		                        String message = "Notification sent to LiveView: "+aNotificationList.toString();
+		                        Log.d(LOG_TAG, message);
+		                        //LiveViewDbHelper.logMessage(this, message);
+                    		} else {
+                    			Log.d(LOG_TAG, "Notification not added because of TpmKranz filter (2). Content: " + content);
+                    		}
                     	} else {
                     		Log.d(LOG_TAG, "Notification not added because of filter (2). Content: " + content);
                     	}
@@ -102,6 +106,24 @@ public class GetNotificationService extends AccessibilityService {
         }
     }
 
+    // TpmKranz
+    private boolean valid(AccessibilityEvent event) {
+		boolean valid = true;
+		String typeNotification = event.getClassName().toString();
+		String typeFilter = "";
+		Prefs prefs = new Prefs(this);
+		if(prefs.getFilterMode()==1) typeFilter = "android.widget.Toast$TN";
+		else if(prefs.getFilterMode()==2) typeFilter = "android.app.Notification";
+		if(typeNotification.equals(typeFilter)) valid = false;
+		if(valid){
+			String packageNotification=event.getPackageName().toString();
+			for(int i = 0; i<prefs.getNumberOfFilters();i++){
+				if(prefs.getFilterString(i).equals(packageNotification)) valid = false;
+			}
+		}
+		return valid;
+	}
+    
     @Override
     public void onInterrupt() {
         String message = "OnInterrupt() triggered in NotificationService.";

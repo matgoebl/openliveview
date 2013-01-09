@@ -21,8 +21,12 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.IBinder;
+import android.provider.ContactsContract;
+import android.provider.ContactsContract.PhoneLookup;
 import android.telephony.PhoneStateListener;
+import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -567,7 +571,7 @@ public class LiveViewService extends Service
 		    		    				{
 		    		    					Log.w("PLUGIN DEBUG", "Sent awaken.");
 		    		    					workerThread.sendCall(new SetScreenMode((byte) MessageConstants.BRIGHTNESS_MAX));
-		    		    					workerThread.open_menu_from_standby();
+		    		    					workerThread.openMenuFromStandby();
 		    		    				}
 		    		    				else
 		    		    				{
@@ -596,6 +600,18 @@ public class LiveViewService extends Service
     		    				int vtime = intent.getExtras().getInt("time");
     		    				workerThread.sendCall(new SetVibrate(vdelay, vtime));
     		    			}
+    		    			if (intent.getExtras().getString("command").contains("panel"))
+    		    			{
+    		    				Log.w("PLUGIN DEBUG", "Show panel.");
+    		    				String top_string = intent.getExtras().getString("top_string");
+    		    				String bottom_string = intent.getExtras().getString("bottom_string");
+    		    				boolean isAlert = intent.getExtras().getBoolean("isAlert");
+    		    				boolean useImage = intent.getExtras().getBoolean("useImage");
+    		    				byte[] img = intent.getExtras().getByteArray("image");
+    		    				workerThread.showPanel(top_string, bottom_string, isAlert, useImage, img);
+    		    				Log.e("DEBUG", top_string);
+    		    				Log.e("DEBUG", bottom_string);
+    		    			}    		    			
 	            			break;
 	            		default:
 	                        String message = "Error: Unknown device state!";
@@ -625,7 +641,7 @@ public class LiveViewService extends Service
 		        	{
 		        		if (workerThread.getLiveViewStatus()==MessageConstants.DEVICESTATUS_OFF)
 		        		{
-								workerThread.showIncomingCallScreen(state, "Incoming call", incomingNumber);
+								workerThread.showIncomingCallScreen(state, "Incoming call", getContactByAddr(myself, incomingNumber));
 		        		}
 		        		Log.d("PhoneCallStateNotified", "Status: RINGING");
 		        	}
@@ -673,4 +689,29 @@ public class LiveViewService extends Service
 		        LiveViewDbHelper.logMessage(this, message);    
 	    	}
         }
+        
+        
+        private static String getContactByAddr(Context context, String phoneNumber) {
+    		Uri personUri = null;
+    		Cursor cur = null;
+
+    		try {
+    			personUri = Uri.withAppendedPath(
+    					ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+    					phoneNumber);
+    			cur = context.getContentResolver()
+    					.query(personUri,
+    							new String[] { PhoneLookup.DISPLAY_NAME }, null,
+    							null, null);
+    			if (cur.moveToFirst()) {
+    				int nameIdx = cur.getColumnIndex(PhoneLookup.DISPLAY_NAME);
+    				return cur.getString(nameIdx);
+    			}
+    			return phoneNumber;
+    		} finally {
+    			if (cur != null) {
+    				cur.close();
+    			}
+    		}
+    	}
 }

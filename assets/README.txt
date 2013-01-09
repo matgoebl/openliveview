@@ -1,6 +1,6 @@
 The PNG images in the assets directory were provided by these people:
 
-Sony liveview source: (need to be replaced!)
+Sony liveview source: (c) Sony
 jerry_music_pause_icn.png
 jerry_music_play_icn.png
 
@@ -13,6 +13,3 @@ menu_notification.png
 
 JKORP (XDA):
 menu_battery.png
-
-Renze:
-Most of the other png files

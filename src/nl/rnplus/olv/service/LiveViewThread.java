@@ -39,7 +39,6 @@ import nl.rnplus.olv.messages.events.CapsResponse;
 import nl.rnplus.olv.messages.events.DeviceStatus;
 import nl.rnplus.olv.messages.events.GetAlert;
 import nl.rnplus.olv.messages.events.Navigation;
-import nl.rnplus.olv.data.LiveViewDbConstants;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -73,6 +72,7 @@ public class LiveViewThread extends Thread {
     private final byte[] bgImage_media_isnotplaying;
     private final byte[] bgImage_black;
     private final byte[] bgImage_blank;
+    private final byte[] bgImage_plugin_loading;
     
 
     /* Communication */
@@ -161,6 +161,7 @@ public class LiveViewThread extends Thread {
                             //.setLargeIcon(icon)
                     .build();
         }
+        
         btAdapter = BluetoothAdapter.getDefaultAdapter();
 
         menuImage = loadImageByteArray(parentService, "menu_blank.png");
@@ -178,6 +179,7 @@ public class LiveViewThread extends Thread {
         bgImage_black = loadImageByteArray(parentService, "bg_black.png");
         bgImage_blank = loadImageByteArray(parentService, "bg_blank.png");
         /* menuImage_min = loadImageByteArray(parentService, "menu_min.png"); */
+        bgImage_plugin_loading = loadImageByteArray(parentService, "plugin_loading.png");
 
         menu_button_count = 0;
 
@@ -226,11 +228,11 @@ public class LiveViewThread extends Thread {
         }
        
         
-        //menu_button_plugintest_id = menu_button_count;
-        //menu_button_count += 1;
+        /* menu_button_plugintest_id = menu_button_count;
+        menu_button_count += 1;
         
-        //menu_button_debug_id = menu_button_count;
-        //menu_button_count += 1;
+        menu_button_debug_id = menu_button_count;
+        menu_button_count += 1; */
         
         menu_state = 0;
     }
@@ -292,6 +294,9 @@ public class LiveViewThread extends Thread {
             sendCall(new CapsRequest());
             Log.d(TAG, "Message sent.");
             sendEvent("connectionstatus".toString(), 1, 0, "connected".toString(), null);
+            
+            device_status = 2; //Bugfix: after connecting device is in menu state.
+            
             do {
                 try {
                     LiveViewEvent response = reader.readMessage();
@@ -435,7 +440,7 @@ public class LiveViewThread extends Thread {
 	                    }
 	                    if (menu_button_plugintest_id == current_id) {
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
-	                                "Plugin test", menuImage));
+	                                "Demo", menuImage));
 	                    }
 	                    if (menu_button_mediamenu_id == current_id) {
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
@@ -592,18 +597,14 @@ public class LiveViewThread extends Thread {
                                     }
                                     if (nav.getMenuItemId() == menu_button_plugintest_id) {
                                         Log.d(TAG, "PLUGIN MENU ITEM TEST");
-                                        sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
-                                        menu_state = 3;
-                                        draw_plugin_loading();
+                                        pluginMenuAction(0);
                                         hasdonesomething = true;
                                     }
                                     if (nav.getMenuItemId() == menu_button_debug_id) {
-                                        //Log.d(TAG, "DEBUG MENU OPENED");
+                                        Log.d(TAG, "DEBUG MENU OPENED");
                                         sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
                                         menu_state = 4;
                                         debug1();
-                                    	//parentService.refreshNotificationCursor();
-                                    	//sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
                                         hasdonesomething = true;
                                     }
                                     if (nav.getMenuItemId() == menu_button_mediamenu_id) {
@@ -701,7 +702,24 @@ public class LiveViewThread extends Thread {
                             sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
                             sendCall(new SetMenuSize(menu_button_count));
                             break;
-
+                        case 3:
+                            Log.e(TAG, "Menu state 3: Plugin");
+                            switch (nav.getNavType()) {
+                            case MessageConstants.NAVTYPE_SELECT:
+                                switch (nav.getNavAction()) {
+                                    case MessageConstants.NAVACTION_LONGPRESS:
+                                    	menu_state = 0;
+    	                                sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
+    	                                sendCall(new SetMenuSize(menu_button_count));
+                                    	break;
+                                }
+                                break;
+	                            default:
+	                            	pluginNavigate(nav.getNavType());
+	                            	//sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
+	                            	break;
+                            }
+                            break; 
                         case 4:
                             Log.e(TAG, "Menu state 4: Debug");
                             switch (nav.getNavType()) {
@@ -773,12 +791,30 @@ public class LiveViewThread extends Thread {
         sendCall(new DisplayPanel("Battery status", (Math.round(get_battery_status() * 100)) + "%", menuImage_battery, false));
     }
     
-    public void draw_plugin_loading() throws IOException {
-        sendCall(new DisplayPanel("", "", menuImage, false));
+    public void pluginMenuAction(int menuId) throws IOException {
+        sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
+        menu_state = 3;
+        sendCall(new DisplayPanel("", "", bgImage_plugin_loading, false));
+        sendEvent("menuitem_opened", menuId, 0, "", "");
     }
     
-    public void open_menu_from_standby() throws IOException {
-        sendCall(new DisplayPanel("Please wait...", "Loading...", menuImage_notification, false));
+    public void pluginNavigate(byte navAction) throws IOException {
+    	sendEvent("navigation", navAction, 0, "", "");
+        sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
+    }
+    
+    public void showPanel(String top_string, String bottom_string, boolean isAlert, boolean useImage, byte[] image) throws IOException {
+    	byte[] img;
+    	if (useImage) {
+    		img = image;
+    	} else {
+    		img = menuImage;
+    	}
+    	sendCall(new DisplayPanel(top_string, bottom_string, img, isAlert));
+    }
+    
+    public void openMenuFromStandby() throws IOException {
+        //sendCall(new DisplayPanel("Please wait...", "Loading...", menuImage_notification, false));
         sendCall(new SetMenuSize(menu_button_count));
     }
     
@@ -841,6 +877,22 @@ public class LiveViewThread extends Thread {
         int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
         return level / (float) scale;
+    }
+    
+    public float get_battery_charge_status()
+    {
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent batteryStatus = parentService.registerReceiver(null, ifilter);
+        int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+        return status;
+    }
+    
+    public float get_battery_voltage()
+    {
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent batteryStatus = parentService.registerReceiver(null, ifilter);
+        int voltage = batteryStatus.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1);
+        return voltage;
     }
 
     public void emulate_media(int keycode) {

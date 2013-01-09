@@ -124,4 +124,42 @@ public class Prefs {
     public int getMenuUpDownAction() {
         return Integer.parseInt(preferences.getString("menu.menuupdownaction", "1"));
     }
+    
+    // TpmKranz
+    public void addFilterString(String string){
+		int number = preferences.getInt("numberoffilters", 0);
+		Editor editor = preferences.edit();
+		editor.putString("filter"+String.valueOf(number), string);
+		editor.putInt("numberoffilters", 1+number);
+		editor.commit();
+	}
+	
+	public void removeFilterString(int position){
+		int number = preferences.getInt("numberoffilters", 0);
+		Editor editor = preferences.edit();
+		for(int i=position;i<number-1;i++){
+			editor.putString("filter"+String.valueOf(i), preferences.getString("filter"+String.valueOf(i+1), ""));
+		}
+		editor.putInt("numberoffilters", number-1);
+		editor.remove("filter"+String.valueOf(number-1));
+		editor.commit();
+	}
+	
+	public String getFilterString(int position){
+		return preferences.getString("filter"+String.valueOf(position), "");
+	}
+	
+	public int getNumberOfFilters(){
+		return preferences.getInt("numberoffilters", 0);
+	}
+	
+	public void setFilterMode(int mode){
+		Editor editor = preferences.edit();
+		editor.putInt("filtermode", mode);
+		editor.commit();
+	}
+	
+	public int getFilterMode(){
+		return preferences.getInt("filtermode", 0);
+	}
 }

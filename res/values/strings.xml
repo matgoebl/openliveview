@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    
+    <string name="language">en</string>
+    
     <string name="app_name">OpenLiveView</string>
+    
+    <string name="prefs_version_summary">1.0.2.0</string> <!-- The version number (don't forget to change the version in AndroidManifest.xml too) -->
+    <string name="developer_name">RN+</string> <!-- Put your name here when you release your own version of olv -->
+    <!-- When releasing your own version of OLV feel free to change or hide the donation link in the settings menu -->
     
     <string name="title_activity_main">OpenLiveView</string>
     <string name="title_activity_plugin_manager">Installed plugins</string>
@@ -106,22 +113,21 @@
     <string name="prefs_cat_olvversion_title">Other stuff</string>
 
     <string name="prefs_version_title">Version</string>
-    <string name="prefs_version_summary">1.0.1.9</string>    
-        
+            
     <string name="accessibility_service_description">This service will display your notifications on the connected LiveView device.</string>
 
     <string name="menu_settings">Settings</string>
     <string name="menu_viewlog">View log</string>
     
 	<string name="main_application_text">Welcome to OpenLiveView!</string>
-	<string name="main_settings_btn_text">Main settings</string>
-	<string name="main_showallnotifications_btn_text">Show all notifications in the database</string>
-	<string name="main_wipeallnotifications_btn_text">Delete all notifications in the database</string>
+	<string name="main_settings_btn_text">Settings</string>
+	<string name="main_notifications_btn_text">Notifications</string>
+	<string name="main_add_note_btn_text">Add note&#8230;</string>
 	<string name="main_expert_settings_btn_text">Advanced settings</string>
-	<string name="main_plugin_manager_btn_text">Manage plugins&#8230;</string>
+	<string name="main_plugin_manager_btn_text">Plugins</string>
+	<string name="main_about_btn_text">About</string>
 	<string name="main_logo_content_desc">OpenLiveView logo</string>
 	<string name="main_help_text">You can configure OpenLiveView by clicking the "Settings" button. Do not forget to enable the Accessibility service for receiving notifications.</string>
-	<string name="main_add_note_btn_text">Add note...</string>
 	
 	<string name="wizard_finish_btn_text">Next ></string>
 	<string name="wizard_bluetooth_btn_text">Bluetooth</string>
@@ -141,4 +147,21 @@
 	<string name="expertconfig_information">Behind \'initial menu item\' you can enter a number from 0 to the amount of menu items you activated. The value is corrected automatically if you enter an impossible value.
 	    Behind \'menu vibration time\' you can enter a value of 0 to 255. This value will be passed on tot the liveview using the menu settings command.
 	    I suggest you leave this value at 0.</string>
+	    
+	<string name="debug_dialog_title">Plugins</string>
+	<string name="debug_function_disabled">This function is not available yet.</string>
+	
+	<string name="close_btn">Close</string>
+	<string name="ok_btn">OK</string>
+	
+	<string name="add_note_help">Please enter the content of your note</string>
+	
+	<!-- TpmKranz -->
+	<string name="prefs_menu_notificationfilter">Filter settings&#8230;</string>
+	<string name="prefs_filtereditor_btn_start">Add app to filter list</string>
+	<string name="prefs_filtereditor_btn_wait">Building app list may take a moment&#8230;</string>
+	<string name="prefs_filtereditor_btn_mode">Set filter mode</string>
+	<string name="title_activity_filter_editor">Filter editor</string>
+	<string name="title_activity_app_dialog">Add app to filter list</string>
+	<string name="message_select_filter_mode">Select which kind of notifications to block completely:</string>
 </resources>
