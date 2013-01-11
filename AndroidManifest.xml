@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Version 1.0.1.9 of OpenLiveView -->
+<!-- Version 1.0.2.1 of OpenLiveView -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="nl.rnplus.olv"
     android:versionCode="14"
     android:versionName="@string/prefs_version_summary" android:installLocation="internalOnly">
+    
+    <!-- Note to other developers: -->
+    <!-- When commiting to the OpenLiveView git please do not change the version number or code! -->
     
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17" />
 
@@ -90,7 +93,7 @@
         </activity>
             
         <activity
-            android:name="nl.rnplus.olv.PluginManagerActivity"
+            android:name="nl.rnplus.olv.OldPluginManagerActivity"
             android:label="@string/title_activity_plugin_manager"
             android:launchMode="singleInstance">
         </activity>  

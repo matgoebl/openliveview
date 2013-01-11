@@ -102,7 +102,7 @@ public class MainActivity extends Activity {
  
             public void onClick(View view) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(myself);
-                builder.setTitle(getString(R.string.debug_dialog_title));
+                builder.setTitle(getString(R.string.plugins_dialog_title));
                 builder.setMessage(getString(R.string.debug_function_disabled));
                 builder.setPositiveButton(getString(R.string.close_btn), null);
                 builder.show();
@@ -132,7 +132,7 @@ public class MainActivity extends Activity {
     }
 
     public void openPluginManager(View view) {
-        startActivity(new Intent(this, PluginManagerActivity.class));
+        startActivity(new Intent(this, OldPluginManagerActivity.class));
     }
     
     public void addNote() {
@@ -162,7 +162,7 @@ public class MainActivity extends Activity {
     public void showAboutDialog() {
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("About OpenLiveView");
-        builder.setMessage("Thank you for using OpenLiveView! This free and open source app was made possible thanks to the following people: Jan Korpegård, basty149, Exception13, TpmKranz, Pedro Veloso and Renze Nicolai. Thank you all for your help.");
+        builder.setMessage(R.string.about);
         builder.setPositiveButton(getString(R.string.close_btn), null);
         builder.show();
     }
@@ -215,7 +215,7 @@ public class MainActivity extends Activity {
 	    	{
 		        AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		        builder.setTitle("Warning");
-		        builder.setMessage("Database corrupt, read column not found! Please reinstall OpenLiveView or wipe all application data.");
+		        builder.setMessage("Database corrupt, column not found! Please reinstall OpenLiveView or wipe all application data.");
 		        builder.setPositiveButton(getString(R.string.close_btn), null);
 		        builder.show();
 	    	}

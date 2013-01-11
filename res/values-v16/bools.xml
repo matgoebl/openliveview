@@ -6,7 +6,4 @@
          so it has to be disabled on pre Jelly Bean android -->
 	<bool name="need_bind_accessibility_service_permission">true</bool>   
 	<bool name="not_need_bind_accessibility_service_permission">false</bool>  
-	
-	<!-- Enable functions to keep the liveview connected on older versions of android -->
-	<bool name="enable_hack_menu">false</bool>
 </resources>

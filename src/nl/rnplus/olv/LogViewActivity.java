@@ -1,5 +1,8 @@
 package nl.rnplus.olv;
 
+// WILL BE DELETED IN MY NEXT COMMIT
+// STILL USED BY THE OLD DATABASE CODE
+
 import nl.rnplus.olv.data.LiveViewData;
 import android.app.ListActivity;
 import android.database.Cursor;

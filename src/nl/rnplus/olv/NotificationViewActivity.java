@@ -1,5 +1,8 @@
 package nl.rnplus.olv;
 
+// WILL BE REMOVED IN MY NEXT COMMIT
+// NOT USED
+
 import nl.rnplus.olv.data.LiveViewData;
 import android.app.ListActivity;
 import android.database.Cursor;

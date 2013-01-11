@@ -1,5 +1,8 @@
 package nl.rnplus.olv;
 
+// WILL BE DELETED IN MY NEXT COMMIT
+// NOT USED
+
 /* Plugin manager activity
  * Added by Renze Nicolai
  * 
@@ -28,7 +31,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 
-public class PluginManagerActivity extends ListActivity
+public class OldPluginManagerActivity extends ListActivity
 {
 	public static final String ACTION_PICK_PLUGIN = "nl.rnplus.olv.intent.action.PICK_PLUGIN";
 	static final String KEY_PKG = "pkg";

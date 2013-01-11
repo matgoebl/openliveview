@@ -5,7 +5,7 @@
     
     <string name="app_name">OpenLiveView</string>
     
-    <string name="prefs_version_summary">1.0.3.0</string> <!-- The version number (don't forget to change the version in AndroidManifest.xml too) -->
+    <string name="prefs_version_summary">1.0.2.1</string> <!-- The version number (don't forget to change the version in AndroidManifest.xml too) -->
     <string name="developer_name">RN+</string> <!-- Put your name here when you release your own version of olv -->
     <!-- When releasing your own version of OLV feel free to change or hide the donation link in the settings menu -->
     
@@ -92,7 +92,7 @@
 
     <string name="prefs_wipenotifications_key">system.wipenotifications</string>
     <string name="prefs_wipenotifications_title">Wipe notifications from LiveView</string>
-    <string name="prefs_wipenotifications_summary">Enabled: Wipe all notifications in database. Disabled: Add current notification text to simple filter.</string>
+    <string name="prefs_wipenotifications_summary">Set the action executed when pressing the button in a notification. Enabled: Wipe all notifications in database. Disabled: Add current notification text to simple filter.</string>
 
     <string name="prefs_cat_actions_title">Actions</string>
     
@@ -150,15 +150,18 @@
 	<string name="expertconfig_save">Save</string>
 	<string name="expertconfig_information">Behind \'initial menu item\' you can enter a number from 0 to the amount of menu items you activated. The value is corrected automatically if you enter an impossible value.
 	    Behind \'menu vibration time\' you can enter a value of 0 to 255. This value will be passed on tot the liveview using the menu settings command.
-	    I suggest you leave this value at 0.</string>
+	    I suggest you leave this value at 0. All notifications of which the full content is part of the string entered in the filter textbox will be ignored.</string>
 	    
-	<string name="debug_dialog_title">Plugins</string>
-	<string name="debug_function_disabled">This function is not available yet.</string>
+	<string name="plugins_dialog_title">Plugins</string>
+	
+	<string name="debug_function_disabled">This function is not available.</string>
 	
 	<string name="close_btn">Close</string>
 	<string name="ok_btn">OK</string>
 	
 	<string name="add_note_help">Please enter the content of your note</string>
+	
+	<string name="about">"Thank you for using OpenLiveView! This free and open source app was made possible thanks to the following people: Jan Korpegård, basty149, Exception13, TpmKranz, Pedro Veloso and Renze Nicolai. Thank you all for your help."</string>
 	
 	<!-- TpmKranz -->
 	<string name="prefs_menu_notificationfilter">Filter settings&#8230;</string>
