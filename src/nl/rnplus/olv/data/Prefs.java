@@ -162,4 +162,8 @@ public class Prefs {
 	public int getFilterMode(){
 		return preferences.getInt("filtermode", 0);
 	}
+
+	public Boolean getWipeNotifications() {
+        return preferences.getBoolean("system.wipenotifications", false);
+	}
 }

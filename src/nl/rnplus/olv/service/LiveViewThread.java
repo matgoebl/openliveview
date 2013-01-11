@@ -529,7 +529,15 @@ public class LiveViewThread extends Thread {
                 if (nav.isInAlert()) {
                     Log.d(TAG, "User pressed button in alert. Wiping all the notifications from the liveview...");
                 	try {
-            	    	LiveViewDbHelper.deleteAllNotifications(parentService);
+                		Prefs pref = new Prefs(parentService);
+                		Boolean removeNotifications = prefs.getWipeNotifications();
+                		if (removeNotifications)
+                			LiveViewDbHelper.deleteAllNotifications(parentService);
+                		else {
+                			String notificationContentFilter = pref.getNotificationFilter();
+                			String currentNotificationText = parentService.getNotificationContent(alertId, LiveViewDbConstants.ALL_NOTIFICATIONS);
+                			pref.setNotificationFilter(notificationContentFilter + " " + currentNotificationText);
+                		}
                 	} catch(Exception e) {
                 		String message = "Error while deleting all notifications from the database: "+e.getMessage();
                         Log.e(TAG, message);

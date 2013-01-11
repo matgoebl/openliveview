@@ -16,6 +16,7 @@
         
         <CheckBoxPreference android:key="@string/prefs_enablenotificationbuzzer_key" android:title="@string/prefs_enablenotificationbuzzer_title" android:summary="@string/prefs_enablenotificationbuzzer_summary" android:icon="@drawable/ic_menu_notifications" android:defaultValue="false"/>
         <CheckBoxPreference android:summary="@string/prefs_updateunreadcountwhenmenuopens_summary" android:title="@string/prefs_updateunreadcountwhenmenuopens_title" android:key="@string/prefs_updateunreadcountwhenmenuopens_key" android:icon="@drawable/ic_menu_start_conversation" android:defaultValue="false"/>
+        <CheckBoxPreference android:summary="@string/prefs_wipenotifications_summary" android:title="@string/prefs_wipenotifications_title" android:key="@string/prefs_wipenotifications_key" android:icon="@drawable/ic_menu_start_conversation" android:defaultValue="false"/>
         
 	</PreferenceCategory>
 	

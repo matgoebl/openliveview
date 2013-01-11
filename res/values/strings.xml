@@ -5,7 +5,7 @@
     
     <string name="app_name">OpenLiveView</string>
     
-    <string name="prefs_version_summary">1.0.2.0</string> <!-- The version number (don't forget to change the version in AndroidManifest.xml too) -->
+    <string name="prefs_version_summary">1.0.3.0</string> <!-- The version number (don't forget to change the version in AndroidManifest.xml too) -->
     <string name="developer_name">RN+</string> <!-- Put your name here when you release your own version of olv -->
     <!-- When releasing your own version of OLV feel free to change or hide the donation link in the settings menu -->
     
@@ -89,7 +89,11 @@
     <string name="prefs_incomingcallvibrate_key">system.incomingcallvibrate</string>
     <string name="prefs_incomingcallvibrate_title">Vibrate on incoming call</string>
     <string name="prefs_incomingcallvibrate_summary">Vibrate the liveview when you receive a call.</string>  
-    
+
+    <string name="prefs_wipenotifications_key">system.wipenotifications</string>
+    <string name="prefs_wipenotifications_title">Wipe notifications from LiveView</string>
+    <string name="prefs_wipenotifications_summary">Enabled: Wipe all notifications in database. Disabled: Add current notification text to simple filter.</string>
+
     <string name="prefs_cat_actions_title">Actions</string>
     
 	<string name="prefs_menu_battery_status_key">menu.batterystatusvisible</string>
