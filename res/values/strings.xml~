@@ -7,7 +7,7 @@
 
 	<!-- Version -->
     <string name="prefs_version_summary">1.0.2.1</string> <!-- The version number (don't forget to change the version in AndroidManifest.xml too) -->
-    <string name="developer_name">RN+</string> <!-- Put your name here when you release your own version of olv -->
+    <string name="developer_name">RN+ / TpmKranz</string> <!-- Put your name here when you release your own version of olv -->
     <!-- When releasing your own version of OLV feel free to change or hide the donation link in the settings menu -->
     
     <!--  Main activity -->
@@ -26,12 +26,8 @@
     	
     	<!-- Experimental -->
     	<string name="prefs_cat_experimental_title">Experimental</string>
-
-	<!-- Features -->
-    	<string name="prefs_cat_features_title">Features</string>
-
-	<!-- Advanced -->
-    	<string name="prefs_cat_advanced_title">Advanced</string>
+    <string name="prefs_cat_features_title">Features</string>
+    <string name="prefs_cat_advanced_title">Advanced</string>
     
     <!-- Advanced settings -->
     <string name="title_expert_settings_manager">Advanced settings</string>
