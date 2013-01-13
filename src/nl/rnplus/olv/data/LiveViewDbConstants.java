@@ -10,7 +10,7 @@ public final class LiveViewDbConstants
 {
   //Database
   public static final String DATABASE_NAME = "olv.db";
-  public static final int DATABASE_VERSION = 1;
+  public static final int DATABASE_VERSION = 2;
   
   //Tables
   public static final String TABLE_ALERT_ITEMS = "alert_items";
@@ -19,7 +19,11 @@ public final class LiveViewDbConstants
   public static final String TABLE_MENU_ITEMS = "menu_items";
   
   //Columns for TABLE_ALERT_ITEMS
+  public static final String COLUMN_ALERT_ITEMS_ID = "_ID";
   public static final String COLUMN_ALERT_ITEMS_CONTENT = "content";
+  public static final String COLUMN_ALERT_ITEMS_TITLE = "title";
+  public static final String COLUMN_ALERT_ITEMS_TYPE = "type";
+  public static final String COLUMN_ALERT_ITEMS_TIMESTAMP = "timestamp";
   
   
   //Alert types

@@ -12,13 +12,18 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import android.util.Log;
 
 public class LiveViewDbHelper2 {
   
- //create table ALERT_ITEMS (ID integer primary key, Content text not null);
  private static final String SCRIPT_CREATE_TABLE_ALERT_ITEMS =
   "create table " + LiveViewDbConstants.TABLE_ALERT_ITEMS + " ("
-  + LiveViewDbConstants.COLUMN_ALERT_ITEMS_CONTENT + " text not null);";
+  + LiveViewDbConstants.COLUMN_ALERT_ITEMS_ID + " integer primary key, " 
+  + LiveViewDbConstants.COLUMN_ALERT_ITEMS_TITLE + " text, "
+  + LiveViewDbConstants.COLUMN_ALERT_ITEMS_CONTENT + " text not null, "
+  + LiveViewDbConstants.COLUMN_ALERT_ITEMS_TYPE + " integer, "
+  + LiveViewDbConstants.COLUMN_ALERT_ITEMS_TIMESTAMP + " integer, "
+  +");";
  
  private SQLiteHelper sqLiteHelper;
  private SQLiteDatabase sqLiteDatabase;
@@ -45,10 +50,12 @@ public class LiveViewDbHelper2 {
   sqLiteHelper.close();
  }
  
- public long insertAlert(String content, String title, int type, long timestamp){
-  
+ public long insertAlert(String title, String content, int type, long timestamp){
   ContentValues contentValues = new ContentValues();
   contentValues.put(LiveViewDbConstants.COLUMN_ALERT_ITEMS_CONTENT, content);
+  contentValues.put(LiveViewDbConstants.COLUMN_ALERT_ITEMS_TITLE, title);
+  contentValues.put(LiveViewDbConstants.COLUMN_ALERT_ITEMS_TYPE, type);
+  contentValues.put(LiveViewDbConstants.COLUMN_ALERT_ITEMS_TIMESTAMP, timestamp);
   return sqLiteDatabase.insert(LiveViewDbConstants.TABLE_ALERT_ITEMS, null, contentValues);
  }
  
@@ -56,8 +63,8 @@ public class LiveViewDbHelper2 {
   return sqLiteDatabase.delete(LiveViewDbConstants.TABLE_ALERT_ITEMS, null, null);
  }
  
- public String queueAll(){
-  String[] columns = new String[]{LiveViewDbConstants.COLUMN_ALERT_ITEMS_CONTENT};
+ public String queueAllAlerts(){
+  String[] columns = new String[]{LiveViewDbConstants.COLUMN_ALERT_ITEMS_CONTENT, LiveViewDbConstants.COLUMN_ALERT_ITEMS_TITLE};
   Cursor cursor = sqLiteDatabase.query(LiveViewDbConstants.TABLE_ALERT_ITEMS, columns, 
     null, null, null, null, null);
   String result = "";
@@ -79,14 +86,20 @@ public class LiveViewDbHelper2 {
 
   @Override
   public void onCreate(SQLiteDatabase db) {
-   // TODO Auto-generated method stub
    db.execSQL(SCRIPT_CREATE_TABLE_ALERT_ITEMS);
   }
 
   @Override
   public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-   // TODO Auto-generated method stub
-
+      if (oldVersion != newVersion)
+      {
+      	try {
+	            db.execSQL("DROP TABLE " + LiveViewDbConstants.TABLE_ALERT_ITEMS);
+      	} catch(Exception e) {
+      		Log.e("LiveViewDbHelper", "Could not delete all tables. "+e.toString());
+      	}
+          onCreate(db);
+      }
   } 
  }
 }

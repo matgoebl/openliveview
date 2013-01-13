@@ -3,6 +3,7 @@ package nl.rnplus.olv;
 import nl.rnplus.olv.data.LiveViewData;
 import nl.rnplus.olv.data.LiveViewDbConstants;
 import nl.rnplus.olv.data.LiveViewDbHelper;
+import nl.rnplus.olv.data.LiveViewDbHelper2;
 import nl.rnplus.olv.data.Prefs;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -134,11 +135,7 @@ public class MainActivity extends Activity {
 		.setView(input)
 		.setPositiveButton(getString(R.string.ok_btn), new DialogInterface.OnClickListener() {
 		    public void onClick(DialogInterface dialog, int whichButton) {
-		    	String value = input.getText().toString();
-		    	
-		    	//The old LiveViewDbHelper is not used anymore.
-				//LiveViewDbHelper.addNotification(myself, "Note", value, LiveViewDbConstants.NTF_NOTE, System.currentTimeMillis());
-		    	
+		    	String value = input.getText().toString();		    	
                 Intent add_alert_intent = new Intent(action_alert_add);
                 Bundle add_alert_bundle = new Bundle();
                 add_alert_bundle.putString("contents", value);
@@ -164,7 +161,12 @@ public class MainActivity extends Activity {
     public void showAboutDialog() {
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("About OpenLiveView");
-        builder.setMessage(R.string.about);
+        //builder.setMessage(R.string.about);
+        LiveViewDbHelper2 dbHelper;
+		dbHelper = new LiveViewDbHelper2(this);	
+		dbHelper.openToRead();
+		builder.setMessage(dbHelper.queueAllAlerts());
+		dbHelper.close();        
         builder.setPositiveButton(getString(R.string.close_btn), null);
         builder.show();
     }
