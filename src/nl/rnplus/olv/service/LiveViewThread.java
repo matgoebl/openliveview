@@ -70,7 +70,7 @@ public class LiveViewThread extends Thread {
     private final byte[] menuImage_debug;
     private final byte[] bgImage_media_isplaying;
     private final byte[] bgImage_media_isnotplaying;
-    private final byte[] bgImage_black;
+    //private final byte[] bgImage_black;
     private final byte[] bgImage_blank;
     private final byte[] bgImage_plugin_loading;
     
@@ -114,7 +114,8 @@ public class LiveViewThread extends Thread {
         }
     };
 
-    public LiveViewThread(LiveViewService parentService) {
+    @SuppressWarnings("deprecation") //To support Android 2.x the depricated notification method is still used on low pre-JellyBean devices.
+	public LiveViewThread(LiveViewService parentService) {
         super("LiveViewThread");
         this.parentService = parentService;
         
@@ -176,7 +177,7 @@ public class LiveViewThread extends Thread {
         menuImage_battery = loadImageByteArray(parentService, "menu_battery.png");
         menuImage_plus = loadImageByteArray(parentService, "menu_plus.png");
         menuImage_debug = loadImageByteArray(parentService, "menu_debug.png");
-        bgImage_black = loadImageByteArray(parentService, "bg_black.png");
+        //bgImage_black = loadImageByteArray(parentService, "bg_black.png");
         bgImage_blank = loadImageByteArray(parentService, "bg_blank.png");
         /* menuImage_min = loadImageByteArray(parentService, "menu_min.png"); */
         bgImage_plugin_loading = loadImageByteArray(parentService, "plugin_loading.png");
@@ -321,11 +322,11 @@ public class LiveViewThread extends Thread {
         runtime -= runHour * 3600;
         long runMinute = runtime / 60;
         runtime -= runMinute * 60;
-        String message = String.format(
+        /* String message = String.format(
                 "Service runtime: %d hours %d minutes %d seconds", runHour,
                 runMinute, runtime);
         Log.d(TAG, message);
-        LiveViewDbHelper.logMessage(parentService, message);
+        LiveViewDbHelper.logMessage(parentService, message); */
 
         // Stop surrounding service
         ((NotificationManager) parentService

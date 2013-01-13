@@ -1,7 +1,6 @@
 package nl.rnplus.olv.service;
 
 import java.io.IOException;
-import java.util.Date;
 
 import nl.rnplus.olv.content.ContentNotification;
 import nl.rnplus.olv.content.manager.SMSNotificationManager;
@@ -26,7 +25,6 @@ import android.os.IBinder;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.PhoneLookup;
 import android.telephony.PhoneStateListener;
-import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 

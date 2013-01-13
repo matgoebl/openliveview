@@ -1,26 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     
+    <!-- General -->
     <string name="language">en</string>
-    
     <string name="app_name">OpenLiveView</string>
-    
+
+	<!-- Version -->
     <string name="prefs_version_summary">1.0.2.1</string> <!-- The version number (don't forget to change the version in AndroidManifest.xml too) -->
     <string name="developer_name">TpmKranz</string> <!-- Put your name here when you release your own version of olv -->
     <!-- When releasing your own version of OLV feel free to change or hide the donation link in the settings menu -->
     
+    <!--  Main activity -->
     <string name="title_activity_main">OpenLiveView</string>
+    
+    <!-- Plugin manager -->
     <string name="title_activity_plugin_manager">Installed plugins</string>
-    <string name="title_activity_plugin_details">Plugin details</string>
-    <string name="title_expert_settings_manager">Advanced settings</string>
     
-    <string name="preferences_name">OpenLiveView settings</string>
-    
-    <string name="prefs_cat_device_title">Device</string>
-    <string name="prefs_cat_menu_title">Menu</string>
-    <string name="prefs_cat_experimental_title">Experimental</string>
+    <!-- Settings -->
+    <string name="preferences_name">OpenLiveView settings</string>    
+    	<!-- Device -->
+    	<string name="prefs_cat_device_title">Device</string>
+    	
+    	<!-- Menu -->
+    	<string name="prefs_cat_menu_title">Menu</string>
+    	
+    	<!-- Experimental -->
+    	<string name="prefs_cat_experimental_title">Experimental</string>
     <string name="prefs_cat_features_title">Features</string>
     <string name="prefs_cat_advanced_title">Advanced</string>
+    
+    <!-- Advanced settings -->
+    <string name="title_expert_settings_manager">Advanced settings</string>
+    
+    
+    
+
     
     <string name="prefs_cat_media_title">Media</string>
     <string name="prefs_cat_notifications_title">Notifications</string>

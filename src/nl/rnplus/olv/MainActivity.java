@@ -19,6 +19,8 @@ import android.widget.EditText;
 public class MainActivity extends Activity {
 	
 	private MainActivity myself;
+	private final String appname = "nl.rnplus.olv";
+ 	private final String action_alert_add = appname+".add.alert";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -122,18 +124,6 @@ public class MainActivity extends Activity {
         Intent myIntent = new Intent(this, ExpertConfigActivity.class);
         this.startActivity(myIntent);
     }
-
-    public void openLog(View view) {
-        startActivity(new Intent(this, LogViewActivity.class));
-    }
-    
-    public void openNotificationList(View view) {
-        startActivity(new Intent(this, NotificationViewActivity.class));
-    }
-
-    public void openPluginManager(View view) {
-        startActivity(new Intent(this, OldPluginManagerActivity.class));
-    }
     
     public void addNote() {
 		final EditText input = new EditText(this);
@@ -145,7 +135,19 @@ public class MainActivity extends Activity {
 		.setPositiveButton(getString(R.string.ok_btn), new DialogInterface.OnClickListener() {
 		    public void onClick(DialogInterface dialog, int whichButton) {
 		    	String value = input.getText().toString();
-				LiveViewDbHelper.addNotification(myself, "Note", value, LiveViewDbConstants.NTF_NOTE, System.currentTimeMillis());
+		    	
+		    	//The old LiveViewDbHelper is not used anymore.
+				//LiveViewDbHelper.addNotification(myself, "Note", value, LiveViewDbConstants.NTF_NOTE, System.currentTimeMillis());
+		    	
+                Intent add_alert_intent = new Intent(action_alert_add);
+                Bundle add_alert_bundle = new Bundle();
+                add_alert_bundle.putString("contents", value);
+                add_alert_bundle.putString("title", "Note");
+                add_alert_bundle.putInt("type", LiveViewDbConstants.NTF_NOTE);
+                add_alert_bundle.putLong("timestamp", System.currentTimeMillis());
+                add_alert_intent.putExtras(add_alert_bundle);
+                sendBroadcast(add_alert_intent);
+                
 				AlertDialog.Builder builder = new AlertDialog.Builder(myself);
 				builder.setTitle("Info");
 				builder.setMessage("Your note is added to the database.");
