@@ -58,21 +58,30 @@ public class LiveViewThread extends Thread {
     private static final int SERVICE_NOTIFY = 100;
 
     /* GUI elements */
-    private final byte[] menuImage;
-    private final byte[] menuImage_notification;
-    private final byte[] menuImage_phone;
-    private final byte[] menuImage_location;
-    private final byte[] menuImage_music;
-    private final byte[] menuImage_left;
-    private final byte[] menuImage_right;
-    private final byte[] menuImage_battery;
-    private final byte[] menuImage_plus;
-    private final byte[] menuImage_debug;
-    private final byte[] bgImage_media_isplaying;
-    private final byte[] bgImage_media_isnotplaying;
-    //private final byte[] bgImage_black;
-    private final byte[] bgImage_blank;
-    private final byte[] bgImage_plugin_loading;
+    private final byte[] lvImage;
+    private final byte[] lvImage_announce_android;
+    private final byte[] lvImage_announce_mail;
+    private final byte[] lvImage_announce_note;
+    private final byte[] lvImage_announce_sms;
+    private final byte[] lvImage_menu_battery;
+    private final byte[] lvImage_menu_debug;
+    private final byte[] lvImage_menu_gmail;
+    private final byte[] lvImage_menu_left;
+    private final byte[] lvImage_menu_location;
+    private final byte[] lvImage_menu_mail;
+    private final byte[] lvImage_menu_media;
+    private final byte[] lvImage_menu_min;
+    private final byte[] lvImage_menu_music;
+    private final byte[] lvImage_menu_notebook;
+    private final byte[] lvImage_menu_notification;
+    private final byte[] lvImage_menu_phone;
+    private final byte[] lvImage_menu_right;
+    private final byte[] lvImage_menu_sms;
+    private final byte[] lvImage_menu_warning;
+    private final byte[] lvImage_music_pause;
+    private final byte[] lvImage_music_play;
+    private final byte[] lvImage_plugin_loading;
+
     
 
     /* Communication */
@@ -165,22 +174,29 @@ public class LiveViewThread extends Thread {
         
         btAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        menuImage = loadImageByteArray(parentService, "menu_blank.png");
-        menuImage_notification = loadImageByteArray(parentService, "menu_notification.png");
-        menuImage_phone = loadImageByteArray(parentService, "menu_phone.png");
-        menuImage_location = loadImageByteArray(parentService, "menu_location.png");
-        menuImage_music = loadImageByteArray(parentService, "menu_music.png");
-        menuImage_left = loadImageByteArray(parentService, "menu_left.png");
-        menuImage_right = loadImageByteArray(parentService, "menu_right.png");
-        bgImage_media_isplaying = loadImageByteArray(parentService, "jerry_music_pause_icn.png");
-        bgImage_media_isnotplaying = loadImageByteArray(parentService, "jerry_music_play_icn.png");
-        menuImage_battery = loadImageByteArray(parentService, "menu_battery.png");
-        menuImage_plus = loadImageByteArray(parentService, "menu_plus.png");
-        menuImage_debug = loadImageByteArray(parentService, "menu_debug.png");
-        //bgImage_black = loadImageByteArray(parentService, "bg_black.png");
-        bgImage_blank = loadImageByteArray(parentService, "bg_blank.png");
-        /* menuImage_min = loadImageByteArray(parentService, "menu_min.png"); */
-        bgImage_plugin_loading = loadImageByteArray(parentService, "plugin_loading.png");
+        lvImage = loadImageByteArray(parentService, "menu_blank.png");
+        lvImage_announce_android = loadImageByteArray(parentService, "announce_android.png");
+        lvImage_announce_mail = loadImageByteArray(parentService, "announce_mail.png");
+        lvImage_announce_note = loadImageByteArray(parentService, "announce_note.png");
+        lvImage_announce_sms = loadImageByteArray(parentService, "announce_sms.png");
+        lvImage_menu_battery = loadImageByteArray(parentService, "menu_battery.png");
+        lvImage_menu_debug = loadImageByteArray(parentService, "menu_debug.png");
+        lvImage_menu_gmail = loadImageByteArray(parentService, "menu_gmail.png");
+        lvImage_menu_left = loadImageByteArray(parentService, "menu_left.png");
+        lvImage_menu_location = loadImageByteArray(parentService, "menu_location.png");
+        lvImage_menu_mail = loadImageByteArray(parentService, "menu_mail.png");
+        lvImage_menu_media = loadImageByteArray(parentService, "menu_media.png");
+        lvImage_menu_min = loadImageByteArray(parentService, "menu_min.png");
+        lvImage_menu_music = loadImageByteArray(parentService, "menu_music.png");
+        lvImage_menu_notebook = loadImageByteArray(parentService, "menu_notebook.png");
+        lvImage_menu_notification = loadImageByteArray(parentService, "menu_notification.png");
+        lvImage_menu_phone = loadImageByteArray(parentService, "menu_phone.png");
+        lvImage_menu_right = loadImageByteArray(parentService, "menu_right.png");
+        lvImage_menu_sms = loadImageByteArray(parentService, "menu_sms.png");
+        lvImage_menu_warning = loadImageByteArray(parentService, "menu_warning.png");
+        lvImage_music_pause = loadImageByteArray(parentService, "music_pause.png");
+        lvImage_music_play = loadImageByteArray(parentService, "music_play.png");
+        lvImage_plugin_loading = loadImageByteArray(parentService, "plugin_loading.png");
 
         menu_button_count = 0;
 
@@ -336,24 +352,24 @@ public class LiveViewThread extends Thread {
         parentService.stopSelf();
     }
     
-    private byte[] getImageForNotification(int alertId, int type) {
+    private byte[] getImageForNotification(int type) {
     	if (type==LiveViewDbConstants.ALL_NOTIFICATIONS) {
     		type = parentService.getNotificationType(alertId);
     	}
     	if (type==LiveViewDbConstants.NTF_GENERIC) {
-    		return menuImage_notification;
+    		return lvImage_announce_android;
     	}
     	if (type==LiveViewDbConstants.NTF_ANDROID) {
-    		return menuImage_debug;
+    		return lvImage_announce_android;
     	}
     	if (type==LiveViewDbConstants.NTF_SMS) {
-    		return menuImage;
+    		return lvImage_announce_sms;
     	}
     	if (type==LiveViewDbConstants.NTF_NOTE) {
-    		return menuImage;
+    		return lvImage_announce_note;
     	}
-    	return menuImage_notification;
-    }
+    	return lvImage_announce_android;
+    } //Would like to use current "announce_android" image as "announce_generic" and a different image for android notifications...
 
     /**
      * Process a message that was sent by the LiveView device.
@@ -417,51 +433,51 @@ public class LiveViewThread extends Thread {
                 	{
 	                    if (menu_button_notifications_id == current_id) {
 	                        sendCall(new MenuItem(current_id, true, new UShort((short) (parentService.getNotificationUnreadCount(LiveViewDbConstants.ALL_NOTIFICATIONS))),
-	                                "All notifications", menuImage_notification));
+	                                "All notifications", lvImage_menu_notification));
 	                    }
 	                    if (menu_button_media_next_id == current_id) {
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
-	                                "Next", menuImage_right));
+	                                "Next", lvImage_menu_right));
 	                    }
 	                    if (menu_button_media_play_id == current_id) {
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
-	                                "Play / Pause", menuImage_music));
+	                                "Play / Pause", lvImage_menu_music));
 	                    }
 	                    if (menu_button_media_previous_id == current_id) {
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
-	                                "Previous", menuImage_left));
+	                                "Previous", lvImage_menu_left));
 	                    }
 	                    if (menu_button_findphone_id == current_id) {
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
-	                                "Find my phone", menuImage_location));
+	                                "Find my phone", lvImage_menu_location));
 	                    }
 	                    if (menu_button_battery_status_id == current_id) {
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) (get_battery_status() * 100)),
-	                                "Battery", menuImage_battery));
+	                                "Battery", lvImage_menu_battery));
 	                    }
 	                    if (menu_button_plugintest_id == current_id) {
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
-	                                "Demo", menuImage));
+	                                "Demo", lvImage_menu_debug));
 	                    }
 	                    if (menu_button_mediamenu_id == current_id) {
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
-	                                "Media menu", menuImage_plus));
+	                                "Media menu", lvImage_menu_media));
 	                    }
 	                    if (menu_button_debug_id == current_id) {
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
-	                                "Bitmap navigation test", menuImage_debug));
+	                                "Bitmap navigation test", lvImage_menu_debug));
 	                    }
 	                    if (menu_button_android_notifications_id == current_id) {
 	                        sendCall(new MenuItem(current_id, true, new UShort((short) parentService.getNotificationUnreadCount(LiveViewDbConstants.NTF_ANDROID)),
-	                                "Android notifications", menuImage_debug));
+	                                "Android notifications", lvImage_menu_warning));
 	                    }
 	                    if (menu_button_sms_id == current_id) {
 	                        sendCall(new MenuItem(current_id, true, new UShort((short) parentService.getNotificationUnreadCount(LiveViewDbConstants.NTF_SMS)),
-	                                "SMS messages", menuImage_debug));
+	                                "SMS messages", lvImage_menu_sms));
 	                    }
 	                    if (menu_button_notes_id == current_id) {
 	                        sendCall(new MenuItem(current_id, true, new UShort((short) parentService.getNotificationUnreadCount(LiveViewDbConstants.NTF_NOTE)),
-	                                "Notes", menuImage_debug));
+	                                "Notes", lvImage_menu_notebook));
 	                    }
                 	}
                     Log.d(TAG, "Menu items sent, menu_state is 0.");
@@ -512,11 +528,11 @@ public class LiveViewThread extends Thread {
                     String notificationTimeString = sdf.get().format(new Date(parentService.getNotificationTime(alertId, type)));
                     sendCall(new GetAlertResponse((byte) parentService.getNotificationTotalCount(type),
                             (byte) parentService.getNotificationUnreadCount(type), alertId, notificationTimeString,
-                            parentService.getNotificationTitle(alertId, type), parentService.getNotificationContent(alertId, type), getImageForNotification(alertId, type)));
+                            parentService.getNotificationTitle(alertId, type), parentService.getNotificationContent(alertId, type), getImageForNotification(type)));
 
                     //if (parentService.getNotificationType(alertId)==LiveViewDbConstants.NTF_SMS)
                 } else {
-                    sendCall(new GetAlertResponse(0, 0, alertId, "", "No notifications", "", menuImage_notification));
+                    sendCall(new GetAlertResponse(0, 0, alertId, "", "No notifications", "", lvImage_announce_android));
                 }
                 break;
             case MessageConstants.MSG_NAVIGATION:
@@ -786,24 +802,24 @@ public class LiveViewThread extends Thread {
         boolean playing = amgr.isMusicActive();
         if (playing) {
             Log.d(TAG, "A song is playing.");
-            sendCall(new DisplayPanel(parentService.getMediaInfoTrack(), "Artist: " + parentService.getMediaInfoArtist() + " Album: " + parentService.getMediaInfoAlbum(), bgImage_media_isplaying, false));
+            sendCall(new DisplayPanel(parentService.getMediaInfoTrack(), "Artist: " + parentService.getMediaInfoArtist() + " Album: " + parentService.getMediaInfoAlbum(), lvImage_music_pause, false));
             //sendCall(new DisplayBitmap((byte) 34, (byte) 34, menuImage_media_isplaying));
             //sendCall(new DisplayPanel("HEADER", "FOOTER", menuImage_media_isplaying, false));
         } else {
             Log.d(TAG, "Nope, there is no music playing.");
-            sendCall(new DisplayPanel("There is no music playing.", "", bgImage_media_isnotplaying, false));
+            sendCall(new DisplayPanel("There is no music playing.", "", lvImage_music_play, false));
             //sendCall(new DisplayBitmap((byte) 34, (byte) 34, menuImage_media_isnotplaying));
         }
     }
 
     public void draw_battery_status() throws IOException {
-        sendCall(new DisplayPanel("Battery status", (Math.round(get_battery_status() * 100)) + "%", menuImage_battery, false));
+        sendCall(new DisplayPanel("Battery status", (Math.round(get_battery_status() * 100)) + "%", lvImage_menu_battery, false));
     }
     
     public void pluginMenuAction(int menuId) throws IOException {
         sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
         menu_state = 3;
-        sendCall(new DisplayPanel("", "", bgImage_plugin_loading, false));
+        sendCall(new DisplayPanel("", "", lvImage_plugin_loading, false));
         sendEvent("menuitem_opened", menuId, 0, "", "");
     }
     
@@ -817,7 +833,7 @@ public class LiveViewThread extends Thread {
     	if (useImage) {
     		img = image;
     	} else {
-    		img = menuImage;
+    		img = lvImage_menu_warning;
     	}
     	sendCall(new DisplayPanel(top_string, bottom_string, img, isAlert));
     }
@@ -833,7 +849,7 @@ public class LiveViewThread extends Thread {
     	{
 	    	menu_state = 2;
 	    	sendCall(new SetScreenMode((byte) MessageConstants.BRIGHTNESS_MAX));
-	        sendCall(new DisplayPanel(topline, bottomline, menuImage_phone, true));
+	        sendCall(new DisplayPanel(topline, bottomline, lvImage_menu_phone, true));
     	}
     	if (prefs.getEnableIncomingCallVibrate())
     	{
@@ -939,14 +955,13 @@ public class LiveViewThread extends Thread {
     
     public void showNewAlert(String line1, String line2, int icon_type, byte[] img) {
     	menu_state = 2;	
-		if (icon_type==1)
-		{
-			img = menuImage_notification;
-		}
-		if (icon_type==2)
-		{
-			img = menuImage;
-		}		
+    	if (icon_type > LiveViewDbConstants.ALL_NOTIFICATIONS) {
+    		if (icon_type < LiveViewDbConstants.NTF_NOTE) {
+    			img = getImageForNotification(icon_type-1);
+    		} else {
+    			img = lvImage_menu_warning;
+    		}
+    	}	
         try {
         	sendCall(new DisplayPanel(line1, line2, img, false));
 		} catch (IOException e) {
@@ -1024,7 +1039,7 @@ public class LiveViewThread extends Thread {
     }
     public void debugdraw() throws IOException {
     	//sendCall(new ClearDisplay());
-    	sendCall(new DisplayBitmap((byte) 0, (byte) 0, bgImage_blank));
-    	sendCall(new DisplayBitmap((byte) debugx, (byte) debugy, menuImage_battery));
+    	//sendCall(new DisplayBitmap((byte) 0, (byte) 0, bgImage_blank));
+    	sendCall(new DisplayBitmap((byte) debugx, (byte) debugy, lvImage));
     }
 }
