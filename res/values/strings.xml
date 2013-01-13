@@ -6,7 +6,7 @@
     <string name="app_name">OpenLiveView</string>
     
     <string name="prefs_version_summary">1.0.2.1</string> <!-- The version number (don't forget to change the version in AndroidManifest.xml too) -->
-    <string name="developer_name">RN+</string> <!-- Put your name here when you release your own version of olv -->
+    <string name="developer_name">TpmKranz</string> <!-- Put your name here when you release your own version of olv -->
     <!-- When releasing your own version of OLV feel free to change or hide the donation link in the settings menu -->
     
     <string name="title_activity_main">OpenLiveView</string>
@@ -165,10 +165,17 @@
 	
 	<!-- TpmKranz -->
 	<string name="prefs_menu_notificationfilter">Filter settings&#8230;</string>
-	<string name="prefs_filtereditor_btn_start">Add app to filter list</string>
-	<string name="prefs_filtereditor_btn_wait">Building app list may take a moment&#8230;</string>
-	<string name="prefs_filtereditor_btn_mode">Set filter mode</string>
+	<string name="prefs_filtereditor_menu_add">Add app to filter</string>
+	<string name="prefs_filtereditor_menu_toast">Block toast messages</string>
+	<string name="prefs_filtereditor_menu_mode">Set filter mode</string>
+	<string name="prefs_filtereditor_mode_whitelist">Whitelist mode</string>
+	<string name="prefs_filtereditor_mode_blacklist">Blacklist mode</string>
+	<string name="prefs_filtereditor_mode_messagewhite">The filter currently operates in whitelist mode; only notifications from apps that are on the list will be captured by OLV.</string>
+	<string name="prefs_filtereditor_mode_messageblack">The filter currently operates in blacklist mode; notifications from apps that are on the list will not be captured by OLV.</string>
+	<string name="prefs_filtereditor_menu_help">Help</string>
+	<string name="prefs_filtereditor_popup_wait">Building app list may take a moment&#8230;</string>
+	<string name="prefs_filtereditor_list_help">Protip: hit the menu button.</string>
+	<string name="prefs_filtereditor_popup_help">To add an app to the filter, tap the \"Add app to filter\" menu button; to remove it, tap its name in the list. If you want to prevent toast messages from being captured by OLV, check the \"Block toast messages\" menu option. If you want to decide whether your filter list will be used as a blacklist or a whitelist, tap the \"Set filter mode\" menu option.</string>
 	<string name="title_activity_filter_editor">Filter editor</string>
-	<string name="title_activity_app_dialog">Add app to filter list</string>
-	<string name="message_select_filter_mode">Select which kind of notifications to block completely:</string>
+	<string name="title_activity_app_dialog">Select app to add to filter</string>
 </resources>

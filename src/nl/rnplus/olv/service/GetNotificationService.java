@@ -110,17 +110,13 @@ public class GetNotificationService extends AccessibilityService {
     private boolean valid(AccessibilityEvent event) {
 		boolean valid = true;
 		String typeNotification = event.getClassName().toString();
-		String typeFilter = "";
 		Prefs prefs = new Prefs(this);
-		if(prefs.getFilterMode()==1) typeFilter = "android.widget.Toast$TN";
-		else if(prefs.getFilterMode()==2) typeFilter = "android.app.Notification";
-		if(typeNotification.equals(typeFilter)) valid = false;
-		if(valid){
-			String packageNotification=event.getPackageName().toString();
-			for(int i = 0; i<prefs.getNumberOfFilters();i++){
-				if(prefs.getFilterString(i).equals(packageNotification)) valid = false;
-			}
+		if(prefs.getFilterToast() && typeNotification.equals("android.widget.Toast$TN")) return false;
+		String packageNotification=event.getPackageName().toString();
+		for(int i = 0; i<prefs.getNumberOfFilters() && valid;i++){
+			if(prefs.getFilterString(i).equals(packageNotification)) valid = false;
 		}
+		if(!prefs.getFilterBlacklist()) valid = !valid;
 		return valid;
 	}
     

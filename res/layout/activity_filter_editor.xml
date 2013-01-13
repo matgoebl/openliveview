@@ -4,30 +4,8 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity" >
 
-        
-    <Button
-        android:id="@+id/btnAddAppToFilter"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@+id/btnSetFilterMode"
-        android:onClick="addAppToFilter"
-        android:text="@string/prefs_filtereditor_btn_start" />
-
-    <Button
-        android:id="@+id/btnSetFilterMode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@id/btnAddAppToFilter"
-        android:onClick="selectFilterMode"
-        android:text="@string/prefs_filtereditor_btn_mode" />
-
     <ListView 
         android:id="@+id/mylist"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_above="@id/btnAddAppToFilter" >
-    </ListView>    
+        android:layout_height="fill_parent" />
 </RelativeLayout>

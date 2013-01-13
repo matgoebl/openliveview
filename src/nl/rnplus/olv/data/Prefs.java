@@ -153,16 +153,27 @@ public class Prefs {
 		return preferences.getInt("numberoffilters", 0);
 	}
 	
-	public void setFilterMode(int mode){
+	public void setFilterToast(boolean value){
 		Editor editor = preferences.edit();
-		editor.putInt("filtermode", mode);
+		editor.putBoolean("filtertoast", value);
 		editor.commit();
 	}
 	
-	public int getFilterMode(){
-		return preferences.getInt("filtermode", 0);
+	public boolean getFilterToast(){
+		return preferences.getBoolean("filtertoast", false);
 	}
+	
 
+	public void setFilterBlacklist(boolean value){
+		Editor editor = preferences.edit();
+		editor.putBoolean("filterblacklist", value);
+		editor.commit();
+	}
+	
+	public boolean getFilterBlacklist(){
+		return preferences.getBoolean("filterblacklist", true);
+	}
+	
 	public Boolean getWipeNotifications() {
         return preferences.getBoolean("system.wipenotifications", false);
 	}
