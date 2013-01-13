@@ -16,10 +16,10 @@
 	<uses-permission android:name="android.permission.RECEIVE_SMS"/><!-- Needed for "SMS receiver" -->
 	<uses-permission android:name="android.permission.READ_SMS"/><!-- Needed for "SMS receiver" -->
 	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/><!-- Needed on some devices -->
+	<uses-permission android:name="android.permission.READ_PHONE_STATE"/><!-- Needed for call notify -->
 	
 	<uses-feature android:name="android.hardware.telephony" android:required="false" /><!-- Needed for "SMS receiver" but not required -->
 	<uses-feature android:name="android.hardware.touchscreen" android:required="false" />
-	<uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
     <application
         android:icon="@drawable/newlogo"
@@ -103,8 +103,7 @@
             android:label="@string/title_expert_settings_manager"
             android:launchMode="singleInstance">
         </activity>    
-        
-        <!-- TpmKranz -->
+
         <activity 
             android:name="nl.rnplus.olv.FilterEditor"
             android:label="@string/title_activity_filter_editor"
@@ -119,6 +118,12 @@
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden|keyboard">
         </activity>
+                
+        <receiver android:name=".receiver.EventReceiver" android:exported="true" android:permission="nl.rnplus.olv.permission.ADD_ALERT">
+			<intent-filter>
+				<action android:name="nl.rnplus.olv.add.alert"></action>
+			</intent-filter>
+		</receiver>
         
     </application>
 

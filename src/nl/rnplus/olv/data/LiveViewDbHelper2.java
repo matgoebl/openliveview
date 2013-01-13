@@ -45,7 +45,7 @@ public class LiveViewDbHelper2 {
   sqLiteHelper.close();
  }
  
- public long insertAlert(String content){
+ public long insertAlert(String content, String title, int type, long timestamp){
   
   ContentValues contentValues = new ContentValues();
   contentValues.put(LiveViewDbConstants.COLUMN_ALERT_ITEMS_CONTENT, content);
