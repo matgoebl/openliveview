@@ -13,7 +13,7 @@ import nl.rnplus.olv.data.Prefs;
  * and controls the LiveView service. It is also used for starting the service
  * on boot (if bluetooth is available).
  *
- * @author Robert &lt;xperimental@solidproject.de&gt;
+ * @author Robert xperimental@solidproject.de;
  */
 public class BTReceiver extends BroadcastReceiver {
 

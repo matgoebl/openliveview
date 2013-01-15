@@ -1,10 +1,8 @@
 /*
  * Added by Renze Nicolai (RN+)
  * Filter added by Jan Korpegård
- * GetNotificationServiceJB.java
+ * GetNotificationService.java
  * Receives all notifications from the OS.
- * (Jelly Bean version, only difference with GetNotificationService.java is the name...)
- * Its needed because of the new permissions Jelly Bean uses for accessibility services.
  */
 package nl.rnplus.olv.service;
 
@@ -35,7 +33,7 @@ public class GetNotificationService extends AccessibilityService {
         info.notificationTimeout = 100;
 
         this.setServiceInfo(info);
-        Log.d(LOG_TAG, "Service started! (JB)");
+        Log.d(LOG_TAG, "Service started!");
 
     }
 

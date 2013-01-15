@@ -27,17 +27,19 @@
     	<!-- Experimental -->
     	<string name="prefs_cat_experimental_title">Experimental</string>
 
-	<!-- Features -->
-    	<string name="prefs_cat_features_title">Features</string>
-
-	<!-- Advanced -->
-    	<string name="prefs_cat_advanced_title">Advanced</string>
+		<!-- Features -->
+	    	<string name="prefs_cat_features_title">Features</string>
+	
+		<!-- Advanced -->
+	    	<string name="prefs_cat_advanced_title">Advanced</string>
     
     <!-- Advanced settings -->
     <string name="title_expert_settings_manager">Advanced settings</string>
     
     
-    
+    <!-- Accessibility -->
+    <string name="accessibility_service_label">OLV Notifications</string>
+    <string name="accessibility_service_description">This service will display your notifications on the connected LiveView device.</string>
 
     
     <string name="prefs_cat_media_title">Media</string>
@@ -136,8 +138,6 @@
 
     <string name="prefs_version_title">Version</string>
             
-    <string name="accessibility_service_description">This service will display your notifications on the connected LiveView device.</string>
-
     <string name="menu_settings">Settings</string>
     <string name="menu_viewlog">View log</string>
     

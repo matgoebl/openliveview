@@ -62,6 +62,15 @@ public class ConfigWizardActivity extends Activity {
             builder.setTitle("Not supported");
             builder.setMessage(R.string.error_not_supported_text);
             builder.setPositiveButton("OK", null);
+            builder.setNegativeButton("Debug: Ignore", new DialogInterface.OnClickListener() {
+    		    public void onClick(DialogInterface dialog, int whichButton) {
+    		    	Prefs prefs = new Prefs(mContext);
+                    prefs.setSetupCompleted(true);
+                    Intent myIntent = new Intent(mContext, MainActivity.class);
+                    mContext.startActivity(myIntent);
+                    finish();    		    	
+    		    }
+            });
             builder.show();
     	}
     }

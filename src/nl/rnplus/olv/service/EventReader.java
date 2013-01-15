@@ -85,7 +85,8 @@ public class EventReader {
                     needRead = payloadSize;
                     break;
                 default:
-                	Log.e("OpenLiveView", "Something went wrong in EventReader.");
+                	//Log.e("OpenLiveView", "Something went wrong in EventReader. ("+state+")");
+                	//Hmm, weird error message... Commented it out. (Renze)
                 	break;
                 }
             }

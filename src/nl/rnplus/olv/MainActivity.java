@@ -143,7 +143,12 @@ public class MainActivity extends Activity {
                 add_alert_bundle.putInt("type", LiveViewDbConstants.NTF_NOTE);
                 add_alert_bundle.putLong("timestamp", System.currentTimeMillis());
                 add_alert_intent.putExtras(add_alert_bundle);
-                sendBroadcast(add_alert_intent);
+                
+                //Switch once new database engine works.
+                
+                //sendBroadcast(add_alert_intent);
+                
+                LiveViewDbHelper.addNotification(myself, "Note", value, LiveViewDbConstants.NTF_NOTE, System.currentTimeMillis());
                 
 				AlertDialog.Builder builder = new AlertDialog.Builder(myself);
 				builder.setTitle("Info");
@@ -156,17 +161,18 @@ public class MainActivity extends Activity {
 		        // Do nothing.
 		    }
 		}).show();
+		
+        /*LiveViewDbHelper2 dbHelper;
+		dbHelper = new LiveViewDbHelper2(this);	
+		dbHelper.openToRead();
+		builder.setMessage(dbHelper.queueAllAlerts());
+		dbHelper.close();        */
     }
     
     public void showAboutDialog() {
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("About OpenLiveView");
-        //builder.setMessage(R.string.about);
-        LiveViewDbHelper2 dbHelper;
-		dbHelper = new LiveViewDbHelper2(this);	
-		dbHelper.openToRead();
-		builder.setMessage(dbHelper.queueAllAlerts());
-		dbHelper.close();        
+        builder.setMessage(R.string.about);
         builder.setPositiveButton(getString(R.string.close_btn), null);
         builder.show();
     }
