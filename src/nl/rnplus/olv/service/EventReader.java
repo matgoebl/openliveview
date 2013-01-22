@@ -6,10 +6,6 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import android.util.Log;
-
-//import android.util.Log;
-
 import nl.rnplus.olv.messages.DecodeException;
 import nl.rnplus.olv.messages.LiveViewEvent;
 import nl.rnplus.olv.messages.MessageDecoder;

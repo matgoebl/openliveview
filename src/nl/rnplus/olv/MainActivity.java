@@ -2,7 +2,6 @@ package nl.rnplus.olv;
 
 import nl.rnplus.olv.data.LiveViewData;
 import nl.rnplus.olv.data.LiveViewDbConstants;
-import nl.rnplus.olv.data.LiveViewDbHelper;
 import nl.rnplus.olv.data.LiveViewDbHelper2;
 import nl.rnplus.olv.data.Prefs;
 import android.app.Activity;
@@ -143,13 +142,7 @@ public class MainActivity extends Activity {
                 add_alert_bundle.putInt("type", LiveViewDbConstants.NTF_NOTE);
                 add_alert_bundle.putLong("timestamp", System.currentTimeMillis());
                 add_alert_intent.putExtras(add_alert_bundle);
-                
-                //Switch once new database engine works.
-                
-                //sendBroadcast(add_alert_intent);
-                
-                LiveViewDbHelper.addNotification(myself, "Note", value, LiveViewDbConstants.NTF_NOTE, System.currentTimeMillis());
-                
+                sendBroadcast(add_alert_intent);         
 				AlertDialog.Builder builder = new AlertDialog.Builder(myself);
 				builder.setTitle("Info");
 				builder.setMessage("Your note is added to the database.");
@@ -160,13 +153,7 @@ public class MainActivity extends Activity {
 		    public void onClick(DialogInterface dialog, int whichButton) {
 		        // Do nothing.
 		    }
-		}).show();
-		
-        /*LiveViewDbHelper2 dbHelper;
-		dbHelper = new LiveViewDbHelper2(this);	
-		dbHelper.openToRead();
-		builder.setMessage(dbHelper.queueAllAlerts());
-		dbHelper.close();        */
+		}).show();     
     }
     
     public void showAboutDialog() {
@@ -179,7 +166,11 @@ public class MainActivity extends Activity {
     
     public void deleteAllNotifications() {
     	try {
-	    	LiveViewDbHelper.deleteAllNotifications(this);
+    		LiveViewDbHelper2 dbHelper;
+    		dbHelper = new LiveViewDbHelper2(this);	
+    		dbHelper.openToWrite();
+    		dbHelper.deleteAllAlerts();
+    		dbHelper.close();
 	    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
 	        builder.setTitle("Info");
 	        builder.setMessage("All stored notifications deleted.");
@@ -200,93 +191,36 @@ public class MainActivity extends Activity {
     }
     
     public void showAllStoredNotifications() {
-        //For debugging the notification database
-    	try {
-    		SQLiteDatabase db = LiveViewDbHelper.getReadableDb(this);
-	    	Cursor notifications = LiveViewDbHelper.getAllNotifications(this, db);
-	    	
-	    	int contentcolumn = -1;
-	    	for (int i = 0; i < notifications.getColumnCount(); i++)
-	    	{
-	    		if (notifications.getColumnName(i).contains(LiveViewData.Notifications.CONTENT))
-	    		{
-	    			contentcolumn = i;
-	    		}
-	    	}
-	    	int readcolumn = -1;
-	    	for (int i = 0; i < notifications.getColumnCount(); i++)
-	    	{
-	    		if (notifications.getColumnName(i).contains(LiveViewData.Notifications.READ))
-	    		{
-	    			readcolumn = i;
-	    		}
-	    	}
-	    	if (readcolumn<0)
-	    	{
-		        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		        builder.setTitle("Warning");
-		        builder.setMessage("Database corrupt, column not found! Please reinstall OpenLiveView or wipe all application data.");
-		        builder.setPositiveButton(getString(R.string.close_btn), null);
-		        builder.show();
-	    	}
-	    	if (contentcolumn>=0)
-	    	{
-	    		if (notifications.getCount()>0)
-	    		{
-	    			notifications.moveToFirst();
-	    			String notificationcontents = "";
-		    		for (int i = 0; i < notifications.getCount(); i++)
-			    	{
-			    		//notificationcontents += "("+(i+1)+"/"+notifications.getCount()+") ("+notifications.getInt(readcolumn)+")";
-			    		notificationcontents += (i+1)+". "+notifications.getString(contentcolumn)+"\n";
-			    		notifications.moveToNext();
-			    	}
-			        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			        builder.setTitle("Stored notifications");
-			        builder.setMessage(notificationcontents);
-			        builder.setPositiveButton(getString(R.string.close_btn), null);
-			        builder.setNeutralButton("Filter settings...", 
-				        	new OnClickListener() {
-							public void onClick(DialogInterface dialog, int which) {
-								openFilterSettings();
-							}});
-			        builder.setNegativeButton("Wipe", 
-			        	new OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-							deleteAllNotifications();
-						}});
-			        builder.show();
-	    		}
-	    		else
-	    		{
-			        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			        builder.setTitle("Database empty");
-			        builder.setMessage("There are currently no notifications in the database.");
-			        builder.setNeutralButton("Filter settings...", 
-				        	new OnClickListener() {
-							public void onClick(DialogInterface dialog, int which) {
-								openFilterSettings();
-							}});
-			        builder.setPositiveButton(getString(R.string.close_btn), null);
-			        builder.show();
-	    		}
-	    	}
-	    	else
-	    	{
-		        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		        builder.setTitle("Database error");
-		        builder.setMessage("Column not found. Please reinstall OpenLiveView or wipe all application data.");
-		        builder.setPositiveButton(getString(R.string.close_btn), null);
-		        builder.show();
-	    	}
-	    	notifications.close();
-	    	LiveViewDbHelper.closeDb(db);
-    	} catch(Exception e) {
-	        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-	        builder.setTitle("Error");
-	        builder.setMessage(e.toString());
-	        builder.setPositiveButton(getString(R.string.close_btn), null);
-	        builder.show();   		
-    	}
+        LiveViewDbHelper2 dbHelper;
+		dbHelper = new LiveViewDbHelper2(this);	
+		dbHelper.openToRead();
+			
+		String[] notificationsArray = dbHelper.getAllAlerts();
+		String notifications = "";
+		if (Integer.getInteger(notificationsArray[0])>0) {
+			for (int i=0;i<=Integer.getInteger(notificationsArray[0]);i++) {
+				notifications = notifications + notificationsArray[i+1];
+			}
+		} else {
+			notifications = "There are currently no notifications in the database.";
+		}
+		dbHelper.close();
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Stored notifications");
+		builder.setMessage(notifications);
+		builder.setPositiveButton(getString(R.string.close_btn), null);
+		builder.setNeutralButton("Filter settings...", 
+		new OnClickListener() {
+		public void onClick(DialogInterface dialog, int which) {
+			openFilterSettings();
+		}});
+		if (Integer.getInteger(notificationsArray[0])>0) {
+			builder.setNegativeButton("Wipe", 
+	    	new OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				deleteAllNotifications();
+			}});
+		}
+		builder.show();
     }
 }

@@ -22,7 +22,7 @@ public class LiveViewDbHelper2 {
   + LiveViewDbConstants.COLUMN_ALERT_ITEMS_TITLE + " text, "
   + LiveViewDbConstants.COLUMN_ALERT_ITEMS_CONTENT + " text not null, "
   + LiveViewDbConstants.COLUMN_ALERT_ITEMS_TYPE + " integer, "
-  + LiveViewDbConstants.COLUMN_ALERT_ITEMS_TIMESTAMP + " integer, "
+  + LiveViewDbConstants.COLUMN_ALERT_ITEMS_TIMESTAMP + " integer "
   +");";
  
  private SQLiteHelper sqLiteHelper;
@@ -63,17 +63,23 @@ public class LiveViewDbHelper2 {
   return sqLiteDatabase.delete(LiveViewDbConstants.TABLE_ALERT_ITEMS, null, null);
  }
  
- public String queueAllAlerts(){
+ public String[] getAllAlerts(){
   String[] columns = new String[]{LiveViewDbConstants.COLUMN_ALERT_ITEMS_CONTENT, LiveViewDbConstants.COLUMN_ALERT_ITEMS_TITLE};
   Cursor cursor = sqLiteDatabase.query(LiveViewDbConstants.TABLE_ALERT_ITEMS, columns, 
     null, null, null, null, null);
-  String result = "";
-  
+  String[] result = null;
+  result[0] = String.valueOf(cursor.getCount());
   int index_CONTENT = cursor.getColumnIndex(LiveViewDbConstants.COLUMN_ALERT_ITEMS_CONTENT);
+  int index_TITLE = cursor.getColumnIndex(LiveViewDbConstants.COLUMN_ALERT_ITEMS_TITLE);
+  int index_TYPE = cursor.getColumnIndex(LiveViewDbConstants.COLUMN_ALERT_ITEMS_TYPE);
+  int index_TIMESTAMP = cursor.getColumnIndex(LiveViewDbConstants.COLUMN_ALERT_ITEMS_TIMESTAMP);
   for(cursor.moveToFirst(); !(cursor.isAfterLast()); cursor.moveToNext()){
-   result = result + cursor.getString(index_CONTENT) + "\n";
+try {
+   result[cursor.getPosition()] = cursor.getString(index_TITLE) + ": " + cursor.getString(index_CONTENT);
+} catch (Exception e) {
+	Log.e("DEBUG IN DBHELPER", "Error: "+e.getMessage());
+}
   }
- 
   return result;
  }
  

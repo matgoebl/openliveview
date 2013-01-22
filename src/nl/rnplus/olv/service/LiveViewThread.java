@@ -60,17 +60,21 @@ public class LiveViewThread extends Thread {
     /* GUI elements */
     private final byte[] lvImage;
     private final byte[] lvImage_announce_android;
-    private final byte[] lvImage_announce_mail;
+    @SuppressWarnings("unused")
+	private final byte[] lvImage_announce_mail;
     private final byte[] lvImage_announce_note;
     private final byte[] lvImage_announce_sms;
     private final byte[] lvImage_menu_battery;
     private final byte[] lvImage_menu_debug;
-    private final byte[] lvImage_menu_gmail;
+    @SuppressWarnings("unused")
+	private final byte[] lvImage_menu_gmail;
     private final byte[] lvImage_menu_left;
     private final byte[] lvImage_menu_location;
-    private final byte[] lvImage_menu_mail;
+    @SuppressWarnings("unused")
+	private final byte[] lvImage_menu_mail;
     private final byte[] lvImage_menu_media;
-    private final byte[] lvImage_menu_min;
+    @SuppressWarnings("unused")
+	private final byte[] lvImage_menu_min;
     private final byte[] lvImage_menu_music;
     private final byte[] lvImage_menu_notebook;
     private final byte[] lvImage_menu_notification;

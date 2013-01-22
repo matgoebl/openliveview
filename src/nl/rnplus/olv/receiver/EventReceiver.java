@@ -1,5 +1,7 @@
 package nl.rnplus.olv.receiver;
  
+import java.io.IOException;
+
 import nl.rnplus.olv.data.LiveViewDbHelper2;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -23,11 +25,15 @@ public class EventReceiver extends BroadcastReceiver {
 			int type = intent.getExtras().getInt("type");			
 			long timestamp = intent.getExtras().getLong("timestamp");
 			LiveViewDbHelper2 dbHelper;
-			dbHelper = new LiveViewDbHelper2(context);	
-			dbHelper.openToWrite();
-			dbHelper.insertAlert(title, contents, type, timestamp);
-			dbHelper.close();
-			Log.i(LOG_TAG, "An alert was added to the database.");
+			try {
+				dbHelper = new LiveViewDbHelper2(context);	
+				dbHelper.openToWrite();
+				dbHelper.insertAlert(title, contents, type, timestamp);
+				dbHelper.close();
+				Log.i(LOG_TAG, "Alert added to the database.");
+			} catch (Exception e) {
+				Log.e(LOG_TAG, "Error: Could not add new alertitem. ("+e.getMessage()+")");
+			}
 			broadcastHandled = true;
 		}
 
