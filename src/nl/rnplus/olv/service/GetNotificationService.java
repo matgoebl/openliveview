@@ -1,127 +1,21 @@
 /*
  * Added by Renze Nicolai (RN+)
  * Filter added by Jan Korpegård
+ * New code by: TpmKranz
  * GetNotificationService.java
  * Receives all notifications from the OS.
  */
-/* package nl.rnplus.olv.service;
 
-import android.accessibilityservice.AccessibilityService;
-import android.accessibilityservice.AccessibilityServiceInfo;
-import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.accessibility.AccessibilityEvent;
-
-import java.util.List;
-
-import nl.rnplus.olv.data.LiveViewDbConstants;
-import nl.rnplus.olv.data.LiveViewDbHelper;
-import nl.rnplus.olv.data.Prefs;
-
-public class GetNotificationService extends AccessibilityService {
-
-    private static final String LOG_TAG = "OLV Notification service";
-    private final String appname = "nl.rnplus.olv";
- 	private final String action_alert_add = appname+".add.alert";
-    
-
-    @Override
-    public void onServiceConnected() {
-        AccessibilityServiceInfo info = new AccessibilityServiceInfo();
-        info.eventTypes = AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED;
-        info.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
-        info.notificationTimeout = 100;
-
-        this.setServiceInfo(info);
-        Log.d(LOG_TAG, "Service started!");
-
-    }
-
-    @Override
-    public void onAccessibilityEvent(AccessibilityEvent event) {
-        final int eventType = event.getEventType();
-        switch (eventType) {
-            case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
-                List<CharSequence> notificationList = event.getText();
-                for (CharSequence aNotificationList : notificationList) {
-                    //Log.d(LOG_TAG, "The notification: " + aNotificationList);
-                    try {
-                    	Long time = System.currentTimeMillis(); //event.getEventTime();
-                    	String notificationContentFilter = (new Prefs(this)).getNotificationFilter();
-                    	String content = aNotificationList.toString();
-                    	if (!notificationContentFilter.contains(content)) {
-                    		if (valid(event)) {
-                    			String value = aNotificationList.toString();	    	
-                                Intent add_alert_intent = new Intent(action_alert_add);
-                                Bundle add_alert_bundle = new Bundle();
-                                add_alert_bundle.putString("contents", value);
-                                add_alert_bundle.putString("title", "Notification");
-                                add_alert_bundle.putInt("type", LiveViewDbConstants.ALERT_ANDROID);
-                                add_alert_bundle.putLong("timestamp", System.currentTimeMillis());
-                                add_alert_intent.putExtras(add_alert_bundle);
-                                sendBroadcast(add_alert_intent);
-		                        String message = "Notification sent to LiveView: "+aNotificationList.toString();
-		                        Log.d(LOG_TAG, message);
-                    		} else {
-                    			Log.d(LOG_TAG, "Notification not added because of TpmKranz filter (2). Content: " + content);
-                    		}
-                    	} else {
-                    		Log.d(LOG_TAG, "Notification not added because of filter (2). Content: " + content);
-                    	}
-                    } catch (IllegalArgumentException e) {
-                        String message = "Error while reading notifications!";
-                        Log.e(LOG_TAG, message);
-                    }
-                }
-                break;
-            default:
-                String message = "Error: unknown event type (" + eventType + ")";
-                Log.e(LOG_TAG, message);              
-        }
-    }
-
-    // TpmKranz
-    private boolean valid(AccessibilityEvent event) {
-		boolean valid = true;
-		String typeNotification = event.getClassName().toString();
-		Prefs prefs = new Prefs(this);
-		if(prefs.getFilterToast() && typeNotification.equals("android.widget.Toast$TN")) return false;
-		String packageNotification=event.getPackageName().toString();
-		for(int i = 0; i<prefs.getNumberOfFilters() && valid;i++){
-			if(prefs.getFilterString(i).equals(packageNotification)) valid = false;
-		}
-		if(!prefs.getFilterBlacklist()) valid = !valid;
-		return valid;
-	}
-    
-    @Override
-    public void onInterrupt() {
-        String message = "OnInterrupt() triggered in NotificationService.";
-        Log.v(LOG_TAG, message);
-        //LiveViewDbHelper.logMessage(this, message);              
-    }
-
-} */
-
-/*
- * Added by Renze Nicolai (RN+)
- * Filter added by Jan Korpegård
- * GetNotificationService.java
- * Receives all notifications from the OS.
- */
 package nl.rnplus.olv.service;
 
 import java.util.List;
 
 import nl.rnplus.olv.R;
 import nl.rnplus.olv.data.LiveViewDbConstants;
-import nl.rnplus.olv.data.LiveViewDbHelper;
 import nl.rnplus.olv.data.Prefs;
 import nl.rnplus.olv.receiver.LiveViewBrConstants;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -258,7 +152,6 @@ public class GetNotificationService extends AccessibilityService {
                 return notifContents;
         }
 
-        // TpmKranz
     private boolean valid(AccessibilityEvent event) {
                 boolean valid = true;
                 String typeNotification = event.getClassName().toString();
