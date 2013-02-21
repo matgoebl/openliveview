@@ -16,7 +16,7 @@
         android:gravity="left"
         android:paddingLeft="10dip"
         android:paddingTop="10dip"
-        android:text="@string/prefs_version_summary"
+        android:text="@string/version_name"
         android:textColor="#606060" />
 
     <TextView

@@ -1,16 +1,14 @@
 package nl.rnplus.olv;
 
-import nl.rnplus.olv.data.LiveViewData;
 import nl.rnplus.olv.data.LiveViewDbConstants;
-import nl.rnplus.olv.data.LiveViewDbHelper2;
+import nl.rnplus.olv.data.LiveViewDbHelper;
 import nl.rnplus.olv.data.Prefs;
+import nl.rnplus.olv.receiver.LiveViewBrConstants;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -19,8 +17,6 @@ import android.widget.EditText;
 public class MainActivity extends Activity {
 	
 	private MainActivity myself;
-	private final String appname = "nl.rnplus.olv";
- 	private final String action_alert_add = appname+".add.alert";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -135,11 +131,11 @@ public class MainActivity extends Activity {
 		.setPositiveButton(getString(R.string.ok_btn), new DialogInterface.OnClickListener() {
 		    public void onClick(DialogInterface dialog, int whichButton) {
 		    	String value = input.getText().toString();		    	
-                Intent add_alert_intent = new Intent(action_alert_add);
+                Intent add_alert_intent = new Intent(LiveViewBrConstants.ALERT_ADD);
                 Bundle add_alert_bundle = new Bundle();
                 add_alert_bundle.putString("contents", value);
                 add_alert_bundle.putString("title", "Note");
-                add_alert_bundle.putInt("type", LiveViewDbConstants.NTF_NOTE);
+                add_alert_bundle.putInt("type", LiveViewDbConstants.ALERT_NOTE);
                 add_alert_bundle.putLong("timestamp", System.currentTimeMillis());
                 add_alert_intent.putExtras(add_alert_bundle);
                 sendBroadcast(add_alert_intent);         
@@ -166,8 +162,8 @@ public class MainActivity extends Activity {
     
     public void deleteAllNotifications() {
     	try {
-    		LiveViewDbHelper2 dbHelper;
-    		dbHelper = new LiveViewDbHelper2(this);	
+    		LiveViewDbHelper dbHelper;
+    		dbHelper = new LiveViewDbHelper(this);	
     		dbHelper.openToWrite();
     		dbHelper.deleteAllAlerts();
     		dbHelper.close();
@@ -191,30 +187,25 @@ public class MainActivity extends Activity {
     }
     
     public void showAllStoredNotifications() {
-        LiveViewDbHelper2 dbHelper;
-		dbHelper = new LiveViewDbHelper2(this);	
-		dbHelper.openToRead();
-			
-		String[] notificationsArray = dbHelper.getAllAlerts();
-		String notifications = "";
-		if (Integer.getInteger(notificationsArray[0])>0) {
-			for (int i=0;i<=Integer.getInteger(notificationsArray[0]);i++) {
-				notifications = notifications + notificationsArray[i+1];
-			}
-		} else {
-			notifications = "There are currently no notifications in the database.";
-		}
-		dbHelper.close();
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    	LiveViewDbHelper dbHelper;
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("Stored notifications");
-		builder.setMessage(notifications);
+		dbHelper = new LiveViewDbHelper(this);	
+		dbHelper.openToRead();
+		String notifications = dbHelper.getAlertsAsString();
+		dbHelper.close();
+		if (notifications.equals("")) {
+			builder.setMessage("There are currently no notifications in the database.");
+		} else {
+			builder.setMessage(notifications);
+		}
 		builder.setPositiveButton(getString(R.string.close_btn), null);
 		builder.setNeutralButton("Filter settings...", 
 		new OnClickListener() {
 		public void onClick(DialogInterface dialog, int which) {
 			openFilterSettings();
 		}});
-		if (Integer.getInteger(notificationsArray[0])>0) {
+		if (notifications.equals("")==false) {
 			builder.setNegativeButton("Wipe", 
 	    	new OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {

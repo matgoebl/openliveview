@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Version 1.0.2.2 of OpenLiveView -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="nl.rnplus.olv"
-    android:versionCode="14"
-    android:versionName="@string/prefs_version_summary" android:installLocation="internalOnly">
-    
-    <!-- Note to other developers: -->
-    <!-- When commiting to the OpenLiveView git please do not change the version name or code! -->
-    
+    android:versionCode="15"
+    android:versionName="@string/version_name" android:installLocation="internalOnly">
+        
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17" />
 
     <uses-permission android:name="android.permission.BLUETOOTH" /> <!-- Needed for "Connection" -->
@@ -62,12 +58,7 @@
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECT_REQUESTED" />
             </intent-filter>
         </receiver>
-
-        <provider
-            android:name="nl.rnplus.olv.data.LiveViewDataProvider"
-            android:authorities="nl.rnplus.olv"
-            android:exported="false"/>
-            
+                    
         <activity
             android:name="nl.rnplus.olv.MainActivity"
             android:label="@string/title_activity_main"
@@ -111,9 +102,10 @@
             android:configChanges="orientation|keyboardHidden|keyboard">
         </activity>
                 
-        <receiver android:name=".receiver.EventReceiver" android:exported="true" android:permission="nl.rnplus.olv.permission.ADD_ALERT">
+        <receiver android:name=".receiver.EventReceiver" android:exported="true">
 			<intent-filter>
-				<action android:name="nl.rnplus.olv.add.alert"></action>
+				<action android:name="nl.rnplus.olv.alert.add"></action>
+				<action android:name="android.provider.Telephony.SMS_RECEIVED"></action>
 			</intent-filter>
 		</receiver>
         

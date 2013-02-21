@@ -10,8 +10,9 @@ import nl.rnplus.olv.messages.MessageConstants;
 public class GetTimeResponse extends LiveViewCall {
 
     private int time;
-
-    public GetTimeResponse(){//Date time) {
+    private byte mode;
+    
+    public GetTimeResponse(boolean mode){//Date time) {
         super(MessageConstants.MSG_GETTIME_RESP);
 
         //this.time = (int) (time.getTime() / 1000);
@@ -20,7 +21,12 @@ public class GetTimeResponse extends LiveViewCall {
         this.time = (int) (Calendar.getInstance().getTimeInMillis() / 1000);
         this.time += Calendar.getInstance().get(Calendar.ZONE_OFFSET)/1000;
         this.time += Calendar.getInstance().get(Calendar.DST_OFFSET) / 1000;
-    	}
+        if (mode) {
+          this.mode = 0;
+        } else {
+          this.mode = 1;
+        }
+    }
 
     /*public GetTimeResponse() {
         this(new Date());
@@ -34,7 +40,7 @@ public class GetTimeResponse extends LiveViewCall {
     protected byte[] getPayload() {
         ByteBuffer buffer = ByteBuffer.allocate(5);
         buffer.putInt(time);
-        buffer.put((byte) 0);
+        buffer.put((byte) mode);
         return buffer.array();
     }
 

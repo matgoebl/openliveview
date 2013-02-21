@@ -177,4 +177,8 @@ public class Prefs {
 	public Boolean getWipeNotifications() {
         return preferences.getBoolean("system.wipenotifications", false);
 	}
+	
+    public Boolean getClockMode() {
+        return preferences.getBoolean("system.clockmode", false);
+    }
 }

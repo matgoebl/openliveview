@@ -1,160 +1,153 @@
 package nl.rnplus.olv.data;
 
+/**
+ * LiveViewDbHelper2.java
+ * @Author Renze Nicolai
+ * Replacement for LiveViewDbHelper.java
+ */
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.util.Log;
 
-/**
- * Database currently holds logs and notifications.
- * 
- * Log database by: Xperimental
- * Notification database by: Renze Nicolai
- */
-public class LiveViewDbHelper extends SQLiteOpenHelper
-{
+public class LiveViewDbHelper {
+  
+ private static final String SCRIPT_CREATE_TABLE_ALERT_ITEMS =
+  "create table " + LiveViewDbConstants.TABLE_ALERT_ITEMS + " ("
+  + LiveViewDbConstants.COLUMN_ALERT_ITEMS_ID + " integer primary key, " 
+  + LiveViewDbConstants.COLUMN_ALERT_ITEMS_TITLE + " text, "
+  + LiveViewDbConstants.COLUMN_ALERT_ITEMS_CONTENT + " text not null, "
+  + LiveViewDbConstants.COLUMN_ALERT_ITEMS_TYPE + " integer, "
+  + LiveViewDbConstants.COLUMN_ALERT_ITEMS_TIMESTAMP + " integer, "
+  + LiveViewDbConstants.COLUMN_ALERT_ITEMS_UNREAD + " integer "
+  +");";
+ 
+ private SQLiteHelper sqLiteHelper;
+ private SQLiteDatabase sqLiteDatabase;
 
-    private static final String DB_NAME = "liveview.db";
+ private Context context;
+ 
+ public LiveViewDbHelper(Context c){
+  context = c;
+ }
+ 
+ public LiveViewDbHelper openToRead() throws android.database.SQLException {
+  sqLiteHelper = new SQLiteHelper(context, LiveViewDbConstants.DATABASE_NAME, null, LiveViewDbConstants.DATABASE_VERSION);
+  sqLiteDatabase = sqLiteHelper.getReadableDatabase();
+  return this; 
+ }
+ 
+ public LiveViewDbHelper openToWrite() throws android.database.SQLException {
+  sqLiteHelper = new SQLiteHelper(context, LiveViewDbConstants.DATABASE_NAME, null, LiveViewDbConstants.DATABASE_VERSION);
+  sqLiteDatabase = sqLiteHelper.getWritableDatabase();
+  return this; 
+ }
+ 
+ public void close(){
+  sqLiteHelper.close();
+ }
+ 
+ public long insertAlert(String title, String content, int type, long timestamp){
+  ContentValues contentValues = new ContentValues();
+  contentValues.put(LiveViewDbConstants.COLUMN_ALERT_ITEMS_CONTENT, content);
+  contentValues.put(LiveViewDbConstants.COLUMN_ALERT_ITEMS_TITLE, title);
+  contentValues.put(LiveViewDbConstants.COLUMN_ALERT_ITEMS_TYPE, type);
+  contentValues.put(LiveViewDbConstants.COLUMN_ALERT_ITEMS_TIMESTAMP, timestamp);  
+  contentValues.put(LiveViewDbConstants.COLUMN_ALERT_ITEMS_UNREAD, 1);  
+  return sqLiteDatabase.insert(LiveViewDbConstants.TABLE_ALERT_ITEMS, null, contentValues);
+ }
+ 
+ public void setAlertRead(int id) {
+	 ContentValues contentValues = new ContentValues();
+	 contentValues.put(LiveViewDbConstants.COLUMN_ALERT_ITEMS_UNREAD, 0);  
+	 String where = LiveViewDbConstants.COLUMN_ALERT_ITEMS_ID + " = " + String.valueOf(id);
+	 sqLiteDatabase.update(LiveViewDbConstants.TABLE_ALERT_ITEMS, contentValues, where, null);
+ }
+ 
+ public int deleteAllAlerts(){
+  return sqLiteDatabase.delete(LiveViewDbConstants.TABLE_ALERT_ITEMS, null, null);
+ }
+ 
+public String getAlertsAsString(){
+	String[] columns = new String[]{LiveViewDbConstants.COLUMN_ALERT_ITEMS_ID, LiveViewDbConstants.COLUMN_ALERT_ITEMS_TITLE, LiveViewDbConstants.COLUMN_ALERT_ITEMS_CONTENT, LiveViewDbConstants.COLUMN_ALERT_ITEMS_TYPE, LiveViewDbConstants.COLUMN_ALERT_ITEMS_TIMESTAMP, LiveViewDbConstants.COLUMN_ALERT_ITEMS_UNREAD};
+	Cursor cursor = sqLiteDatabase.query(LiveViewDbConstants.TABLE_ALERT_ITEMS, columns, null, null, null, null, null);
+	String result = "";
+	int index_CONTENT = cursor.getColumnIndex(LiveViewDbConstants.COLUMN_ALERT_ITEMS_CONTENT);
+	int index_TITLE = cursor.getColumnIndex(LiveViewDbConstants.COLUMN_ALERT_ITEMS_TITLE);
+	@SuppressWarnings("unused")
+	int index_TYPE = cursor.getColumnIndex(LiveViewDbConstants.COLUMN_ALERT_ITEMS_TYPE);
+	@SuppressWarnings("unused")
+	int index_TIMESTAMP = cursor.getColumnIndex(LiveViewDbConstants.COLUMN_ALERT_ITEMS_TIMESTAMP);
+	for(cursor.moveToFirst(); !(cursor.isAfterLast()); cursor.moveToNext()){
+		try {
+			String type = "(Unknown)";
+			if (cursor.getInt(index_TYPE) == LiveViewDbConstants.ALERT_ANDROID) {
+				type = "(Notification)";
+			}
+			if (cursor.getInt(index_TYPE) == LiveViewDbConstants.ALERT_SMS) {
+				type = "(SMS)";
+			}
+			if (cursor.getInt(index_TYPE) == LiveViewDbConstants.ALERT_NOTE) {
+				type = "(Note)";
+			}
+			result = result + type + " " + cursor.getString(index_TITLE) + ": " + cursor.getString(index_CONTENT) + "\n";
+		} catch (Exception e) {
+			Log.e("db helper", "Error: "+e.getMessage());
+		}
+	}
+	return result;
+}
 
-    private static final int DB_VERSION = 2;
+public Cursor getAlertsOfType(int type){
+	String[] columns = new String[]{LiveViewDbConstants.COLUMN_ALERT_ITEMS_ID, LiveViewDbConstants.COLUMN_ALERT_ITEMS_TITLE, LiveViewDbConstants.COLUMN_ALERT_ITEMS_CONTENT, LiveViewDbConstants.COLUMN_ALERT_ITEMS_TYPE, LiveViewDbConstants.COLUMN_ALERT_ITEMS_TIMESTAMP, LiveViewDbConstants.COLUMN_ALERT_ITEMS_UNREAD};
+	String where = null;
+	if (type!=LiveViewDbConstants.ALERT_ALL) {
+		where = LiveViewDbConstants.COLUMN_ALERT_ITEMS_TYPE + " = "+ String.valueOf(type);
+	}
+	Cursor cursor = sqLiteDatabase.query(LiveViewDbConstants.TABLE_ALERT_ITEMS, columns, where, null, null, null, null);
+	//int index_CONTENT = cursor.getColumnIndex(LiveViewDbConstants.COLUMN_ALERT_ITEMS_CONTENT);
+	//int index_TITLE = cursor.getColumnIndex(LiveViewDbConstants.COLUMN_ALERT_ITEMS_TITLE);
+	//int index_TYPE = cursor.getColumnIndex(LiveViewDbConstants.COLUMN_ALERT_ITEMS_TYPE);
+	//int index_TIMESTAMP = cursor.getColumnIndex(LiveViewDbConstants.COLUMN_ALERT_ITEMS_TIMESTAMP);
+	//cursor.getString(index_TITLE)
+	return cursor;
+}
 
-    public LiveViewDbHelper(Context context)
-    {
-        super(context, DB_NAME, null, DB_VERSION);
-    }
+public int getIntColumnFromCursor(Cursor cursor, String Column) {
+	return cursor.getInt(cursor.getColumnIndex(Column));
+}
 
-    /*
-     * (non-Javadoc)
-     * @see
-     * android.database.sqlite.SQLiteOpenHelper#onCreate(android.database.sqlite
-     * .SQLiteDatabase)
-     */
-    @Override
-    public void onCreate(SQLiteDatabase db)
-    {
-        db.execSQL(LiveViewData.Log.SCHEMA);
-        db.execSQL(LiveViewData.Notifications.SCHEMA);
-    }
+public String getStringColumnFromCursor(Cursor cursor, String Column) {
+	return cursor.getString(cursor.getColumnIndex(Column));
+}
+ 
+ public class SQLiteHelper extends SQLiteOpenHelper {
 
-    /*
-     * (non-Javadoc)
-     * @see
-     * android.database.sqlite.SQLiteOpenHelper#onUpgrade(android.database.sqlite
-     * .SQLiteDatabase, int, int)
-     */
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
-    {
-        if (oldVersion != DB_VERSION)
-        {
-        	try {
-	            db.execSQL("DROP TABLE " + LiveViewData.Log.TABLE);
-	            db.execSQL("DROP TABLE " + LiveViewData.Notifications.TABLE);
-        	} catch(Exception e) {
-        		Log.e("LiveViewDbHelper", "Could not delete all tables. "+e.toString());
-        	}
-            onCreate(db);
-        }
-    }
+  public SQLiteHelper(Context context, String name,
+    CursorFactory factory, int version) {
+   super(context, name, factory, version);
+  }
 
-    public static void logMessage(Context context, String message)
-    {
-        LiveViewDbHelper helper = new LiveViewDbHelper(context);
-        SQLiteDatabase db = helper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(LiveViewData.Log.TIMESTAMP, System.currentTimeMillis());
-        values.put(LiveViewData.Log.MESSAGE, message);
-        db.insert(LiveViewData.Log.TABLE, LiveViewData.Log._ID, values);
-        db.close();
-    }
-    
-    public static void addNotification(Context context, String title, String content, Integer type, Long timestamp)
-    {
-    	Log.w("DEBUG", "addNotification.");
-        LiveViewDbHelper helper = new LiveViewDbHelper(context);
-        SQLiteDatabase db = helper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(LiveViewData.Notifications.TIMESTAMP, timestamp);
-        values.put(LiveViewData.Notifications.TITLE, title);
-        values.put(LiveViewData.Notifications.CONTENT, content);
-        values.put(LiveViewData.Notifications.TYPE, type);
-        values.put(LiveViewData.Notifications.READ, 0);
-        db.insert(LiveViewData.Notifications.TABLE, LiveViewData.Notifications._ID, values);
-        db.close();
-        //deleteOldNotifications(context);
-    }
-    
-    public static void setNotificationRead(Context context, Integer id)
-    {
-    	Log.w("DEBUG", "setNotificationRead");
-        LiveViewDbHelper helper = new LiveViewDbHelper(context);
-        SQLiteDatabase db = helper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(LiveViewData.Notifications.READ, 1);
-        db.update(LiveViewData.Notifications.TABLE,  values, LiveViewData.Notifications._ID + "="+id, null);
-        db.close();
-    }
-    
-    public static void setAllNotificationsRead(Context context, int type)
-    {
-    	Log.w("DEBUG", "setAllNotificationsRead");
-        LiveViewDbHelper helper = new LiveViewDbHelper(context);
-        SQLiteDatabase db = helper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(LiveViewData.Notifications.READ, 1);
-        if (type==LiveViewDbConstants.ALL_NOTIFICATIONS){
-        	db.update(LiveViewData.Notifications.TABLE,  values, "1", null);
-        }else{
-        	db.update(LiveViewData.Notifications.TABLE,  values, LiveViewData.Notifications.TYPE + "="+type, null);
-        }
-        db.close();
-    }
-    
-    public static SQLiteDatabase getReadableDb(Context context){
-    	LiveViewDbHelper helper = new LiveViewDbHelper(context);
-    	SQLiteDatabase db = helper.getReadableDatabase();
-    	return db;
-    }
-    
-    public static void closeDb(SQLiteDatabase db){
-    	db.close();
-    }
-    
-	public static Cursor getAllNotifications(Context context, SQLiteDatabase db)
-	    {
-			Log.w("DEBUG", "getAllNotifications");
-	    	Cursor cur=db.rawQuery("SELECT * FROM "+LiveViewData.Notifications.TABLE+" ORDER BY "+LiveViewData.Notifications._ID+" DESC",new String [] {});    
-	    	return cur;
-	    }
-	
-	public static Cursor deleteAllNotifications(Context context)
-    {
-		Log.w("DEBUG", "deleteAllNotifications");
-    	LiveViewDbHelper helper = new LiveViewDbHelper(context);
-    	SQLiteDatabase db = helper.getWritableDatabase();  
-    	db.delete(LiveViewData.Notifications.TABLE, null, null);
-    	db.close();
-     return null;
-    }
-	
-	public static Cursor deleteNotification(Context context, int id)
-    {
-		Log.w("DEBUG", "deleteNotification");
-    	LiveViewDbHelper helper = new LiveViewDbHelper(context);
-    	SQLiteDatabase db = helper.getWritableDatabase();  
-    	db.delete(LiveViewData.Notifications.TABLE, LiveViewData.Notifications._ID + "="+id, null);
-    	db.close();
-     return null;
-    }
-	
-	public static void deleteOldNotifications(Context context){
-		Log.w("DEBUG", "deleteOldNotifications");
-    	LiveViewDbHelper helper = new LiveViewDbHelper(context);
-    	SQLiteDatabase db = helper.getWritableDatabase();  
-    	db.delete(LiveViewData.Notifications.TABLE, LiveViewData.Notifications.READ + "= 1", null);
-    	db.close();
-    }
+  @Override
+  public void onCreate(SQLiteDatabase db) {
+   db.execSQL(SCRIPT_CREATE_TABLE_ALERT_ITEMS);
+  }
 
+  @Override
+  public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+      if (oldVersion != newVersion)
+      {
+      	try {
+	            db.execSQL("DROP TABLE " + LiveViewDbConstants.TABLE_ALERT_ITEMS);
+      	} catch(Exception e) {
+      		Log.e("LiveViewDbHelper", "Could not delete all tables. "+e.toString());
+      	}
+          onCreate(db);
+      }
+  } 
+ }
 }

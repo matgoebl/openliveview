@@ -31,7 +31,7 @@ public class SMSNotificationManager {
 				final String messageBody = messages[0].getMessageBody();
 
 				result.setContent(messageBody);
-				result.setTitle("SMS " + getContactByAddr(context, messages[0]));
+				result.setTitle(getContactByAddr(context, messages[0]));
 				result.setTimestamp(messages[0].getTimestampMillis());
 			}
 		}
