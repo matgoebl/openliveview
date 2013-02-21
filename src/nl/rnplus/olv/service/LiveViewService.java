@@ -319,10 +319,10 @@ public class LiveViewService extends Service
 		    		    					if (line1==null) line1 = "";
 		    		    					if (line2==null) line2 = "";
 		    		    					int icon_type = intent.getExtras().getInt("icon_type");
-		    		    					if (icon_type>2)
+		    		    					/* if (icon_type>2)
 		    		    					{
 		    		    						icon_type=2;
-		    		    					}
+		    		    					} */
 		    		    					byte[] img = intent.getExtras().getByteArray("icon");
 		    		    					workerThread.showNewAlert(line1, line2, icon_type, img);
 		    		    				}

@@ -76,7 +76,7 @@
         </activity>
             
         <activity
-            android:name="nl.rnplus.olv.OldPluginManagerActivity"
+            android:name="nl.rnplus.olv.PluginManagerActivity"
             android:label="@string/title_activity_plugin_manager"
             android:launchMode="singleInstance">
         </activity>  
@@ -90,8 +90,7 @@
         <activity 
             android:name="nl.rnplus.olv.FilterEditor"
             android:label="@string/title_activity_filter_editor"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|keyboardHidden|keyboard">
+            android:launchMode="singleInstance">
         </activity> 
            
         <activity

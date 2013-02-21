@@ -961,12 +961,8 @@ public class LiveViewThread extends Thread {
     
     public void showNewAlert(String line1, String line2, int icon_type, byte[] img) {
     	menu_state = 2;	
-    	if (icon_type > LiveViewDbConstants.ALERT_ALL) {
-    		if (icon_type < LiveViewDbConstants.ALERT_NOTE) {
-    			img = getImageForNotification(icon_type-1);
-    		} else {
-    			img = lvImage_menu_warning;
-    		}
+    	if (icon_type != LiveViewDbConstants.ALERT_PLUGIN_I) {
+    		img = getImageForNotification(icon_type-1);
     	}	
         try {
         	sendCall(new DisplayPanel(line1, line2, img, false));

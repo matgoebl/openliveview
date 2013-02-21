@@ -33,4 +33,6 @@ public final class LiveViewDbConstants
   public static final int ALERT_ANDROID = 1; //Notifications received by the accessibility service
   public static final int ALERT_SMS = 2; //SMS messages
   public static final int ALERT_NOTE = 3; //Notes
+  public static final int ALERT_PLUGIN = 4; //Plugin
+  public static final int ALERT_PLUGIN_I = 5; //Plugin (with custom icon)
 }

@@ -1,10 +1,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    tools:context=".MainActivity" >
 
     <TextView
-        android:id="@+id/android:empty"
+        android:id="@+id/noplugins_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -13,8 +14,9 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         tools:context=".PluginManagerActivity" />
     
-      <ListView android:id="@+id/android:list"
+      <ListView 
+        android:id="@+id/mylist"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"/>
+        android:layout_height="fill_parent" />
 
 </RelativeLayout>

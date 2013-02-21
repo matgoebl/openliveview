@@ -99,11 +99,7 @@ public class MainActivity extends Activity {
         btn_plugins.setOnClickListener(new View.OnClickListener() {
  
             public void onClick(View view) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(myself);
-                builder.setTitle(getString(R.string.plugins_dialog_title));
-                builder.setMessage(getString(R.string.debug_function_disabled));
-                builder.setPositiveButton(getString(R.string.close_btn), null);
-                builder.show();
+                openPluginManager();
             }
         }); 
         
@@ -183,6 +179,11 @@ public class MainActivity extends Activity {
     
     public void openFilterSettings() {
     	Intent intent = new Intent(this, FilterEditor.class);
+    	startActivity(intent);
+    }
+    
+    public void openPluginManager() {
+    	Intent intent = new Intent(this, PluginManagerActivity.class);
     	startActivity(intent);
     }
     

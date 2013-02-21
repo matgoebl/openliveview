@@ -191,6 +191,10 @@
 	
 	<string name="about">"Thank you for using OpenLiveView! This free and open source app was made possible thanks to the following people: Jan Korpegård, basty149, Exception13, TpmKranz, Pedro Veloso and Renze Nicolai. Thank you all for your help."</string>
 	
+	<string name="pluginmanager_popup_wait">Building app list may take a moment&#8230;</string>
+	<string name="pluginmanager_menu_help">Help</string>
+	<string name="pluginmanager_menu_help_text">PLUGINMANAGERHELPTEXT</string>
+	
 	<!-- TpmKranz -->
 	<string name="prefs_menu_notificationfilter">Filter settings&#8230;</string>
 	<string name="prefs_filtereditor_menu_add">Add app to filter</string>
