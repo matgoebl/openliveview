@@ -173,7 +173,8 @@
 	<string name="etc_content_desc">image</string>
 	
 	<string name="error_not_supported_text">OpenLiveView could not read from the list of connected Bluetooth devices. This probably means that your Android rom does not implement the Bluetooth functionality needed by OpenLiveView, please ask for help at http://openliveview.googlecode.com</string>
-
+	<string name="wizard_initial_setup_btn_text">Manual setup</string>
+	
 	<string name="expertconfig_cancel">Cancel</string>
 	<string name="expertconfig_save">Save</string>
 	<string name="expertconfig_information">Behind \'initial menu item\' you can enter a number from 0 to the amount of menu items you activated. The value is corrected automatically if you enter an impossible value.
@@ -193,7 +194,7 @@
 	
 	<string name="pluginmanager_popup_wait">Building app list may take a moment&#8230;</string>
 	<string name="pluginmanager_menu_help">Help</string>
-	<string name="pluginmanager_menu_help_text">PLUGINMANAGERHELPTEXT</string>
+	<string name="pluginmanager_menu_help_text">Here should be a helpful text</string>
 	
 	<!-- TpmKranz -->
 	<string name="prefs_menu_notificationfilter">Filter settings&#8230;</string>

@@ -252,8 +252,9 @@ public class LiveViewThread extends Thread {
         }
        
         
-        /* menu_button_plugintest_id = menu_button_count;
+        menu_button_plugintest_id = menu_button_count;
         menu_button_count += 1;
+        /*
         
         menu_button_debug_id = menu_button_count;
         menu_button_count += 1; */
@@ -826,7 +827,7 @@ public class LiveViewThread extends Thread {
     public void pluginMenuAction(int menuId) throws IOException {
         sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
         menu_state = 3;
-        sendCall(new DisplayPanel("", "", lvImage_plugin_loading, false));
+        sendCall(new DisplayPanel("Press buttons!", "", lvImage_menu_music, false));
         sendEvent("menuitem_opened", menuId, 0, "", "");
     }
     
@@ -946,7 +947,7 @@ public class LiveViewThread extends Thread {
         Intent bci = new Intent(PLUGIN_EVENT);
         Bundle bcb = new Bundle();
         bcb.putString("event", event);
-        bcb.putString("plugin", "nl.rnplus.nothing.here.yet");
+        bcb.putString("plugin", "Here should be the target plugin package name");
         bcb.putInt("p1", a);
         bcb.putInt("p2", b);
         if (string1==null) string1="no value";

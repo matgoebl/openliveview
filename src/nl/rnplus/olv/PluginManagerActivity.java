@@ -6,6 +6,7 @@ import java.util.List;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -88,10 +89,23 @@ public class PluginManagerActivity extends Activity {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				String [] packagelist = packages.toArray(new String[packages.size()]);
 				AlertDialog.Builder builder = new AlertDialog.Builder(myself);
-		        builder.setTitle("Plugin");
+		        /*builder.setTitle("Plugin");
 		        builder.setMessage(packagelist[position]);
 		        builder.setPositiveButton(getString(R.string.close_btn), null);
-		        builder.show();
+		        builder.show();*/
+				Log.w("Debug", "Starting settings for "+packagelist[position]+"...");
+				try {
+					Intent intent = new Intent();
+					intent.setComponent(new ComponentName(packagelist[position], packagelist[position]+".PluginSettings"));
+					startActivity(intent);
+					Log.w("Debug", "Done.");
+				} catch (Exception e) {
+					Log.w("Debug", "Failed: the PluginSettings activity is missing.");
+					builder.setTitle("Sorry");
+			        builder.setMessage("This plugin ("+packagelist[position]+") has no settings.");
+			        builder.setPositiveButton(getString(R.string.close_btn), null);
+			        builder.show();
+				}
 				onResume();
 			}
 		});

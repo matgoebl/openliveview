@@ -6,6 +6,7 @@ package nl.rnplus.olv.data;
  * 
  * @author Renze Nicolai
  */
+
 public final class LiveViewDbConstants
 {
   //Database

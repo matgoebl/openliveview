@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
+import nl.rnplus.olv.ConfigWizardActivity;
 import nl.rnplus.olv.data.Prefs;
 
 /**
