@@ -108,7 +108,7 @@ public Cursor getAlertsOfType(int type){
 	if (type!=LiveViewDbConstants.ALERT_ALL) {
 		where = LiveViewDbConstants.COLUMN_ALERT_ITEMS_TYPE + " = "+ String.valueOf(type);
 	}
-	Cursor cursor = sqLiteDatabase.query(LiveViewDbConstants.TABLE_ALERT_ITEMS, columns, where, null, null, null, null);
+	Cursor cursor = sqLiteDatabase.query(LiveViewDbConstants.TABLE_ALERT_ITEMS, columns, where, null, null, null, LiveViewDbConstants.COLUMN_ALERT_ITEMS_ID+" DESC");
 	//int index_CONTENT = cursor.getColumnIndex(LiveViewDbConstants.COLUMN_ALERT_ITEMS_CONTENT);
 	//int index_TITLE = cursor.getColumnIndex(LiveViewDbConstants.COLUMN_ALERT_ITEMS_TITLE);
 	//int index_TYPE = cursor.getColumnIndex(LiveViewDbConstants.COLUMN_ALERT_ITEMS_TYPE);

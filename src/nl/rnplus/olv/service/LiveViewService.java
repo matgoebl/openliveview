@@ -40,7 +40,6 @@ public class LiveViewService extends Service
     private LiveViewThread workerThread = null;
     
     Boolean NotificationNeedsUpdate = true;
-    Cursor notification_cursor = null;    
     int contentcolumn = -1;
     int titlecolumn = -1;
     int typecolumn = -1;
@@ -85,14 +84,7 @@ public class LiveViewService extends Service
     public void onDestroy()
     {    
     	unregisterReceiver(media_receiver);
-    	unregisterReceiver(plugin_receiver);
-    	try {
-    		notification_cursor.close();
-    	} catch(Exception e) {
-    		String message = "Database error in service (onDestroy): " + e.getMessage();
-	        Log.e(TAG, message);
-    	}
-    	
+    	unregisterReceiver(plugin_receiver);    	
     }    
 
     /*

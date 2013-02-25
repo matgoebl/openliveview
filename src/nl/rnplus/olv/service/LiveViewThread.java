@@ -588,6 +588,7 @@ public class LiveViewThread extends Thread {
                                             sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
                                             break;
                                     }
+                                    break;
                                 case MessageConstants.NAVTYPE_MENUSELECT:
                                 	Log.d(TAG, "Menuselect key triggered.");
                                     boolean hasdonesomething = false;
