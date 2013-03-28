@@ -16,6 +16,7 @@ import nl.rnplus.olv.data.Prefs;
 import nl.rnplus.olv.receiver.LiveViewBrConstants;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -110,12 +111,22 @@ public class GetNotificationService extends AccessibilityService {
         }
     }
     
-        private String[] getNotifContents(AccessibilityEvent event) {
+        @SuppressLint("NewApi")
+		private String[] getNotifContents(AccessibilityEvent event) {
                 String[] notifContents = new String[2];
                 //Ids from http://t.co/AmjZB0l2 and http://t.co/VaxK16f4
                 int messageId = (android.os.Build.VERSION.SDK_INT < 11 ? 16908352 : 16908358);
                 PackageManager pM = this.getPackageManager();
-                String tickerText = (event.getText().size() == 0 ? "" : event.getText().get(0).toString());
+                String tickerText;
+                if(event.getText().size() == 0) {
+                	tickerText = "";
+                }else {
+                	tickerText = "";
+                	for(int i = 0; i < event.getText().size(); i++){
+                		tickerText += event.getText().get(i).toString() + "\n";
+                	}
+                }
+                Log.v(LOG_TAG, "PENIS: " + tickerText);
                 String appName;
                 try{
                         ApplicationInfo aI = pM.getApplicationInfo(event.getPackageName().toString(), 0);
@@ -127,23 +138,61 @@ public class GetNotificationService extends AccessibilityService {
                         notifContents[0] = getString(R.string.backup_title_toast)+appName;
                         notifContents[1] = tickerText;
                 }else{
+                	 
                         try{
                                 //Method from http://stackoverflow.com/questions/9292032/extract-notification-text-from-parcelable-contentview-or-contentintent
-                                Notification notification = (Notification) event.getParcelableData();
-                                RemoteViews remoteViews = notification.contentView;
-                                LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-                                ViewGroup localViews = (ViewGroup) inflater.inflate(remoteViews.getLayoutId(), null);
-                                remoteViews.reapply(this, localViews);
-                                String title = ((TextView) localViews.findViewById(android.R.id.title)).getText().toString();
-                                String message = ((TextView) localViews.findViewById(messageId)).getText().toString();
-                                notifContents[0] = title+appName;
-                                notifContents[1] = message;
-                                if(android.os.Build.VERSION.SDK_INT > 13){
-                                        messageId = 16908309;
-                                        message = ((TextView) localViews.findViewById(messageId)).getText().toString();
-                                        if(!message.equals(""))
-                                                notifContents[1] = notifContents[1]+":\n"+message;
-                                }
+                        	String notificationContents = "";                        
+                            try{
+                                    Notification notification = (Notification) event.getParcelableData();
+                                    RemoteViews remoteViews = notification.contentView;
+                                    ViewGroup localViews = (ViewGroup) remoteViews.apply(this, null);
+                                    String title = ((TextView) localViews.findViewById(android.R.id.title)).getText().toString();
+                                    String piece = "";
+                                    for( int j = 16905000 ; j < 16910000 ; j++ ){
+                                            try{
+                                                    piece = "\n"+( (TextView) localViews.findViewById(j) ).getText().toString();
+                                                    notificationContents = notificationContents.concat(piece);
+                                            }catch(Exception e){
+                                                    
+                                            }
+                                    }
+                                    if(android.os.Build.VERSION.SDK_INT >= 16){
+                                            try{
+                                                    remoteViews = notification.bigContentView;
+                                                    localViews = (ViewGroup) remoteViews.apply(this, null);
+                                                    piece = "";
+                                                    notificationContents = ""; 
+                                                    title = ( (TextView) localViews.findViewById(16908310) ).getText().toString();
+                                                    Log.v(LOG_TAG, "PENIS: title" + title);
+                                                    int titleId = 16908310;
+                                                    int iconId = 16908309;
+                                                    int contentTextId = 16908358;
+                                                    int contentInfoId = 16909244;
+                                                    int timeId = 16908388;
+                                                    
+                                                    for( int j = 16905000 ; j < 16910000 ; j++ ){
+                                                            try{
+                                                            		String text = ( (TextView) localViews.findViewById(j) ).getText().toString();
+                                                            		if(!text.equals("") && (j != iconId) && (j != contentTextId) && (j != contentInfoId) && (j != timeId) && (j != titleId)) {
+                                                            			piece = text+"\n---------\n";
+                                                            			Log.v(LOG_TAG, "PENIS: " + text);
+                                                            			notificationContents = notificationContents.concat(piece);
+                                                            		}
+                                                            }catch(Exception e){
+                                                                    
+                                                            }
+                                                    }
+                                            }catch(Exception e){
+                                                    
+                                            }
+                                    }
+                                  notifContents[0] = title+appName;
+                                  notifContents[1] = notificationContents;
+                            }catch(Exception e){
+                                    
+                            }
+
+                                
                         }catch(Exception e){
                                 notifContents[0] = getString(R.string.backup_title_toast)+appName;
                                 notifContents[1] = tickerText; 
