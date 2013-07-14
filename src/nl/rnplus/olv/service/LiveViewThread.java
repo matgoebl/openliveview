@@ -193,7 +193,7 @@ public class LiveViewThread extends Thread {
         lvImage_menu_gmail = loadImageByteArray(parentService, "menu_gmail.png");
         lvImage_menu_left = loadImageByteArray(parentService, "menu_left.png");
         lvImage_menu_location = loadImageByteArray(parentService, "menu_location.png");
-        lvImage_menu_totp = loadImageByteArray(parentService, "announce_android.png");
+        lvImage_menu_totp = loadImageByteArray(parentService, "menu_totp.png");
         lvImage_menu_mail = loadImageByteArray(parentService, "menu_mail.png");
         lvImage_menu_media = loadImageByteArray(parentService, "menu_media.png");
         lvImage_menu_min = loadImageByteArray(parentService, "menu_min.png");
@@ -855,7 +855,7 @@ public class LiveViewThread extends Thread {
     public void draw_totp_pin(int menuId) throws IOException {
         sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
         menu_state = 3;
-        sendCall(new DisplayPanel("hello, world!", "this is a stub", lvImage_menu_debug, false));
+        sendCall(new DisplayPanel("hello, world!", "pin: " + get_totp_pin() , lvImage_menu_debug, false));
         sendEvent("menuitem_opened", menuId, 0, "", "");
     }
     
@@ -961,6 +961,12 @@ public class LiveViewThread extends Thread {
         parentService.sendOrderedBroadcast(buttonIntent, null);
         buttonIntent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP, keycode));
         parentService.sendOrderedBroadcast(buttonIntent, null);
+    }
+    
+    public String get_totp_pin() //This function was added by tvall (user on XDA)
+    {
+        String pin = "123456";
+        return pin;
     }
 
     public boolean isLooping() {
