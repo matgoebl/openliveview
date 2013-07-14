@@ -66,6 +66,7 @@ public class LiveViewThread extends Thread {
     private final byte[] lvImage_announce_note;
     private final byte[] lvImage_announce_sms;
     private final byte[] lvImage_menu_battery;
+    private final byte[] lvImage_menu_totp;
     private final byte[] lvImage_menu_debug;
     @SuppressWarnings("unused")
 	private final byte[] lvImage_menu_gmail;
@@ -115,6 +116,7 @@ public class LiveViewThread extends Thread {
     private byte menu_button_android_notifications_id = -1;
     private byte menu_button_sms_id = -1;
     private byte menu_button_notes_id = -1;
+    private byte menu_button_totp_id = -1;
     
     private byte debugx = 0;
     private byte debugy = 0;
@@ -191,6 +193,7 @@ public class LiveViewThread extends Thread {
         lvImage_menu_gmail = loadImageByteArray(parentService, "menu_gmail.png");
         lvImage_menu_left = loadImageByteArray(parentService, "menu_left.png");
         lvImage_menu_location = loadImageByteArray(parentService, "menu_location.png");
+        lvImage_menu_totp = loadImageByteArray(parentService, "announce_android.png");
         lvImage_menu_mail = loadImageByteArray(parentService, "menu_mail.png");
         lvImage_menu_media = loadImageByteArray(parentService, "menu_media.png");
         lvImage_menu_min = loadImageByteArray(parentService, "menu_min.png");
@@ -215,6 +218,7 @@ public class LiveViewThread extends Thread {
         Boolean menu_show_media_previous = prefs.getMenuShowMediaPrevious();
         Boolean menu_show_battery_status = prefs.getMenuShowBatteryStatus();
         Boolean menu_show_mediamenu_status = prefs.getMenuShowMediaMenuStatus();
+        Boolean menu_show_totp = prefs.getMenuShowTotp();
         if (menu_show_notifications) {
             menu_button_notifications_id = menu_button_count;
             menu_button_count += 1;
@@ -248,6 +252,11 @@ public class LiveViewThread extends Thread {
         
         if (menu_show_mediamenu_status) {
         	menu_button_mediamenu_id = menu_button_count;
+            menu_button_count += 1;
+        }
+        
+        if (menu_show_totp) {
+        	menu_button_totp_id = menu_button_count;
             menu_button_count += 1;
         }
        
@@ -463,6 +472,10 @@ public class LiveViewThread extends Thread {
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) (get_battery_status() * 100)),
 	                                "Battery", lvImage_menu_battery));
 	                    }
+	                    if (menu_button_totp_id == current_id) {
+	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
+	                                "totp", lvImage_menu_totp));
+	                    }
 	                    if (menu_button_plugintest_id == current_id) {
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
 	                                "Demo", lvImage_menu_debug));
@@ -627,6 +640,13 @@ public class LiveViewThread extends Thread {
                                         sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
                                         menu_state = 2;
                                         draw_battery_status();
+                                        hasdonesomething = true;
+                                    }
+                                    if (nav.getMenuItemId() == menu_button_totp_id) {
+                                        Log.d(TAG, "Show totp.");
+                                        sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
+                                        menu_state = 2;
+                                        draw_totp_pin(0);
                                         hasdonesomething = true;
                                     }
                                     if (nav.getMenuItemId() == menu_button_plugintest_id) {
@@ -832,6 +852,13 @@ public class LiveViewThread extends Thread {
         sendEvent("menuitem_opened", menuId, 0, "", "");
     }
     
+    public void draw_totp_pin(int menuId) throws IOException {
+        sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
+        menu_state = 3;
+        sendCall(new DisplayPanel("hello, world!", "this is a stub", lvImage_menu_debug, false));
+        sendEvent("menuitem_opened", menuId, 0, "", "");
+    }
+    
     public void pluginNavigate(byte navAction) throws IOException {
     	sendEvent("navigation", navAction, 0, "", "");
         sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
@@ -927,7 +954,7 @@ public class LiveViewThread extends Thread {
         int voltage = batteryStatus.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1);
         return voltage;
     }
-
+    
     public void emulate_media(int keycode) {
         Intent buttonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
         buttonIntent.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, keycode));

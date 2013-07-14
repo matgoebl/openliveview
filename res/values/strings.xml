@@ -7,7 +7,7 @@
 
 	<!-- Version -->
 	<string name="version_code">15</string>
-    <string name="version_name">1.0.3.1</string>
+    <string name="version_name">1.0.3.1-tvall</string>
     <string name="developer_name">RN+</string> <!-- Put your name here when you release your own version of olv -->
     <!-- When releasing your own version of OLV feel free to change or hide the donation link in the settings menu -->
     
@@ -127,6 +127,10 @@
 	<string name="prefs_menu_battery_status_key">menu.batterystatusvisible</string>
 	<string name="prefs_menu_battery_status_title">Battery status</string>
 	<string name="prefs_menu_battery_status_summary">Show the phones battery status.</string>
+	
+	<string name="prefs_menu_totp_key">menu.totpvisible</string>
+	<string name="prefs_menu_totp_title">topt gen</string>
+	<string name="prefs_menu_totp_summary">Show a TOTP key.</string>
 	
 	<string name="prefs_menu_mediamenubutton_key">menu.mediamenuvisible</string>
 	<string name="prefs_menu_mediamenubutton_title">Media menu</string>

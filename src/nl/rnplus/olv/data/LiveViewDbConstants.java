@@ -36,4 +36,5 @@ public final class LiveViewDbConstants
   public static final int ALERT_NOTE = 3; //Notes
   public static final int ALERT_PLUGIN = 4; //Plugin
   public static final int ALERT_PLUGIN_I = 5; //Plugin (with custom icon)
+  public static final int ALERT_TOTP = 6; //totp
 }
