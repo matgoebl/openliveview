@@ -62,6 +62,10 @@ public class Prefs {
     public Boolean getMenuShowTotp() {
         return preferences.getBoolean("menu.totpvisible", true);
     }
+    
+    public String getTotpKey() {
+    	return preferences.getString("totp.pin", null);
+    }
 
     public Boolean getSetupCompleted() {
         return preferences.getBoolean("system.setupcompleted", false);
