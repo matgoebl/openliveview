@@ -130,11 +130,11 @@
 	
 	<string name="prefs_menu_totp_key">menu.totpvisible</string>
 	<string name="prefs_menu_totp_title">topt gen</string>
-	<string name="prefs_menu_totp_summary">Show a TOTP pin. (for 2 step auth)</string>
+	<string name="prefs_menu_totp_summary">Show a TOTP pin. (for 2 step auth) this is curently unfinished</string>
 	
 	<string name="prefs_totp_key">totp.pin</string>
 	<string name="prefs_totp_title">totp key</string>
-	<string name="prefs_totp_summary">TOTP private key</string>
+	<string name="prefs_totp_summary">TOTP shared secret (in hex format)</string>
 	
 	<string name="prefs_menu_mediamenubutton_key">menu.mediamenuvisible</string>
 	<string name="prefs_menu_mediamenubutton_title">Media menu</string>

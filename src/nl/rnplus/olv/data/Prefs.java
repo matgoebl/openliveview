@@ -11,7 +11,7 @@ import nl.rnplus.olv.R;
  */
 public class Prefs {
 
-    private final SharedPreferences preferences;
+    private static SharedPreferences preferences;
     private final String keyDeviceAddress;
 
     public Prefs(Context context) {
@@ -63,7 +63,7 @@ public class Prefs {
         return preferences.getBoolean("menu.totpvisible", true);
     }
     
-    public String getTotpKey() {
+    public static String getTotpKey() {
     	return preferences.getString("totp.pin", null);
     }
 

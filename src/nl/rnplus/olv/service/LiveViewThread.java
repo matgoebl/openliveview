@@ -31,6 +31,7 @@ import android.view.KeyEvent;
 import nl.rnplus.olv.LiveViewPreferences;
 import nl.rnplus.olv.MainActivity;
 import nl.rnplus.olv.R;
+import nl.rnplus.olv.TOTP;
 import nl.rnplus.olv.data.LiveViewDbConstants;
 import nl.rnplus.olv.data.LiveViewDbHelper;
 import nl.rnplus.olv.data.Prefs;
@@ -339,7 +340,7 @@ public class LiveViewThread extends Thread {
                     processEvent(response);
                 } catch (DecodeException e) {
                     Log.e(TAG, "Error decoding message: " + e.getMessage());
-                }
+                } 
             } while (true);
         } catch (IOException e) {
             String msg = e.getMessage();
@@ -853,10 +854,10 @@ public class LiveViewThread extends Thread {
     }
     
     public void draw_totp_pin(int menuId) throws IOException {
-        sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
-        menu_state = 3;
-        sendCall(new DisplayPanel("hello, world!", "pin: " + get_totp_pin() , lvImage_menu_debug, false));
-        sendEvent("menuitem_opened", menuId, 0, "", "");
+        //sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
+        //menu_state = 3;
+        sendCall(new DisplayPanel("Hello, world!", "pin: " + get_totp_pin() , lvImage_menu_debug, false));
+        //sendEvent("menuitem_opened", menuId, 0, "", "");
     }
     
     public void pluginNavigate(byte navAction) throws IOException {
@@ -965,10 +966,15 @@ public class LiveViewThread extends Thread {
     
     public String get_totp_pin() //This function was added by tvall (user on XDA)
     {
-        String pin = "123456";
-        return pin;
+    	String totp_key = Prefs.getTotpKey();
+    	//String totp_key = "12345678901234567890";
+    	long unixTime = System.currentTimeMillis()/1000/30;
+    	String time = String.valueOf(unixTime);
+    	String pin = TOTP.generateTOTP(totp_key, time, "6", "HmacSHA1");
+    	//String pin = 
+    	return pin;
     }
-
+    
     public boolean isLooping() {
         return serverSocket != null;
     }
