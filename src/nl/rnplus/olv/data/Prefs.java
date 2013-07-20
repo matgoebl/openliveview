@@ -58,6 +58,10 @@ public class Prefs {
     public Boolean getMenuShowBatteryStatus() {
         return preferences.getBoolean("menu.batterystatusvisible", true);
     }
+    
+    public Boolean getMenuShowWifiToggle() {
+        return preferences.getBoolean("menu.wifitogglevisible", true);
+    }
 
     public Boolean getSetupCompleted() {
         return preferences.getBoolean("system.setupcompleted", false);

@@ -21,6 +21,7 @@ import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -86,6 +87,7 @@ public class LiveViewThread extends Thread {
     private final byte[] lvImage_music_pause;
     private final byte[] lvImage_music_play;
     private final byte[] lvImage_plugin_loading;
+    private final byte[] lvImage_menu_wifi;
 
     
 
@@ -109,6 +111,7 @@ public class LiveViewThread extends Thread {
     private byte menu_button_media_previous_id = -1;
     private byte menu_button_findphone_id = -1;
     private byte menu_button_battery_status_id = -1;
+    private byte menu_button_wifi_toggle_id = -1;
     private byte menu_button_plugintest_id = -1;
     private byte menu_button_debug_id = -1;
     private byte menu_button_mediamenu_id = -1;
@@ -204,6 +207,7 @@ public class LiveViewThread extends Thread {
         lvImage_music_pause = loadImageByteArray(parentService, "music_pause.png");
         lvImage_music_play = loadImageByteArray(parentService, "music_play.png");
         lvImage_plugin_loading = loadImageByteArray(parentService, "plugin_loading.png");
+        lvImage_menu_wifi = loadImageByteArray(parentService, "menu_wifi.png");
 
         menu_button_count = 0;
 
@@ -214,6 +218,7 @@ public class LiveViewThread extends Thread {
         Boolean menu_show_media_play = prefs.getMenuShowMediaPlay();
         Boolean menu_show_media_previous = prefs.getMenuShowMediaPrevious();
         Boolean menu_show_battery_status = prefs.getMenuShowBatteryStatus();
+        Boolean menu_show_wifi_toggle = prefs.getMenuShowWifiToggle();
         Boolean menu_show_mediamenu_status = prefs.getMenuShowMediaMenuStatus();
         if (menu_show_notifications) {
             menu_button_notifications_id = menu_button_count;
@@ -245,6 +250,10 @@ public class LiveViewThread extends Thread {
             menu_button_battery_status_id = menu_button_count;
             menu_button_count += 1;
         }
+        if (menu_show_wifi_toggle) {
+            menu_button_wifi_toggle_id = menu_button_count;
+            menu_button_count += 1;
+        }
         
         if (menu_show_mediamenu_status) {
         	menu_button_mediamenu_id = menu_button_count;
@@ -252,9 +261,8 @@ public class LiveViewThread extends Thread {
         }
        
         
-        menu_button_plugintest_id = menu_button_count;
+        /*menu_button_plugintest_id = menu_button_count;
         menu_button_count += 1;
-        /*
         
         menu_button_debug_id = menu_button_count;
         menu_button_count += 1; */
@@ -463,6 +471,10 @@ public class LiveViewThread extends Thread {
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) (get_battery_status() * 100)),
 	                                "Battery", lvImage_menu_battery));
 	                    }
+	                    if (menu_button_wifi_toggle_id == current_id) {
+	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
+	                                "Toggle WiFi", lvImage_menu_wifi));
+	                    }
 	                    if (menu_button_plugintest_id == current_id) {
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
 	                                "Demo", lvImage_menu_debug));
@@ -632,6 +644,11 @@ public class LiveViewThread extends Thread {
                                     if (nav.getMenuItemId() == menu_button_plugintest_id) {
                                         Log.d(TAG, "PLUGIN MENU ITEM TEST");
                                         pluginMenuAction(0);
+                                        hasdonesomething = true;
+                                    }
+                                    if (nav.getMenuItemId() == menu_button_wifi_toggle_id) {
+                                        Log.d(TAG, "toggling wifi");
+                                        pluginWifiToggle(0);
                                         hasdonesomething = true;
                                     }
                                     if (nav.getMenuItemId() == menu_button_debug_id) {
@@ -830,6 +847,17 @@ public class LiveViewThread extends Thread {
         menu_state = 3;
         sendCall(new DisplayPanel("Press buttons!", "", lvImage_menu_music, false));
         sendEvent("menuitem_opened", menuId, 0, "", "");
+    }
+    
+    public void pluginWifiToggle(int menuId) throws IOException {
+    	WifiManager wifi = (WifiManager) parentService.getSystemService(Context.WIFI_SERVICE);
+        Boolean b=wifi.isWifiEnabled();
+        if (b == true) {
+            wifi.setWifiEnabled(false);
+        }
+        else {
+        	wifi.setWifiEnabled(true);
+        }
     }
     
     public void pluginNavigate(byte navAction) throws IOException {

@@ -67,6 +67,11 @@
     <string name="prefs_menu_find_my_phone_visible_title">Find my phone</string>
     <string name="prefs_menu_find_my_phone_visible_summary">Find your phone by making noise and vibrations.</string>
 
+    <string name="prefs_menu_wifi_toggle_visible_key">menu.wifitogglevisible</string>
+    <string name="prefs_menu_wifi_toggle_visible_title">Wifi Toggle</string>
+    <string name="prefs_menu_wifi_toggle_visible_summary">toggles wifi on/off.</string>
+    
+    
     <string name="prefs_menu_notifications_visible_key">menu.notificationsvisible</string>
     <string name="prefs_menu_notifications_visible_title">Menu item</string>
     <string name="prefs_menu_notifications_visible_summary">Show a menu item that allows you to browse received notifications.</string>    
