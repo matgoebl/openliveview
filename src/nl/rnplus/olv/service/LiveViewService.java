@@ -180,9 +180,9 @@ public class LiveViewService extends Service
     
     public long getNotificationTime(int notification, int type) {
     	long timestamp = 0;
+    	LiveViewDbHelper dbHelper = null;
+    	Cursor cursor = null;
     	try {
-	    	LiveViewDbHelper dbHelper;
-	    	Cursor cursor;
 			dbHelper = new LiveViewDbHelper(this);	
 			dbHelper.openToRead();
 			cursor = dbHelper.getAlertsOfType(type);
@@ -193,6 +193,10 @@ public class LiveViewService extends Service
 			dbHelper.close();
     	} catch (Exception e) {
     		Log.e("getNotificationTime", "Error: "+e.getMessage());
+    		if (cursor != null)
+    			cursor.close();
+    		if (dbHelper != null)
+    			dbHelper.close();
     	}
     	return timestamp;
     }
