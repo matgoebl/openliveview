@@ -235,10 +235,10 @@ public class LiveViewService extends Service
     
     /* Media receiver */
     
-    boolean MediaInfoNeedsUpdate = false;
-    String MediaInfoArtist = "";
-    String MediaInfoTrack  = "";
-    String MediaInfoAlbum  = "";
+    private boolean MediaInfoNeedsUpdate = false;
+    private String MediaInfoArtist = "";
+    private String MediaInfoTrack  = "";
+    private String MediaInfoAlbum  = "";
     
     public Boolean getMediaInfoNeedsUpdate()
     {
@@ -263,6 +263,14 @@ public class LiveViewService extends Service
     public String getMediaInfoAlbum()
     {
         return MediaInfoAlbum;
+    }
+    
+    public void setMediaInfo(String Track, String Artist, String Album, Boolean needsUpdate)
+    {
+    	MediaInfoArtist = Artist;
+    	MediaInfoAlbum = Album;
+    	MediaInfoTrack = Track;
+    	MediaInfoNeedsUpdate = needsUpdate;
     }
     
     private BroadcastReceiver media_receiver = new BroadcastReceiver()

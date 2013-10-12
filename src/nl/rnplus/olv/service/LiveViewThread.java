@@ -458,9 +458,9 @@ public class LiveViewThread extends Thread {
             	break;	
             case MessageConstants.MSG_DISPLAYPANEL_ACK:
                 Log.d(TAG, "Got display panel ack.");
-                if ((parentService.MediaInfoNeedsUpdate) && (menu_state == 1)) {
+                if ((parentService.getMediaInfoNeedsUpdate()) && (menu_state == 1)) {
                     draw_media_menu();
-                    parentService.MediaInfoNeedsUpdate = false;
+                    parentService.setMediaInfoNeedsUpdate(false);
                 }
                 break;
             case MessageConstants.MSG_GETMENUITEMS:
