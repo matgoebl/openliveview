@@ -20,7 +20,10 @@ import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.Build;
@@ -990,6 +993,22 @@ public class LiveViewThread extends Thread {
         Intent batteryStatus = parentService.registerReceiver(null, ifilter);
         int voltage = batteryStatus.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1);
         return voltage;
+    }
+
+    public String get_current_ssid() {
+        String ssid = "";
+        Context context = parentService.getApplicationContext();
+        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        if (networkInfo.isConnected()) {
+            final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            final WifiInfo connectionInfo = wifiManager.getConnectionInfo();
+            if (connectionInfo != null && connectionInfo.getSSID() !=  null && connectionInfo.getSSID() != "" ) {
+                ssid = connectionInfo.getSSID();
+                Log.d(TAG, "got ssid='"+ssid+"'");
+            }
+        }
+        return ssid;
     }
 
     public void emulate_media(int keycode) {

@@ -17,6 +17,7 @@
 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /><!-- needed for wifi toggle -->
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.INTERNET"/><!-- needed for web control -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/><!-- needed for web control to get ssid -->
 	
 	<uses-feature android:name="android.hardware.telephony" android:required="false" /><!-- Needed for "SMS receiver" but not required -->
 	<uses-feature android:name="android.hardware.touchscreen" android:required="false" />
