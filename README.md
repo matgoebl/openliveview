@@ -1,9 +1,12 @@
-OpenLiveView
-============
+OpenLiveView-WebControl
+=======================
 
 *An open implementation of Sony's LiveView protocol.*
 
 This Android application aims to be a complete replacement for the proprietary applications provided by Sony.
+
+This version contains extensions for controlling e.g. your smart home using web-interfaces.
+
 
 Notice
 ------
@@ -13,6 +16,7 @@ License
 -------
     Copyright 2013 Renze Nicolai
     Original source code: Copyright 2011 Robert Jacob
+    WebControl and small fixes by Matthias Goebl <matthias.goebl@goebl.net>
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
