@@ -42,14 +42,27 @@ import nl.rnplus.olv.messages.events.DeviceStatus;
 import nl.rnplus.olv.messages.events.GetAlert;
 import nl.rnplus.olv.messages.events.Navigation;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.AbstractHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 @TargetApi(17)
 public class LiveViewThread extends Thread {
@@ -1073,5 +1086,53 @@ public class LiveViewThread extends Thread {
     	//sendCall(new ClearDisplay());
     	//sendCall(new DisplayBitmap((byte) 0, (byte) 0, bgImage_blank));
     	sendCall(new DisplayBitmap((byte) debugx, (byte) debugy, lvImage));
+    }
+
+    public static String httpGet(String serverUrl) throws Exception {
+        String result = "";
+        HttpClient httpclient = new DefaultHttpClient();
+        URL url = new URL(serverUrl);
+        String userInfo = url.getUserInfo();
+        HttpGet httpget = new HttpGet(serverUrl); 
+        if( userInfo != null )
+        {
+                ((AbstractHttpClient) httpclient).getCredentialsProvider().setCredentials(
+                                new AuthScope(url.getHost(), url.getPort(), null),
+                                new UsernamePasswordCredentials(userInfo)
+                );
+                httpget.addHeader(new BasicScheme().authenticate(new UsernamePasswordCredentials(userInfo), httpget));
+        }
+        HttpResponse response;
+        response = httpclient.execute(httpget);
+        HttpEntity entity = response.getEntity();
+        if (entity != null) {
+            BufferedReader inReader = new BufferedReader(new InputStreamReader(entity.getContent()));
+            StringBuffer strBuf = new StringBuffer("");
+            String line = "";
+            String NL = System.getProperty("line.separator");
+            while ((line = inReader.readLine()) != null) {
+                strBuf.append(line + NL);
+            }
+            result = strBuf.toString();
+            inReader.close();
+        }
+        int status = response.getStatusLine().getStatusCode();
+        if ( status < 200 || status > 299 ) {
+            throw new Exception(response.getStatusLine().toString());
+        }
+        return result;
+    }
+
+    public static void asyncHttpGet(final String serverUrls) {
+        new Thread() {
+            public void run() {
+                for (final String serverUrl : serverUrls.split("\\s+")) {
+                    try {
+                        httpGet(serverUrl);
+                    } catch (Exception e) {
+                    }
+                }
+            }
+        }.start();
     }
 }
