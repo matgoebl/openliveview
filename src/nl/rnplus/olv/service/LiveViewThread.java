@@ -673,6 +673,7 @@ public class LiveViewThread extends Thread {
                                     }
                                     if (nav.getMenuItemId() == menu_button_wifi_toggle_id) {
                                         Log.d(TAG, "toggling wifi");
+                                        sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
                                         pluginWifiToggle(0);
                                         hasdonesomething = true;
                                     }
