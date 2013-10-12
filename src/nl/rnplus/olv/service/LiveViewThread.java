@@ -309,7 +309,8 @@ public class LiveViewThread extends Thread {
         serverSocket = null;
         try {
             Log.d(TAG, "Starting server...");
-            serverSocket = btAdapter.listenUsingRfcommWithServiceRecord("LiveView", SERIAL);
+            //serverSocket = btAdapter.listenUsingRfcommWithServiceRecord("LiveView", SERIAL);
+            serverSocket = btAdapter.listenUsingInsecureRfcommWithServiceRecord("LiveView", SERIAL);
         } catch (IOException e) {
             Log.e(TAG, "Error starting BT server: " + e.getMessage());
             return;
