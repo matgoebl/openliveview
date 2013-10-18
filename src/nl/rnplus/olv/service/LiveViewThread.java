@@ -50,6 +50,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -66,6 +67,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserFactory;
 
 @TargetApi(17)
 public class LiveViewThread extends Thread {
@@ -142,6 +145,17 @@ public class LiveViewThread extends Thread {
     
     private String PLUGIN_COMMAND = "nl.rnplus.olv.plugin.command";
     private String PLUGIN_EVENT = "nl.rnplus.olv.plugin.event";
+
+    private long playpause_time_last = 0;
+    // TODO: Make configurable via Preferences
+    private static final String ENIGMA2SSID="movieroom";
+    private static final String ENIGMA2URL="https://user:password@yourserver.example.com/enigma2";
+    private static final String WEBPLAYERSSID="audioroom|livingroom";
+    private static final String WEBPLAYERURL="https://user:password@yourserver.example.com/audioplayer/mediactrl.txt?cmd=";
+    // Web-Player API:
+    //  Commands: volup|voldn|next|prev|playpause|poweron|powertoggle|info|vol
+    //  Result for info: Title\nArtist\nAlbum\n
+    //  e.g. https://user:password@yourserver.example.com/audioplayer/mediactrl.txt?cmd=next
 
     private ThreadLocal<DateFormat> sdf = new ThreadLocal<DateFormat>() {
         protected DateFormat initialValue() {
@@ -621,6 +635,7 @@ public class LiveViewThread extends Thread {
                                                 sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
                                                 menu_state = 1;
                                                 draw_media_menu();
+                                                action_media_info_update(0);
                                             }
                                             break;
                                         default:
@@ -646,19 +661,19 @@ public class LiveViewThread extends Thread {
                                     }
                                     if (nav.getMenuItemId() == menu_button_media_next_id) {
                                         Log.d(TAG, "MEDIA: Next");
-                                        emulate_media(KeyEvent.KEYCODE_MEDIA_NEXT);
+                                        action_next(); //emulate_media(KeyEvent.KEYCODE_MEDIA_NEXT);
                                         sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
                                         hasdonesomething = true;
                                     }
                                     if (nav.getMenuItemId() == menu_button_media_play_id) {
                                         Log.d(TAG, "MEDIA: Play / Pause");
-                                        emulate_media(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
+                                        action_playpause(); //emulate_media(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
                                         sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
                                         hasdonesomething = true;
                                     }
                                     if (nav.getMenuItemId() == menu_button_media_previous_id) {
                                         Log.d(TAG, "MEDIA: Previous");
-                                        emulate_media(KeyEvent.KEYCODE_MEDIA_PREVIOUS);
+                                        action_prev(); //emulate_media(KeyEvent.KEYCODE_MEDIA_PREVIOUS);
                                         sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
                                         hasdonesomething = true;
                                     }
@@ -698,6 +713,7 @@ public class LiveViewThread extends Thread {
                                         sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
                                         menu_state = 1;
                                         draw_media_menu();
+                                        action_media_power(1);
                                         hasdonesomething = true;
                                     }
                                     if (!hasdonesomething) {
@@ -737,7 +753,13 @@ public class LiveViewThread extends Thread {
                                             Log.d(TAG, "Returning to main menu.");
                                             break;
                                         case MessageConstants.NAVACTION_PRESS:
-                                            emulate_media(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
+                                            //emulate_media(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
+                                            long timenow = System.currentTimeMillis();
+                                            if (timenow-playpause_time_last<1000)
+                                                action_media_power(-1);
+                                            else
+                                                action_playpause();
+                                            playpause_time_last = timenow;                                        	
                                             draw_media_menu();
                                             sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
                                             Log.d(TAG, "Navigation: Play / pause from media menu.");
@@ -763,13 +785,15 @@ public class LiveViewThread extends Thread {
                                     Log.d(TAG, "Navigation: Volume down from media menu.");
                                     break;
                                 case MessageConstants.NAVTYPE_LEFT:
-                                    emulate_media(KeyEvent.KEYCODE_MEDIA_PREVIOUS);
+                                    //emulate_media(KeyEvent.KEYCODE_MEDIA_PREVIOUS);
+                                	action_prev();
                                     sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
                                     draw_media_menu();
                                     Log.d(TAG, "Navigation: Previous track from media menu.");
                                     break;
                                 case MessageConstants.NAVTYPE_RIGHT:
-                                    emulate_media(KeyEvent.KEYCODE_MEDIA_NEXT);
+                                    //emulate_media(KeyEvent.KEYCODE_MEDIA_NEXT);
+                                    action_next();
                                     sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
                                     draw_media_menu();
                                     Log.d(TAG, "Navigation: Next track from media menu.");
@@ -857,9 +881,12 @@ public class LiveViewThread extends Thread {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public void draw_media_menu() throws IOException {
         Log.d(TAG, "Drawing media menu.");
+        String ssid = get_current_ssid();
         AudioManager amgr = (AudioManager) parentService.getSystemService(Context.AUDIO_SERVICE);
+    	if(amgr.isWiredHeadsetOn()) {
         boolean playing = amgr.isMusicActive();
         if (playing) {
             Log.d(TAG, "A song is playing.");
@@ -871,6 +898,13 @@ public class LiveViewThread extends Thread {
             sendCall(new DisplayPanel("There is no music playing.", "", lvImage_music_play, false));
             //sendCall(new DisplayBitmap((byte) 34, (byte) 34, menuImage_media_isnotplaying));
         }
+    	} else if (ssid.matches(ENIGMA2SSID)) {
+    		sendCall(new DisplayPanel(parentService.getMediaInfoTrack(), parentService.getMediaInfoArtist().length() > 0 ? parentService.getMediaInfoArtist() : "PVR Control", lvImage_music_play, false));
+    	} else if (ssid.matches(WEBPLAYERSSID)) {
+    		sendCall(new DisplayPanel(parentService.getMediaInfoTrack(), parentService.getMediaInfoArtist().length() > 0 ? parentService.getMediaInfoArtist() + " -- " + parentService.getMediaInfoAlbum(): "Media Control", lvImage_music_play, false));
+    	} else {
+    		sendCall(new DisplayPanel("Nothing to Control", "", lvImage_music_play, false));
+    	}
     }
 
     public void draw_battery_status() throws IOException {
@@ -933,16 +967,187 @@ public class LiveViewThread extends Thread {
     	}
     }
 
+    @SuppressWarnings("deprecation")
     public void action_volume_up() {
+    	String ssid = get_current_ssid();
         AudioManager audioManager = (AudioManager) parentService.getSystemService(Context.AUDIO_SERVICE);
+    	if (audioManager.isWiredHeadsetOn()) {
+    		Log.d(TAG, "audio action @headset");
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) + 1,
                 AudioManager.FLAG_SHOW_UI);
+    	} else if (ssid.matches(ENIGMA2SSID)) {
+    		Log.d(TAG, "audio action @home");
+    		asyncHttpGet(ENIGMA2URL+"/web/vol?set=up");
+    	} else if (ssid.matches(WEBPLAYERSSID)) {
+    		Log.d(TAG, "audio action @car");
+    		asyncHttpGet(WEBPLAYERURL+"volup");
+    	} else {
+    		return;
+    	}
     }
 
     public void action_volume_down() {
+    	String ssid = get_current_ssid();
         AudioManager audioManager = (AudioManager) parentService.getSystemService(Context.AUDIO_SERVICE);
+    	if (audioManager.isWiredHeadsetOn()) {
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) - 1,
                 AudioManager.FLAG_SHOW_UI);
+    	} else if (ssid.matches(ENIGMA2SSID)) {
+    		asyncHttpGet(ENIGMA2URL+"/web/vol?set=down");
+    	} else if (ssid.matches(WEBPLAYERSSID)) {
+    		asyncHttpGet(WEBPLAYERURL+"voldn");
+    	} else {
+    		return;
+    	}
+    }
+    
+    public void action_playpause() {
+    	String ssid = get_current_ssid();
+    	AudioManager audioManager = (AudioManager) parentService.getSystemService(Context.AUDIO_SERVICE);
+    	if (audioManager.isWiredHeadsetOn()) {
+    		emulate_media(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
+    	} else if (ssid.matches(ENIGMA2SSID)) {
+    		asyncHttpGet(ENIGMA2URL+"/web/remotecontrol?command=119&rcu=advanced");
+    	} else if (ssid.matches(WEBPLAYERSSID)) {
+    		asyncHttpGet(WEBPLAYERURL+"playpause");
+    	} else {
+    		return;
+    	}
+    	action_media_info_update(500);
+    }
+
+    public void action_next() {
+    	String ssid = get_current_ssid();
+    	AudioManager audioManager = (AudioManager) parentService.getSystemService(Context.AUDIO_SERVICE);
+    	if (audioManager.isWiredHeadsetOn()) {
+    		emulate_media(KeyEvent.KEYCODE_MEDIA_NEXT);
+    	} else if (ssid.matches(ENIGMA2SSID)) {
+    		asyncHttpGet(ENIGMA2URL+"/web/remotecontrol?command=402&rcu=advanced");
+    	} else if (ssid.matches(WEBPLAYERSSID)) {
+    		asyncHttpGet(WEBPLAYERURL+"next");
+    	} else {
+    		return;
+    	}
+    	action_media_info_update(500);
+    }	
+
+    public void action_prev() throws IOException {
+    	String ssid = get_current_ssid();
+    	AudioManager audioManager = (AudioManager) parentService.getSystemService(Context.AUDIO_SERVICE);
+    	if (audioManager.isWiredHeadsetOn()) {
+    		emulate_media(KeyEvent.KEYCODE_MEDIA_PREVIOUS);
+    	} else if (ssid.matches(ENIGMA2SSID)) {
+    		asyncHttpGet(ENIGMA2URL+"/web/remotecontrol?command=403&rcu=advanced");
+    	} else if (ssid.matches(WEBPLAYERSSID)) {
+    		asyncHttpGet(WEBPLAYERURL+"prev");
+    	} else {
+    		return;
+    	}
+    	action_media_info_update(500);
+    }
+
+    public void action_media_power(int state) {
+    	String ssid = get_current_ssid();
+    	AudioManager audioManager = (AudioManager) parentService.getSystemService(Context.AUDIO_SERVICE);
+    	if (audioManager.isWiredHeadsetOn()) {
+    		// do nothing
+    	} else if (ssid.matches(ENIGMA2SSID)) {
+    		if (state==-1)
+    			asyncHttpGet(ENIGMA2URL+"/web/powerstate?newstate=0");
+    		else if (state==1)
+    			asyncHttpGet(ENIGMA2URL+"/web/powerstate?newstate=4 "+ENIGMA2URL+"/web/remotecontrol?command=385");
+    	} else if (ssid.matches(WEBPLAYERSSID)) {
+    		asyncHttpGet(WEBPLAYERURL+(state==1?"poweron":"powertoggle"));
+    	} else {
+    		return;
+    	}
+    	try {
+			sendCall(new DisplayPanel(state==1?"Power On...":"Toggle Standby...", "", lvImage_music_play, false));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    	action_media_info_update(2000);
+    }
+
+    public void action_media_info_update(int delay) {
+    	String ssid = get_current_ssid();
+    	AudioManager audioManager = (AudioManager) parentService.getSystemService(Context.AUDIO_SERVICE);
+    	if (audioManager.isWiredHeadsetOn()) {
+    		// done using broadcast receiver
+    	} else if (ssid.matches(ENIGMA2SSID)) {
+    		enigma2MediaInfo(ENIGMA2URL+"/web/getcurrent", delay);
+    	} else if (ssid.matches(WEBPLAYERSSID)) {
+    		// should return 3 lines: title<nl>artist<nl>album<nl>
+    		webplayerMediaInfo(WEBPLAYERURL+"info",delay);
+    	} else {
+    		return;
+    	}
+    }
+
+    public void enigma2MediaInfo(final String serverUrl, final int delay_msecs) {
+		new Thread() {
+			public void run() {
+				String title = "";
+				String artist = "";
+				try {
+					Thread.sleep(delay_msecs);
+					String data = httpGet(serverUrl);
+
+					XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
+					parser.setInput( new StringReader(data) );
+					int eventType = parser.getEventType();
+					while(eventType != XmlPullParser.END_DOCUMENT) {
+						switch(eventType) {
+						case XmlPullParser.START_DOCUMENT:
+							break;
+						case XmlPullParser.START_TAG:
+							String tagName = parser.getName();
+							if(tagName.equalsIgnoreCase("e2eventservicename") && artist.equals("") ){
+								artist = parser.nextText();
+							} else if(tagName.equalsIgnoreCase("e2eventtitle") && title.equals("") ){
+								title = parser.nextText();
+							}
+							break;
+						}
+						eventType = parser.next();
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				parentService.setMediaInfo(title, artist, "", false);
+				try {
+					draw_media_menu();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}.start();
+    }
+
+    public void webplayerMediaInfo(final String serverUrl, final int delay_msecs) {
+		new Thread() {
+			public void run() {
+				String title = "";
+				String artist = "";
+				String album = "";
+				try {
+					Thread.sleep(delay_msecs*2);
+					String data = httpGet(serverUrl);
+					String lines[] = data.split("\\r?\\n");
+					title = lines[0];
+					artist = lines[1];
+					album = lines[2];
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				parentService.setMediaInfo(title, artist, album, false);
+				try {
+					draw_media_menu();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}.start();
     }
 
     /**
