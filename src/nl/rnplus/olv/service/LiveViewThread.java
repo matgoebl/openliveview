@@ -156,6 +156,7 @@ public class LiveViewThread extends Thread {
     //  Commands: volup|voldn|next|prev|playpause|poweron|powertoggle|info|vol
     //  Result for info: Title\nArtist\nAlbum\n
     //  e.g. https://user:password@yourserver.example.com/audioplayer/mediactrl.txt?cmd=next
+    private static final String LIGHTURL="http://user:password@yourserver.example.com/services/switch-light.cgi";
 
     private ThreadLocal<DateFormat> sdf = new ThreadLocal<DateFormat>() {
         protected DateFormat initialValue() {
@@ -930,7 +931,7 @@ public class LiveViewThread extends Thread {
     }
     
 	public void pluginLightToggle(int menuId) throws IOException {
-		asyncHttpGet("http://user:password@yourserver.example.com/services/switch-light.cgi");
+		asyncHttpGet(LIGHTURL);
     }
 	
     public void pluginNavigate(byte navAction) throws IOException {
