@@ -511,8 +511,10 @@ public class LiveViewThread extends Thread {
 	                                "Battery", lvImage_menu_battery));
 	                    }
 	                    if (menu_button_wifi_toggle_id == current_id) {
+	                        WifiManager wifi = (WifiManager) parentService.getSystemService(Context.WIFI_SERVICE);
+	                        String ssidtext = wifi.isWifiEnabled() ? " (" + get_current_ssid() + ")" : "";
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
-	                                "Toggle WiFi", lvImage_menu_wifi));
+	                                "Toggle WiFi"+ssidtext, lvImage_menu_wifi));
 	                    }
 	                    if (menu_button_light_id == current_id) {
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
