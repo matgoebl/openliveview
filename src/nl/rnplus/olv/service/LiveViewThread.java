@@ -758,14 +758,16 @@ public class LiveViewThread extends Thread {
                                         case MessageConstants.NAVACTION_PRESS:
                                             //emulate_media(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
                                             long timenow = System.currentTimeMillis();
-                                            if (timenow-playpause_time_last<1000)
+                                            if (timenow-playpause_time_last<1000) {
+                                            	Log.d(TAG, "Navigation: Double press on select key while in media menu: Toggle Standby.");
                                                 action_media_power(-1);
-                                            else
+                                            } else {
+                                            	Log.d(TAG, "Navigation: Play / pause from media menu.");
                                                 action_playpause();
+                                            }
                                             playpause_time_last = timenow;                                        	
                                             draw_media_menu();
                                             sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
-                                            Log.d(TAG, "Navigation: Play / pause from media menu.");
                                             break;
                                         default:
                                             String message = "Navigation error: unknown action with select button while in media menu (" + nav.getNavAction() + ")!";
@@ -1379,6 +1381,7 @@ public class LiveViewThread extends Thread {
                     try {
                         httpGet(serverUrl);
                     } catch (Exception e) {
+            	        Log.e(TAG, "Error from HTTP GET "+ serverUrl + ": " + e.getMessage()); 
                     }
                 }
             }
