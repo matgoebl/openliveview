@@ -108,6 +108,9 @@ public class LiveViewThread extends Thread {
     private final byte[] lvImage_plugin_loading;
     private final byte[] lvImage_menu_wifi;
     private final byte[] lvImage_menu_light;
+    private final byte[] lvImage_menu_home;
+    private final byte[] lvImage_status_ok;
+    private final byte[] lvImage_status_error;
 
     
 
@@ -133,6 +136,7 @@ public class LiveViewThread extends Thread {
     private byte menu_button_battery_status_id = -1;
     private byte menu_button_wifi_toggle_id = -1;
     private byte menu_button_light_id = -1;
+    private byte menu_button_home_id = -1;
     private byte menu_button_plugintest_id = -1;
     private byte menu_button_debug_id = -1;
     private byte menu_button_mediamenu_id = -1;
@@ -157,6 +161,7 @@ public class LiveViewThread extends Thread {
     //  Result for info: Title\nArtist\nAlbum\n
     //  e.g. https://user:password@yourserver.example.com/audioplayer/mediactrl.txt?cmd=next
     private static final String LIGHTURL="http://user:password@yourserver.example.com/services/switch-light.cgi";
+    private static final String HOMESTATUSURL="http://user:password@yourserver.example.com/services/home-status.cgi";
 
     private ThreadLocal<DateFormat> sdf = new ThreadLocal<DateFormat>() {
         protected DateFormat initialValue() {
@@ -242,6 +247,9 @@ public class LiveViewThread extends Thread {
         lvImage_plugin_loading = loadImageByteArray(parentService, "plugin_loading.png");
         lvImage_menu_wifi = loadImageByteArray(parentService, "menu_wifi.png");
         lvImage_menu_light = loadImageByteArray(parentService, "menu_light.png");
+        lvImage_menu_home = loadImageByteArray(parentService, "menu_home.png");
+        lvImage_status_ok = loadImageByteArray(parentService, "status_ok.png");
+        lvImage_status_error = loadImageByteArray(parentService, "status_error.png");
 
         menu_button_count = 0;
 
@@ -290,6 +298,10 @@ public class LiveViewThread extends Thread {
         }
         if (true) {
             menu_button_light_id = menu_button_count;
+            menu_button_count += 1;
+        }
+        if (true) {
+            menu_button_home_id = menu_button_count;
             menu_button_count += 1;
         }
         
@@ -520,6 +532,10 @@ public class LiveViewThread extends Thread {
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
 	                                "Toggle Light", lvImage_menu_light));
 	                    }
+	                    if (menu_button_home_id == current_id) {
+	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
+	                                "Home Status", lvImage_menu_home));
+	                    }
 	                    if (menu_button_plugintest_id == current_id) {
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
 	                                "Demo", lvImage_menu_debug));
@@ -702,6 +718,12 @@ public class LiveViewThread extends Thread {
                                         Log.d(TAG, "toggling light");
                                         pluginLightToggle(0);
                                         sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
+                                        hasdonesomething = true;
+                                    }
+                                    if (nav.getMenuItemId() == menu_button_home_id) {
+                                        Log.d(TAG, "getting home status");
+                                        sendCall(new NavigationResponse(MessageConstants.RESULT_OK));
+                                        pluginHomeStatus(0);
                                         hasdonesomething = true;
                                     }
                                     if (nav.getMenuItemId() == menu_button_debug_id) {
@@ -936,6 +958,29 @@ public class LiveViewThread extends Thread {
     
 	public void pluginLightToggle(int menuId) throws IOException {
 		asyncHttpGet(LIGHTURL);
+    }
+	public void pluginHomeStatus(int menuId) throws IOException {
+		new Thread() {
+			public void run() {
+				String status = "";
+				Boolean ok = false;
+				try {
+					status = httpGet(HOMESTATUSURL);
+					if(! status.toLowerCase().startsWith("error"))
+						ok = true;
+				} catch (Exception e) {
+					e.printStackTrace();
+					status = e.getMessage();
+				}
+				String lines[] = status.split("\\r?\\n");
+				try {
+			    	sendCall(new DisplayPanel(lines[0], lines.length >= 2 ? lines[1] : "", ok ? lvImage_status_ok : lvImage_status_error, false));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}.start();
+
     }
 	
     public void pluginNavigate(byte navAction) throws IOException {
