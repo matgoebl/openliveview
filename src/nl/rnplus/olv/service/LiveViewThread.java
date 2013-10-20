@@ -493,6 +493,9 @@ public class LiveViewThread extends Thread {
                     parentService.setMediaInfoNeedsUpdate(false);
                 }
                 break;
+            case MessageConstants.MSG_DISPLAYTEXT_ACK:
+            	Log.d(TAG, "Got displaytext ack.");
+            	break;
             case MessageConstants.MSG_GETMENUITEMS:
                 Log.d(TAG, "Sending menu items...");
                 if (menu_state == 0) {

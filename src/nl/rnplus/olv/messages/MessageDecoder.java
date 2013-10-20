@@ -24,6 +24,8 @@ public final class MessageDecoder {
                 return new ResultEvent(id);
             case MessageConstants.MSG_DISPLAYPANEL_ACK:
                 return new ResultEvent(id);
+            case MessageConstants.MSG_DISPLAYTEXT_ACK:
+                return new ResultEvent(id);
             case MessageConstants.MSG_SETLED_ACK:
                 return new ResultEvent(id);
             case MessageConstants.MSG_GETTIME:
