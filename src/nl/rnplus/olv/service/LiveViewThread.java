@@ -978,7 +978,26 @@ public class LiveViewThread extends Thread {
     }
     
 	public void pluginShowFlag(int menuId) throws IOException {
-		asyncHttpGet(FLAGURL);
+		new Thread() {
+			public void run() {
+				String status = "";
+				Boolean ok = false;
+				try {
+					status = httpGet(FLAGURL);
+					if(! status.toLowerCase().startsWith("error"))
+						ok = true;
+				} catch (Exception e) {
+					e.printStackTrace();
+					status = e.getMessage();
+				}
+				String lines[] = status.split("\\r?\\n");
+				try {
+			    	sendCall(new DisplayPanel(lines[0], lines.length >= 2 ? lines[1] : "", ok ? lvImage_menu_flag : lvImage_status_error, false));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}.start();
     }
 	public void pluginLightToggle(int menuId) throws IOException {
 		asyncHttpGet(LIGHTURL);
