@@ -107,6 +107,7 @@ public class LiveViewThread extends Thread {
     private final byte[] lvImage_music_play;
     private final byte[] lvImage_plugin_loading;
     private final byte[] lvImage_menu_wifi;
+    private final byte[] lvImage_menu_flag;
     private final byte[] lvImage_menu_light;
     private final byte[] lvImage_menu_home;
     private final byte[] lvImage_status_ok;
@@ -135,6 +136,7 @@ public class LiveViewThread extends Thread {
     private byte menu_button_findphone_id = -1;
     private byte menu_button_battery_status_id = -1;
     private byte menu_button_wifi_toggle_id = -1;
+    private byte menu_button_flag_id = -1;
     private byte menu_button_light_id = -1;
     private byte menu_button_home_id = -1;
     private byte menu_button_plugintest_id = -1;
@@ -160,6 +162,7 @@ public class LiveViewThread extends Thread {
     //  Commands: volup|voldn|next|prev|playpause|poweron|powertoggle|info|vol
     //  Result for info: Title\nArtist\nAlbum\n
     //  e.g. https://user:password@yourserver.example.com/audioplayer/mediactrl.txt?cmd=next
+    private static final String FLAGURL="http://user:password@yourserver.example.com/services/show-flag.cgi";
     private static final String LIGHTURL="http://user:password@yourserver.example.com/services/switch-light.cgi";
     private static final String HOMESTATUSURL="http://user:password@yourserver.example.com/services/home-status.cgi";
 
@@ -246,6 +249,7 @@ public class LiveViewThread extends Thread {
         lvImage_music_play = loadImageByteArray(parentService, "music_play.png");
         lvImage_plugin_loading = loadImageByteArray(parentService, "plugin_loading.png");
         lvImage_menu_wifi = loadImageByteArray(parentService, "menu_wifi.png");
+        lvImage_menu_flag = loadImageByteArray(parentService, "menu_flag.png");
         lvImage_menu_light = loadImageByteArray(parentService, "menu_light.png");
         lvImage_menu_home = loadImageByteArray(parentService, "menu_home.png");
         lvImage_status_ok = loadImageByteArray(parentService, "status_ok.png");
@@ -294,6 +298,10 @@ public class LiveViewThread extends Thread {
         }
         if (menu_show_wifi_toggle) {
             menu_button_wifi_toggle_id = menu_button_count;
+            menu_button_count += 1;
+        }
+        if (true) {
+            menu_button_flag_id = menu_button_count;
             menu_button_count += 1;
         }
         if (true) {
@@ -531,6 +539,10 @@ public class LiveViewThread extends Thread {
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
 	                                "Toggle WiFi"+ssidtext, lvImage_menu_wifi));
 	                    }
+	                    if (menu_button_flag_id == current_id) {
+	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
+	                                "Show Flag", lvImage_menu_flag));
+	                    }
 	                    if (menu_button_light_id == current_id) {
 	                        sendCall(new MenuItem(current_id, false, new UShort((short) 0),
 	                                "Toggle Light", lvImage_menu_light));
@@ -715,6 +727,12 @@ public class LiveViewThread extends Thread {
                                         Log.d(TAG, "toggling wifi");
                                         sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
                                         pluginWifiToggle(0);
+                                        hasdonesomething = true;
+                                    }
+                                    if (nav.getMenuItemId() == menu_button_flag_id) {
+                                        Log.d(TAG, "showing flag");
+                                        pluginShowFlag(0);
+                                        sendCall(new NavigationResponse(MessageConstants.RESULT_CANCEL));
                                         hasdonesomething = true;
                                     }
                                     if (nav.getMenuItemId() == menu_button_light_id) {
@@ -959,6 +977,9 @@ public class LiveViewThread extends Thread {
         }
     }
     
+	public void pluginShowFlag(int menuId) throws IOException {
+		asyncHttpGet(FLAGURL);
+    }
 	public void pluginLightToggle(int menuId) throws IOException {
 		asyncHttpGet(LIGHTURL);
     }
