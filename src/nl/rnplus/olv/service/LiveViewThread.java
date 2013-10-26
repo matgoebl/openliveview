@@ -112,6 +112,8 @@ public class LiveViewThread extends Thread {
     private final byte[] lvImage_menu_home;
     private final byte[] lvImage_status_ok;
     private final byte[] lvImage_status_error;
+    private final byte[] lvImage_status_on;
+    private final byte[] lvImage_status_off;
 
     
 
@@ -254,6 +256,8 @@ public class LiveViewThread extends Thread {
         lvImage_menu_home = loadImageByteArray(parentService, "menu_home.png");
         lvImage_status_ok = loadImageByteArray(parentService, "status_ok_small.png");
         lvImage_status_error = loadImageByteArray(parentService, "status_error_small.png");
+        lvImage_status_on = loadImageByteArray(parentService, "status_on.png");
+        lvImage_status_off = loadImageByteArray(parentService, "status_off.png");
 
         menu_button_count = 0;
 
@@ -1000,8 +1004,30 @@ public class LiveViewThread extends Thread {
 		}.start();
     }
 	public void pluginLightToggle(int menuId) throws IOException {
-		asyncHttpGet(LIGHTURL);
+		new Thread() {
+			public void run() {
+				String status = "";
+				byte[] img = lvImage_status_error;
+				try {
+					status = httpGet(LIGHTURL);
+					if(status.toLowerCase().startsWith("1"))
+						img = lvImage_status_on;
+					if(status.toLowerCase().startsWith("0"))
+						img = lvImage_status_off;
+				} catch (Exception e) {
+					e.printStackTrace();
+					status = e.getMessage();
+				}
+				String lines[] = status.split("\\r?\\n");
+				try {
+			    	sendCall(new DisplayPanel(lines[0], lines.length >= 2 ? lines[1] : "", img, false));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}.start();
     }
+
 	public void pluginHomeStatus(int menuId) throws IOException {
 		new Thread() {
 			public void run() {
