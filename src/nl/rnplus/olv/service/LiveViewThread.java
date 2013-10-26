@@ -252,8 +252,8 @@ public class LiveViewThread extends Thread {
         lvImage_menu_flag = loadImageByteArray(parentService, "menu_flag.png");
         lvImage_menu_light = loadImageByteArray(parentService, "menu_light.png");
         lvImage_menu_home = loadImageByteArray(parentService, "menu_home.png");
-        lvImage_status_ok = loadImageByteArray(parentService, "status_ok.png");
-        lvImage_status_error = loadImageByteArray(parentService, "status_error.png");
+        lvImage_status_ok = loadImageByteArray(parentService, "status_ok_small.png");
+        lvImage_status_error = loadImageByteArray(parentService, "status_error_small.png");
 
         menu_button_count = 0;
 
@@ -1015,9 +1015,10 @@ public class LiveViewThread extends Thread {
 					e.printStackTrace();
 					status = e.getMessage();
 				}
+				status+="\n\n\n\n\n\n";
 				String lines[] = status.split("\\r?\\n");
 				try {
-			    	sendCall(new DisplayPanel(lines[0], lines.length >= 2 ? lines[1] : "", ok ? lvImage_status_ok : lvImage_status_error, false));
+			    	sendCall(new DisplayPanel(lines[0]+"\n"+lines[1]+"\n"+lines[2], lines[3]+"\n"+lines[4]+"\n"+lines[5], ok ? lvImage_status_ok : lvImage_status_error, false));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
